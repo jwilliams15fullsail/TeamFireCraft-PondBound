@@ -1,1 +1,3 @@
 # TeamFireCraft
+
+THIS IS ONLY FOR STABLE VERSION!
