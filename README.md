@@ -9,7 +9,8 @@ PondBound is a 1–4 player cooperative physics adventure. Mutated lab frogs esc
 ## Team
 | Name | Role | Branch |
 |---|---|---|
-| <name> | Networking & integration | `Development` |
+| Dev | Systems Test Branch | `Development` |
+| JWilliams | Networking, integration, Core Gameplay Mechanics | `Core Gameplay Mechanics` |
 | <name> | <role> | `mackenzieBranch` |
 | <name> | <role> | `moose-branch` |
 | <name> | <role> | `vance` |
