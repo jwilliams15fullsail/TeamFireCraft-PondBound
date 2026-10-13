@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8423d1b93e7aa54a929e93db8195c95, type: 3}
+  m_Name: FrogTuning
+  m_EditorClassIdentifier: Assembly-CSharp::FrogTuning
+  moveSpeed: 3.5
+  groundAcceleration: 30
+  airAcceleration: 6
+  turnSpeed: 540
+  maxSlopeAngle: 50
+  groundProbeDistance: 0.12
+  coyoteTime: 0.12
+  fullChargeTime: 1
+  minJumpSpeed: 3.5
+  maxJumpSpeed: 9
+  chargeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  forwardJumpRatio: 0.5
+  wallJumpUpBias: 0.8
+  stickReach: 0.3
+  climbSpeed: 2
+  gripStrength: 25
+  gripSlipTolerance: 0.35
+  reattachCooldown: 0.3
+  maxSurfaceTurn: 60
+  minWallUpDot: -0.25
+  maxWallUpDot: 0.75
+  tongueRange: 7
+  tongueExtendSpeed: 35
+  tongueRetractSpeed: 45
+  tongueRadius: 0.06
+  tongueStiffness: 60
+  tongueDamping: 6
+  tongueMaxTension: 60
+  tongueBreakDistance: 10
+  reelSpeed: 3
+  minRestLength: 0.6
+  foodReelSpeed: 8
+  eatDistance: 0.45
+  blockedBreakTime: 0.15
