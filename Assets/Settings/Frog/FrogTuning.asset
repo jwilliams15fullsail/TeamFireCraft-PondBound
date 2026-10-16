@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8423d1b93e7aa54a929e93db8195c95, type: 3}
   m_Name: FrogTuning
   m_EditorClassIdentifier: Assembly-CSharp::FrogTuning
-  moveSpeed: 3.5
+  moveSpeed: 2.5
   groundAcceleration: 30
   airAcceleration: 6
-  turnSpeed: 540
+  turnSpeed: 450
   maxSlopeAngle: 50
   groundProbeDistance: 0.12
   coyoteTime: 0.12
@@ -63,7 +63,7 @@ MonoBehaviour:
   tongueStiffness: 60
   tongueDamping: 6
   tongueMaxTension: 60
-  tongueBreakDistance: 10
+  tongueBreakDistance: 7
   reelSpeed: 3
   minRestLength: 0.6
   foodReelSpeed: 8

@@ -20,6 +20,7 @@ public class FrogClimb : NetworkBehaviour
     Vector3 externalForce;  // tongue pulls on this frog during the current step
     float overloadTime;
     float cooldownUntil;
+    float wallUpSign = 1f;  // +1: W climbs up the wall, -1: W climbs down (camera looking over the top)
 
     void Awake()
     {
@@ -47,7 +48,7 @@ public class FrogClimb : NetworkBehaviour
         {
             if (dir.sqrMagnitude < 0.01f)
                 continue;
-            if (CastForSurface(dir.normalized, motor.Tuning.stickReach, out RaycastHit hit) && (!found || hit.distance < best.distance))
+            if (CastForSurface(dir.normalized, motor.Tuning.stickReach, true, out RaycastHit hit) && (!found || hit.distance < best.distance))
             {
                 best = hit;
                 found = true;
@@ -80,27 +81,36 @@ public class FrogClimb : NetworkBehaviour
     {
         FrogTuning t = motor.Tuning;
         Vector3 n = SurfaceNormal;
+        Vector3 forward = SurfaceForward(n, input);
+        Vector3 climbDir = charging ? Vector3.zero : ClimbDirection(n, forward, input);
 
-        // Input in the plane of the surface: W = up the wall, D = right along it.
-        Vector3 surfaceUp = Vector3.ProjectOnPlane(Vector3.up, n);
-        if (surfaceUp.sqrMagnitude < 0.001f)
-            surfaceUp = Vector3.ProjectOnPlane(input.ViewForward, n);
-        surfaceUp.Normalize();
-        Vector3 surfaceRight = Vector3.Cross(n, surfaceUp);
-        Vector3 climbDir = charging ? Vector3.zero : Vector3.ClampMagnitude(surfaceUp * input.Move.y + surfaceRight * input.Move.x, 1f);
-
-        // Inside corner: another climbable face directly ahead. Switch onto it.
-        if (climbDir.sqrMagnitude > 0.01f
-            && CastForSurface(climbDir.normalized, 0.05f, out RaycastHit ahead)
-            && Vector3.Angle(ahead.normal, n) <= t.maxSurfaceTurn)
+        if (climbDir.sqrMagnitude > 0.01f)
         {
-            n = SurfaceNormal = ahead.normal;
+            Vector3 dir = climbDir.normalized;
+
+            // Inside corner: another climbable face just ahead (a side wall, a ledge above,
+            // a climbable floor below). Switch onto it before bumping into it.
+            if (CastForSurface(dir, t.cornerLookAhead, false, out RaycastHit ahead)
+                && Vector3.Angle(ahead.normal, n) > 5f
+                && Vector3.Angle(ahead.normal, n) <= t.maxCornerTurn)
+            {
+                n = SurfaceNormal = ahead.normal;
+                forward = SurfaceForward(n, input);
+                climbDir = ClimbDirection(n, forward, input);
+            }
+            // Ordinary walkable ground ahead that isn't climbable (the floor at the bottom
+            // of a wall): let go and step onto it.
+            else if (WalkableGroundAhead(dir, t))
+            {
+                return false;
+            }
         }
 
-        // Find the surface under the belly again (it may be curved or moving).
-        if (!CastForSurface(-n, t.stickReach, out RaycastHit hit) || Vector3.Angle(hit.normal, n) > t.maxSurfaceTurn)
+        // Find the surface under the belly again. Around an outside edge this hits the
+        // edge itself, so the normal rolls over a little each step and the frog wraps around.
+        if (!CastForSurface(-n, t.stickReach, false, out RaycastHit hit) || Vector3.Angle(hit.normal, n) > t.maxSurfaceTurn)
         {
-            // Climbed past the top edge: pop up and over instead of just dropping.
+            // Climbed past an edge that can't be climbed: pop up and over instead of just dropping.
             if (Vector3.Dot(climbDir, Vector3.up) > 0.3f)
                 rb.linearVelocity = Vector3.up * 2.5f - n * 1.5f;
             return false;
@@ -134,12 +144,54 @@ public class FrogClimb : NetworkBehaviour
         if (overloadTime > t.gripSlipTolerance)
             return false;
 
-        // Lie flat on the surface, head toward the climb direction (head-up when idle).
-        motor.FaceTowards(climbDir, n, dt, surfaceUp);
+        // Lie flat on the surface, head toward the climb direction (or "forward" when idle).
+        motor.FaceTowards(climbDir, n, dt, forward);
         return true;
     }
 
-    bool CastForSurface(Vector3 direction, float reach, out RaycastHit hit)
+    // Which way W moves on this surface. On walls W climbs up (or down, when the camera
+    // looks at the wall from over its top). On tops and gentle slopes W goes where the
+    // camera looks. The two blend as the frog rolls over an edge, so the controls never flip.
+    Vector3 SurfaceForward(Vector3 n, FrogInputState input)
+    {
+        float facing = Vector3.Dot(input.ViewForward, -n);
+        if (Mathf.Abs(facing) > 0.2f)
+            wallUpSign = facing > 0f ? 1f : -1f; // keep the last choice while side-on to the wall
+
+        Vector3 wallForward = Vector3.ProjectOnPlane(Vector3.up, n) * wallUpSign;
+        Vector3 topForward = Vector3.ProjectOnPlane(input.ViewForward, n);
+        wallForward = wallForward.sqrMagnitude > 0.0001f ? wallForward.normalized : Vector3.zero;
+        topForward = topForward.sqrMagnitude > 0.0001f ? topForward.normalized : Vector3.zero;
+
+        float topness = Mathf.InverseLerp(0.5f, 0.85f, Vector3.Dot(n, Vector3.up));
+        Vector3 forward = Vector3.Lerp(wallForward, topForward, topness);
+        if (forward.sqrMagnitude < 0.0001f)
+            forward = wallForward.sqrMagnitude > 0f ? wallForward : topForward;
+        if (forward.sqrMagnitude < 0.0001f)
+            forward = Vector3.ProjectOnPlane(transform.forward, n);
+        return forward.normalized;
+    }
+
+    static Vector3 ClimbDirection(Vector3 n, Vector3 forward, FrogInputState input)
+    {
+        Vector3 right = Vector3.Cross(n, forward);
+        return Vector3.ClampMagnitude(forward * input.Move.y + right * input.Move.x, 1f);
+    }
+
+    bool WalkableGroundAhead(Vector3 dir, FrogTuning t)
+    {
+        float castRadius = motor.Radius * 0.8f;
+        float distance = (motor.Radius - castRadius) + t.cornerLookAhead;
+        if (!Physics.SphereCast(rb.position, castRadius, dir, out RaycastHit hit, distance, surfaceMask, QueryTriggerInteraction.Ignore))
+            return false;
+        if (hit.rigidbody == rb || hit.collider.GetComponentInParent<ClimbableSurface>() != null)
+            return false;
+        return Vector3.Angle(hit.normal, Vector3.up) <= t.maxSlopeAngle;
+    }
+
+    // attaching = true: pressing Stick only grabs walls and steep slopes (not floors).
+    // attaching = false: once stuck, any climbable face counts, including flat tops.
+    bool CastForSurface(Vector3 direction, float reach, bool attaching, out RaycastHit hit)
     {
         float castRadius = motor.Radius * 0.8f;
         float distance = (motor.Radius - castRadius) + reach;
@@ -148,8 +200,9 @@ public class FrogClimb : NetworkBehaviour
         if (hit.rigidbody == rb || hit.collider.GetComponentInParent<ClimbableSurface>() == null)
             return false;
 
-        // Walls and steep slopes only: floors are for walking, ceilings come later.
         float upDot = Vector3.Dot(hit.normal, Vector3.up);
-        return upDot >= motor.Tuning.minWallUpDot && upDot <= motor.Tuning.maxWallUpDot;
+        if (upDot < motor.Tuning.minWallUpDot)
+            return false; // ceilings come later
+        return !attaching || upDot <= motor.Tuning.maxWallUpDot;
     }
 }
