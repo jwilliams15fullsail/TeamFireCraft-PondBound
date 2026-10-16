@@ -319,7 +319,7 @@ GameObject:
   - component: {fileID: 1705107463119049175}
   m_Layer: 6
   m_Name: Frog
-  m_TagString: Untagged
+  m_TagString: Frog
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -403,14 +403,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 831001381
+  GlobalObjectIdHash: 4012153730
   InScenePlacedSourceGlobalObjectIdHash: 4012153730
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -604,6 +604,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FrogAnimatorDriver
   animator: {fileID: 8197045581172350487}
   runClipSpeed: 3.5
+  climbClipSpeed: 2
   minRunPlayback: 0.6
   maxRunPlayback: 1.6
   fullTurnRate: 270
@@ -640,9 +641,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogTongueBones
   tongue: {fileID: 6495230529249112660}
+  frogMesh: {fileID: 0}
   tongueRoot: {fileID: 5102085842948758802}
   tongueTip: {fileID: 2224903339897910366}
   thickness: 1
+  maxSag: 0.5
+  recoilWobble: 0.12
+  tongueWeightSplit: 0.5
 --- !u!1001 &3303885819701114112
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -21,7 +21,7 @@ public class CheckpointManager : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && !isActivated)
+        if (other.CompareTag("Frog") && !isActivated)
         {
             isActivated = true;
 
