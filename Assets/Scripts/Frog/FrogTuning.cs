@@ -28,7 +28,9 @@ public class FrogTuning : ScriptableObject
     public float gripStrength = 25f;          // newtons the toe pads can hold
     public float gripSlipTolerance = 0.35f;   // seconds of overload before the frog lets go
     public float reattachCooldown = 0.3f;
-    public float maxSurfaceTurn = 100f;        // biggest angle when climbing into an inside corner (90 = square room corner)
+    public float maxSurfaceTurn = 60f;        // biggest normal change per step while following bumps and outside edges
+    public float maxCornerTurn = 100f;        // biggest angle when climbing into an inside corner (90 = square room corner)
+    public float cornerLookAhead = 0.15f;     // how far ahead (m) to look for an inside corner or the floor
     [Range(-1f, 1f)] public float minWallUpDot = -0.25f; // below this = ceiling, not allowed yet
     [Range(-1f, 1f)] public float maxWallUpDot = 0.75f;  // above this = floor, just walk on it
 
