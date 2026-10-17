@@ -4,6 +4,7 @@ using UnityEngine;
 public class WaypointMover : MonoBehaviour
 {
     [SerializeField] private Waypoint waypoint;
+    [SerializeField] bool isBoomerang = false;
     [SerializeField] private float distanceThreshold = .1f;
     [Range(1f, 5f)] [SerializeField] private float moveSpeed;
     [Range(.5f, 10f)] [SerializeField] private float pauseTime;
@@ -13,6 +14,11 @@ public class WaypointMover : MonoBehaviour
     private Transform currentWaypoint;
     private bool isWaiting = false;
     private Quaternion targetRotation;
+
+    /////   FOR AI INTEGRATION   /////
+    public bool canMove { get; set; } = true;
+    public Transform CurrentWaypoint => currentWaypoint;
+    // -------------------------------
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -35,18 +41,35 @@ public class WaypointMover : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isWaiting)
+        if (canMove && !isWaiting)     // <- Modifid for AI INTEGRATION //
         {
             transform.position = Vector3.MoveTowards(transform.position, currentWaypoint.position, moveSpeed * Time.deltaTime);
 
             if (Vector3.Distance(transform.position, currentWaypoint.position) < distanceThreshold)
             {
                 transform.position = currentWaypoint.position;
-                currentWaypoint = waypoint.GetNextWaypoint(currentWaypoint);
+                if (isBoomerang) { currentWaypoint = waypoint.GetNextWaypointBoomerang(currentWaypoint); }
+                else { currentWaypoint = waypoint.GetNextWaypoint(currentWaypoint); }
                 StartCoroutine(WaitAtWaypoint());
             }
         }
     }
+
+    /////   FOR AI INTEGRATION   /////
+    public void ResumePatrol()
+    {
+        canMove = true;
+        isWaiting = false;
+        StopAllCoroutines();
+
+        // Rotate back to our next waypoint
+        Vector3 lookDirection = currentWaypoint.position - transform.position;
+        if (lookDirection != Vector3.zero)
+        {
+            targetRotation = Quaternion.LookRotation(lookDirection);
+        }
+    }
+    // -------------------------------
 
     IEnumerator WaitAtWaypoint()
     {
@@ -62,6 +85,8 @@ public class WaypointMover : MonoBehaviour
         bool isRotationFinished = false;
         while (elapsedTime < pauseTime || !isRotationFinished)
         {
+            if (!canMove) { yield break; }      // AI INTEGRATION: Stop rotating if player is found and chase starts
+
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             if (Quaternion.Angle(transform.rotation, targetRotation) < 1.0f)
             {
