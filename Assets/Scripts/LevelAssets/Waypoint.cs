@@ -3,6 +3,8 @@ using UnityEngine;
 public class Waypoint : MonoBehaviour
 {
     [Range(0f, 3f)] [SerializeField] private float waypointSize;
+    private bool isMovingForward = true;
+
     private void OnDrawGizmos()
     {
         foreach (Transform waypoint in transform)
@@ -16,8 +18,6 @@ public class Waypoint : MonoBehaviour
         {
             Gizmos.DrawLine(transform.GetChild(child).position, transform.GetChild(child + 1).position);
         }
-
-        Gizmos.DrawLine(transform.GetChild(transform.childCount - 1).position, transform.GetChild(0).position);
     }
 
     public Transform GetNextWaypoint(Transform currentWaypoint)
@@ -33,6 +33,41 @@ public class Waypoint : MonoBehaviour
         else
         {
             return transform.GetChild(0);
+        }
+    }
+
+    public Transform GetNextWaypointBoomerang(Transform currentWaypoint)
+    {
+        if (currentWaypoint == null)
+        {
+            isMovingForward = true;
+            return transform.GetChild(0);
+        }
+
+        int currentIndex = currentWaypoint.GetSiblingIndex();
+        if (isMovingForward)
+        {
+            if (currentIndex < transform.childCount - 1)
+            {
+                return transform.GetChild(currentIndex + 1);
+            }
+            else
+            {
+                isMovingForward = false;
+                return transform.GetChild(currentIndex - 1);
+            }
+        }
+        else
+        {
+            if (currentIndex > 0)
+            {
+                return transform.GetChild(currentIndex - 1);
+            }
+            else
+            {
+                isMovingForward = true;
+                return transform.GetChild(currentIndex + 1);
+            }
         }
     }
 }
