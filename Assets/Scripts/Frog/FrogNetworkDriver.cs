@@ -18,6 +18,7 @@ public class FrogNetworkDriver : NetworkBehaviour
     public bool LocalJumpHeld { get; private set; }
     public float LocalJumpHeldTime { get; private set; }
 
+    Rigidbody frogRigidbody;
     FrogMotor motor;
     FrogTongue tongue;
     FrogCamera frogCamera;
@@ -25,6 +26,7 @@ public class FrogNetworkDriver : NetworkBehaviour
 
     void Awake()
     {
+        frogRigidbody = GetComponent<Rigidbody>();
         motor = GetComponent<FrogMotor>();
         tongue = GetComponent<FrogTongue>();
     }
@@ -46,6 +48,11 @@ public class FrogNetworkDriver : NetworkBehaviour
         frogCamera = Camera.main != null ? Camera.main.GetComponent<FrogCamera>() : null;
         if (frogCamera != null)
             frogCamera.SetTarget(transform);
+
+        if (TestObserver.instance != null)
+        {
+            TestObserver.instance.RegisterLocalPlayer(this.gameObject, frogRigidbody, transform.position);
+        }
     }
 
     void Update()
