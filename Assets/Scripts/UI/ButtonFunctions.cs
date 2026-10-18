@@ -5,12 +5,14 @@ public class buttonFunctions : MonoBehaviour
     [SerializeField] private GameObject mainMenu;
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject creditsMenu;
+    [SerializeField] private GameObject multiplayerMenu;
 
     private void ShowScreen(GameObject screenToShow)
     {
         mainMenu.SetActive(false);
         settingsMenu.SetActive(false);
         creditsMenu.SetActive(false);
+        multiplayerMenu.SetActive(false);
         screenToShow.SetActive(true);
     }
     public void OpenSettings()
@@ -21,6 +23,11 @@ public class buttonFunctions : MonoBehaviour
     public void OpenCredits()
     {
         ShowScreen(creditsMenu);
+    }
+
+    public void OpenMultiplayer()
+    {
+        ShowScreen(multiplayerMenu);
     }
 
     public void BackButton()
