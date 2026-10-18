@@ -1,13 +1,16 @@
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-// Minimal Host / Join UI for a 1-4 player local/LAN session.
+// Lives on the NetworkManager. Approves joins (4 players online, only the host offline)
+// and draws the small in-game panel: mode, players, join code, Leave.
+// Games are started from the main menu (PlayMenu); frogs are spawned by each level's
+// PlayerSpawner. If a level is opened directly in the editor, the old Host / Join box
+// still shows so the level can be tested on its own.
 [RequireComponent(typeof(NetworkManager))]
 public class NetworkSessionUI : MonoBehaviour
 {
-    const int MaxPlayers = 4;
-
     string address = "127.0.0.1";
     string status = "";
 
@@ -29,30 +32,42 @@ public class NetworkSessionUI : MonoBehaviour
 
     void ApproveConnection(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
-        int playerIndex = manager.ConnectedClientsIds.Count;
-        bool hasRoom = playerIndex < MaxPlayers;
+        bool isHost = request.ClientNetworkId == NetworkManager.ServerClientId;
+        int limit = GameSession.IsOffline ? 1 : GameSession.MaxPlayers;
+        bool hasRoom = isHost || manager.ConnectedClientsIds.Count < limit;
         response.Approved = hasRoom;
-        response.CreatePlayerObject = hasRoom;
-        response.Reason = hasRoom ? "" : $"Session is full ({MaxPlayers} players max).";
-
-        // Spawn frogs side by side so they never start inside each other.
-        response.Position = new Vector3(-3f + 2f * playerIndex, 1f, 0f);
-        response.Rotation = Quaternion.identity;
+        response.CreatePlayerObject = false; // PlayerSpawner does it once the player is in the level
+        response.Reason = hasRoom ? "" : GameSession.IsOffline ? "That game is offline." : $"Session is full ({limit} players max).";
     }
 
     void OnClientDisconnect(ulong clientId)
     {
-        // On a client, our own disconnect means we were rejected or the host left.
-        if (!manager.IsServer && clientId == manager.LocalClientId)
-            status = string.IsNullOrEmpty(manager.DisconnectReason) ? "Disconnected." : manager.DisconnectReason;
+        // On a client, our own disconnect means we were turned away or the host left.
+        if (manager.IsServer || clientId != manager.LocalClientId)
+            return;
+        string reason = string.IsNullOrEmpty(manager.DisconnectReason) ? "Disconnected from the host." : manager.DisconnectReason;
+        if (SceneManager.GetActiveScene().name == GameSession.MenuScene || GameSession.Current != null)
+        {
+            GameSession.LastMessage = reason;
+            GameSession.LeaveToMenu();
+        }
+        else
+        {
+            status = reason; // testing a level directly: stay here
+        }
     }
 
     void OnGUI()
     {
-        GUILayout.BeginArea(new Rect(10, 10, 260, 240), GUI.skin.box);
+        bool running = manager.IsClient || manager.IsServer;
+        if (!running && SceneManager.GetActiveScene().name == GameSession.MenuScene)
+            return; // the menu has its own buttons
 
-        if (!manager.IsClient && !manager.IsServer)
+        GUILayout.BeginArea(new Rect(10, 10, 260, 260), GUI.skin.box);
+
+        if (!running)
         {
+            GUILayout.Label("Testing this level directly");
             GUILayout.Label("Address");
             address = GUILayout.TextField(address);
 
@@ -69,15 +84,22 @@ public class NetworkSessionUI : MonoBehaviour
         }
         else
         {
-            string mode = manager.IsHost ? "Host" : manager.IsServer ? "Server" : "Client";
+            string mode = GameSession.IsOffline ? "Offline" : manager.IsHost ? "Host" : manager.IsServer ? "Server" : "Client";
             GUILayout.Label($"Mode: {mode}");
-            if (manager.IsServer)
-                GUILayout.Label($"Players: {manager.ConnectedClientsIds.Count}/{MaxPlayers}");
+            if (manager.IsServer && !GameSession.IsOffline)
+                GUILayout.Label($"Players: {manager.ConnectedClientsIds.Count}/{GameSession.MaxPlayers}");
             else if (manager.IsConnectedClient)
                 status = "";
+            if (GameSession.Current != null)
+                GUILayout.Label($"Join code: {GameSession.Current.Code}");
 
             if (GUILayout.Button("Leave"))
-                manager.Shutdown();
+            {
+                if (SceneManager.GetActiveScene().name == GameSession.MenuScene || GameSession.Current != null || GameSession.IsOffline)
+                    GameSession.LeaveToMenu();
+                else
+                    manager.Shutdown(); // testing a level directly: just stop
+            }
         }
 
         if (!string.IsNullOrEmpty(status))

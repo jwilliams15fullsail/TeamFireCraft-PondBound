@@ -187,6 +187,8 @@ public class FrogTongue : NetworkBehaviour
     void Attach(TongueTarget newTarget, Vector3 point)
     {
         target = newTarget;
+        //added to attach to buttons
+        newTarget.GetComponent<WallButton>()?.Activate();
         localAnchor = target.transform.InverseTransformPoint(point);
         restLength = Vector3.Distance(mouth.position, point); // no sudden yank on contact
         tipDistance = restLength;
