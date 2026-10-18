@@ -1,0 +1,351 @@
+using System;
+using System.Collections.Generic;
+using Unity.Netcode;
+using UnityEngine;
+
+public enum TongueState : byte { Idle, Extending, Attached, Retracting }
+
+// Everything a client needs to draw the tongue, packed in one variable so it always arrives together.
+public struct TongueSync : INetworkSerializable, IEquatable<TongueSync>
+{
+    public TongueState State;
+    public Vector3 Direction;              // firing direction while extending
+    public NetworkObjectReference Target;  // what the tongue is stuck to
+    public Vector3 LocalAnchor;            // hit point in the target's local space
+    public float RestLength;
+    public float Tension;                  // 0..1, drives thinning and sag
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref State);
+        serializer.SerializeValue(ref Direction);
+        serializer.SerializeValue(ref Target);
+        serializer.SerializeValue(ref LocalAnchor);
+        serializer.SerializeValue(ref RestLength);
+        serializer.SerializeValue(ref Tension);
+    }
+
+    public bool Equals(TongueSync other)
+    {
+        return State == other.State && Direction == other.Direction && Target.Equals(other.Target)
+            && LocalAnchor == other.LocalAnchor && Mathf.Approximately(RestLength, other.RestLength)
+            && Mathf.Approximately(Tension, other.Tension);
+    }
+}
+
+// Host-side tongue: swept hit detection, a tension-only elastic constraint, reeling,
+// eating and release rules. FrogTongueRenderer draws it on every machine.
+public class FrogTongue : NetworkBehaviour
+{
+    [Tooltip("Gameplay mouth point. A child of the frog root, NOT of the visual model.")]
+    [SerializeField] Transform mouth;
+    [SerializeField] LayerMask hitMask = ~0;
+
+    public readonly NetworkVariable<TongueSync> Sync = new();
+    public Transform Mouth => mouth;
+
+    // Host: every spawned tongue, for "one grab per target" and "break free".
+    static readonly List<FrogTongue> spawned = new();
+
+    FrogMotor motor;
+    FrogNetworkDriver driver;
+    FrogClimb climb;
+    Rigidbody rb;
+    readonly RaycastHit[] hits = new RaycastHit[16];
+
+    TongueState state;
+    Vector3 direction;
+    float tipDistance;
+    float restLength;
+    float blockedTime;
+    TongueTarget target;
+    Vector3 localAnchor;
+    bool pressQueued;
+    Vector3 aimOrigin, aimDirection;
+
+    FrogTuning Tuning => motor.Tuning;
+
+    void Awake()
+    {
+        motor = GetComponent<FrogMotor>();
+        driver = GetComponent<FrogNetworkDriver>();
+        climb = GetComponent<FrogClimb>();
+        rb = GetComponent<Rigidbody>();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+            spawned.Add(this);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        spawned.Remove(this);
+    }
+
+    // ---- Commands (host only) ----
+
+    public void PressTongue(Vector3 origin, Vector3 dir)
+    {
+        if (dir.sqrMagnitude < 0.5f)
+            return; // ignore garbage aim data
+        pressQueued = true;
+        aimOrigin = origin;
+        aimDirection = dir.normalized;
+    }
+
+    // Break free: drop every tongue currently holding this object.
+    public static void ReleaseEverythingHolding(NetworkObject grabbed)
+    {
+        foreach (FrogTongue tongue in spawned)
+        {
+            if (tongue.target != null && tongue.target.NetObject == grabbed)
+                tongue.StartRetract();
+        }
+    }
+
+    static bool IsHeldByAnyone(TongueTarget candidate)
+    {
+        foreach (FrogTongue tongue in spawned)
+        {
+            if (tongue.target == candidate)
+                return true;
+        }
+        return false;
+    }
+
+    // ---- Simulation (host only) ----
+
+    void FixedUpdate()
+    {
+        if (!IsServer || !IsSpawned)
+            return;
+
+        float dt = Time.fixedDeltaTime;
+        if (pressQueued)
+        {
+            pressQueued = false;
+            OnPress();
+        }
+
+        switch (state)
+        {
+            case TongueState.Extending:
+                Extend(dt);
+                break;
+            case TongueState.Attached:
+                Hold(dt);
+                break;
+            case TongueState.Retracting:
+                tipDistance -= Tuning.tongueRetractSpeed * dt;
+                if (tipDistance <= 0f)
+                    SetState(TongueState.Idle);
+                break;
+        }
+    }
+
+    void OnPress()
+    {
+        if (state == TongueState.Attached)
+        {
+            StartRetract(); // second click lets go
+            return;
+        }
+        if (state != TongueState.Idle)
+            return;
+
+        // Fire from the mouth toward whatever is under the crosshair.
+        Vector3 aimPoint = aimOrigin + aimDirection * 100f;
+        if (CastIgnoringSelf(aimOrigin, aimDirection, 0f, 100f, out RaycastHit aimHit))
+            aimPoint = aimHit.point;
+        direction = (aimPoint - mouth.position).normalized;
+        tipDistance = 0f;
+        SetState(TongueState.Extending);
+    }
+
+    void Extend(float dt)
+    {
+        // Swept test from the old tip to the new tip, so a fast tongue can't skip past a fly.
+        float step = Tuning.tongueExtendSpeed * dt;
+        Vector3 from = mouth.position + direction * tipDistance;
+        if (CastIgnoringSelf(from, direction, Tuning.tongueRadius, step, out RaycastHit hit))
+        {
+            TongueTarget hitTarget = hit.collider.GetComponentInParent<TongueTarget>();
+            if (hitTarget != null && hitTarget.NetObject.IsSpawned && !IsHeldByAnyone(hitTarget))
+                Attach(hitTarget, hit.distance > 0f ? hit.point : from);
+            else
+                StartRetract(); // plain scenery: the first version doesn't wrap or stick
+            return;
+        }
+
+        tipDistance += step;
+        if (tipDistance >= Tuning.tongueRange)
+            StartRetract();
+    }
+
+    void Attach(TongueTarget newTarget, Vector3 point)
+    {
+        target = newTarget;
+        //added to attach to buttons
+        newTarget.GetComponent<WallButton>()?.Activate();
+        localAnchor = target.transform.InverseTransformPoint(point);
+        restLength = Vector3.Distance(mouth.position, point); // no sudden yank on contact
+        tipDistance = restLength;
+        blockedTime = 0f;
+        SetState(TongueState.Attached);
+    }
+
+    void Hold(float dt)
+    {
+        if (target == null || !target.NetObject.IsSpawned)
+        {
+            StartRetract(); // target was eaten, destroyed, or its player left
+            return;
+        }
+
+        Vector3 mouthPos = mouth.position;
+        Vector3 anchor = target.transform.TransformPoint(localAnchor);
+        Vector3 delta = anchor - mouthPos;
+        float distance = delta.magnitude;
+        tipDistance = distance;
+
+        if (distance > Tuning.tongueBreakDistance)
+        {
+            StartRetract();
+            return;
+        }
+
+        // Scenery between mouth and anchor: allow a brief graze, then snap.
+        if (IsBlocked(mouthPos, anchor))
+        {
+            blockedTime += dt;
+            if (blockedTime > Tuning.blockedBreakTime)
+            {
+                StartRetract();
+                return;
+            }
+        }
+        else
+        {
+            blockedTime = 0f;
+        }
+
+        if (target.kind == TongueTargetKind.Food)
+        {
+            ReelFood(anchor, distance);
+            return;
+        }
+
+        if (driver.CurrentInput.Reel)
+            restLength = Mathf.Max(Tuning.minRestLength, restLength - Tuning.reelSpeed * dt);
+
+        // Tension-only spring: pulls when stretched past rest length, slack otherwise.
+        float tension = 0f;
+        float stretch = distance - restLength;
+        if (stretch > 0f && distance > 0.001f)
+        {
+            Vector3 dir = delta / distance;
+            Rigidbody other = target.Body;
+            Vector3 otherVelocity = other != null ? other.GetPointVelocity(anchor) : Vector3.zero;
+            float separating = Vector3.Dot(otherVelocity - rb.linearVelocity, dir);
+            tension = Mathf.Clamp(Tuning.tongueStiffness * stretch + Tuning.tongueDamping * separating, 0f, Tuning.tongueMaxTension);
+
+            // Equal and opposite forces. Mass decides who moves more.
+            Vector3 force = dir * tension;
+            rb.AddForce(force);
+            climb.AddExternalForce(force);
+            if (other != null && !other.isKinematic)
+            {
+                other.AddForceAtPosition(-force, anchor);
+                if (target.Climb != null)
+                    target.Climb.AddExternalForce(-force); // a clinging teammate's grip feels it
+            }
+        }
+        PushSync(tension / Tuning.tongueMaxTension);
+    }
+
+    void ReelFood(Vector3 anchor, float distance)
+    {
+        if (distance <= Tuning.eatDistance)
+        {
+            target.Consume(this); // the host eats it exactly once
+            StartRetract();
+            return;
+        }
+
+        // Food is very light, which would make a spring unstable, so drive it to the mouth directly.
+        Rigidbody food = target.Body;
+        if (food != null && !food.isKinematic)
+            food.linearVelocity = (mouth.position - anchor).normalized * Tuning.foodReelSpeed + rb.linearVelocity;
+        PushSync(1f);
+    }
+
+    void StartRetract()
+    {
+        target = null;
+        SetState(TongueState.Retracting);
+    }
+
+    void SetState(TongueState newState)
+    {
+        state = newState;
+        if (newState != TongueState.Attached)
+            target = null;
+        PushSync(0f);
+    }
+
+    void PushSync(float tension01)
+    {
+        Sync.Value = new TongueSync
+        {
+            State = state,
+            Direction = direction,
+            Target = target != null ? new NetworkObjectReference(target.NetObject) : default,
+            LocalAnchor = localAnchor,
+            RestLength = Mathf.Round(restLength * 50f) / 50f, // rounding = fewer network updates
+            Tension = Mathf.Round(tension01 * 20f) / 20f,
+        };
+    }
+
+    bool IsBlocked(Vector3 from, Vector3 to)
+    {
+        Vector3 delta = to - from;
+        float length = delta.magnitude;
+        if (length < 0.1f)
+            return false;
+
+        int count = Physics.RaycastNonAlloc(from, delta / length, hits, length - 0.05f, hitMask, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < count; i++)
+        {
+            if (hits[i].rigidbody == rb)
+                continue;
+            if (hits[i].collider.GetComponentInParent<TongueTarget>() == target)
+                continue;
+            return true;
+        }
+        return false;
+    }
+
+    // Nearest hit along a ray or sphere sweep, skipping this frog's own collider.
+    bool CastIgnoringSelf(Vector3 origin, Vector3 dir, float radius, float distance, out RaycastHit best)
+    {
+        int count = radius > 0f
+            ? Physics.SphereCastNonAlloc(origin, radius, dir, hits, distance, hitMask, QueryTriggerInteraction.Ignore)
+            : Physics.RaycastNonAlloc(origin, dir, hits, distance, hitMask, QueryTriggerInteraction.Ignore);
+
+        best = default;
+        bool found = false;
+        for (int i = 0; i < count; i++)
+        {
+            if (hits[i].rigidbody == rb)
+                continue;
+            if (!found || hits[i].distance < best.distance)
+            {
+                best = hits[i];
+                found = true;
+            }
+        }
+        return found;
+    }
+}
