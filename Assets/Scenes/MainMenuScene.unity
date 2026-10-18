@@ -2097,6 +2097,8 @@ RectTransform:
   - {fileID: 1237457603}
   - {fileID: 1844078294}
   - {fileID: 1118620499}
+  - {fileID: 979567930}
+  - {fileID: 1783166294}
   m_Father: {fileID: 92184541}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2326,8 +2328,6 @@ RectTransform:
   m_Children:
   - {fileID: 1123227224}
   - {fileID: 1783738314}
-  - {fileID: 979567930}
-  - {fileID: 1783166294}
   m_Father: {fileID: 1079471691}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -3021,7 +3021,7 @@ MonoBehaviour:
   multiplayerPanel: {fileID: 92184544}
   sessionNameInput: {fileID: 979567931}
   joinCodeInput: {fileID: 1783166295}
-  sessionList: {fileID: 1129710056}
+  sessionList: {fileID: 633062952}
   sessionRowPrefab: {fileID: 4674477183212134207, guid: a35d79f3dd3513046acc32a3243b23e1, type: 3}
   statusText: {fileID: 633839035}
 --- !u!4 &895186613
@@ -3071,11 +3071,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 397191365}
-  m_Father: {fileID: 633062952}
+  m_Father: {fileID: 607941612}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 285, y: -208}
+  m_AnchoredPosition: {x: 634.25006, y: -448.62497}
   m_SizeDelta: {x: 570, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &979567931
@@ -5937,11 +5937,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 425891496}
-  m_Father: {fileID: 633062952}
+  m_Father: {fileID: 607941612}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 285, y: -243}
+  m_AnchoredPosition: {x: 634.25006, y: -483.62503}
   m_SizeDelta: {x: 570, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1783166295
