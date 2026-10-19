@@ -15,7 +15,8 @@ MonoBehaviour:
   moveSpeed: 2.5
   groundAcceleration: 30
   airAcceleration: 6
-  turnSpeed: 450
+  turnSpeed: 400
+  facing: 0
   maxSlopeAngle: 50
   groundProbeDistance: 0.12
   coyoteTime: 0.12
@@ -54,6 +55,8 @@ MonoBehaviour:
   gripSlipTolerance: 0.35
   reattachCooldown: 0.3
   maxSurfaceTurn: 60
+  maxCornerTurn: 100
+  cornerLookAhead: 0.15
   minWallUpDot: -0.25
   maxWallUpDot: 0.75
   tongueRange: 7

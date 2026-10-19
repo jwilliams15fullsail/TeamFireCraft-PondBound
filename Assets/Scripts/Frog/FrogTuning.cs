@@ -1,5 +1,9 @@
 using UnityEngine;
 
+
+// How a frog on the ground or in the air turns its body.
+public enum FrogFacing : byte { MoveDirection, CameraWhenMoving, AlwaysCamera }
+
 // Shared tuning values for every frog. Every frog prefab points at the same asset,
 // so a designer can tweak feel in one place (even during Play Mode).
 [CreateAssetMenu(menuName = "PondBound/Frog Tuning", fileName = "FrogTuning")]
@@ -10,6 +14,8 @@ public class FrogTuning : ScriptableObject
     public float groundAcceleration = 30f;
     public float airAcceleration = 6f;
     public float turnSpeed = 540f;            // degrees per second
+    [Tooltip("MoveDirection: turn toward where you walk. CameraWhenMoving: face the camera while moving. AlwaysCamera: always face the camera, like a shooter.")]
+    public FrogFacing facing = FrogFacing.AlwaysCamera;
     public float maxSlopeAngle = 50f;
     public float groundProbeDistance = 0.12f;
     public float coyoteTime = 0.12f;          // grace period after walking off a ledge
@@ -42,10 +48,23 @@ public class FrogTuning : ScriptableObject
     public float tongueStiffness = 60f;       // spring strength (N per metre of stretch)
     public float tongueDamping = 6f;
     public float tongueMaxTension = 60f;      // force cap so the spring can never explode
+    public float tongueBraceForce = 60f;      // pull (N) a grounded frog's feet absorb, so it can drag heavy things
     public float tongueBreakDistance = 10f;
     public float reelSpeed = 3f;              // metres per second of rest length removed
     public float minRestLength = 0.6f;
     public float foodReelSpeed = 8f;
     public float eatDistance = 0.45f;
     public float blockedBreakTime = 0.15f;    // tongue snaps if scenery blocks it this long
+
+
+    [Header("Survival")]
+    public float maxHealth = 100f;
+    public float maxHunger = 100f;            // hunger doubles as stamina: effort burns it
+    public float maxHydration = 100f;
+    public float hungerDrainPerSecond = 0.5f;
+    public float hydrationDrainPerSecond = 0.8f;
+    public float jumpHungerCost = 3f;         // for a full-charge jump; small hops cost less
+    public float climbHungerPerSecond = 1f;
+    public float starvingDamagePerSecond = 2f; // for each empty bar (hunger, hydration)
+    public float healthRegenPerSecond = 0.5f; // while hunger and hydration are both above half
 }

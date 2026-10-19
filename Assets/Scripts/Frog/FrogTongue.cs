@@ -48,6 +48,7 @@ public class FrogTongue : NetworkBehaviour
     static readonly List<FrogTongue> spawned = new();
 
     FrogMotor motor;
+    
     FrogNetworkDriver driver;
     FrogClimb climb;
     Rigidbody rb;
@@ -187,6 +188,9 @@ public class FrogTongue : NetworkBehaviour
     void Attach(TongueTarget newTarget, Vector3 point)
     {
         target = newTarget;
+        //added to attach to buttons
+        if (newTarget.TryGetComponent(out WallButton button))
+            button.Activate();
         localAnchor = target.transform.InverseTransformPoint(point);
         restLength = Vector3.Distance(mouth.position, point); // no sudden yank on contact
         tipDistance = restLength;
@@ -249,9 +253,10 @@ public class FrogTongue : NetworkBehaviour
             float separating = Vector3.Dot(otherVelocity - rb.linearVelocity, dir);
             tension = Mathf.Clamp(Tuning.tongueStiffness * stretch + Tuning.tongueDamping * separating, 0f, Tuning.tongueMaxTension);
 
-            // Equal and opposite forces. Mass decides who moves more.
+            // Equal and opposite forces. Mass decides who moves more, except that a frog
+            // standing on the ground braces its feet (see BracedPull).
             Vector3 force = dir * tension;
-            rb.AddForce(force);
+            rb.AddForce(BracedPull(force));
             climb.AddExternalForce(force);
             if (other != null && !other.isKinematic)
             {
@@ -261,6 +266,18 @@ public class FrogTongue : NetworkBehaviour
             }
         }
         PushSync(tension / Tuning.tongueMaxTension);
+    }
+    // The part of the tongue's pull that actually moves this frog. On the ground its feet
+    // push against the ground and soak up to tongueBraceForce of the pull along it, so a
+    // light frog can drag a heavy box instead of being dragged to it. Lifts still work.
+    Vector3 BracedPull(Vector3 force)
+    {
+        if (motor.Mode.Value != FrogMode.Grounded)
+            return force;
+        Vector3 along = Vector3.ProjectOnPlane(force, motor.GroundNormal);
+        if (along.sqrMagnitude < 1e-6f)
+            return force;
+        return force - along.normalized * Mathf.Min(along.magnitude, Tuning.tongueBraceForce);
     }
 
     void ReelFood(Vector3 anchor, float distance)
