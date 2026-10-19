@@ -255,8 +255,12 @@ public class FrogMotor : NetworkBehaviour
             rb.AddForce(dir * add, ForceMode.VelocityChange);
         }
 
-        // Face where we're going, or where the camera looks while aiming a charged jump.
-        FaceTowards(IsCharging.Value ? input.ViewForward : wish, up, dt, Vector3.zero);
+        // Which way the body faces is set by FrogTuning > Facing. While aiming a charged
+        // jump it always faces the camera, whatever the setting.
+        bool faceCamera = IsCharging.Value
+            || tuning.facing == FrogFacing.AlwaysCamera
+            || (tuning.facing == FrogFacing.CameraWhenMoving && hasInput);
+        FaceTowards(faceCamera ? input.ViewForward : wish, up, dt, Vector3.zero);
     }
 
     // Turns the body with a speed limit (never snaps the physics body).
@@ -276,7 +280,7 @@ public class FrogMotor : NetworkBehaviour
         rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, target, tuning.turnSpeed * dt));
     }
 
-    void Respawn()
+    public void Respawn()
     {
         if (Mode.Value == FrogMode.Climbing)
             climb.Detach();

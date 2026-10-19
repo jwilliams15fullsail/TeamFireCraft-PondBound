@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8961673880041530411
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2659039804961914706}
+  - component: {fileID: 4947122815495747006}
+  m_Layer: 0
+  m_Name: PlayMenu
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2659039804961914706
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8961673880041530411}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 664.159, y: 405.13617, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4947122815495747006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8961673880041530411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd1774f15c7fbef43a5d2ab570aa8255, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayMenu
+  gameScene:
+    sceneAsset: {fileID: 102900000, guid: dbabab8b1669ce14590a4b50c7b41fb3, type: 3}
+    sceneName: TutorialLevel
+  multiplayerPanel: {fileID: 0}
+  sessionNameInput: {fileID: 0}
+  joinCodeInput: {fileID: 0}
+  sessionList: {fileID: 0}
+  sessionRowPrefab: {fileID: 4674477183212134207, guid: a35d79f3dd3513046acc32a3243b23e1, type: 3}
+  statusText: {fileID: 0}

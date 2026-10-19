@@ -317,6 +317,7 @@ GameObject:
   - component: {fileID: 2501737555277548509}
   - component: {fileID: 8596617574870936090}
   - component: {fileID: 1705107463119049175}
+  - component: {fileID: 5094990125865133694}
   m_Layer: 6
   m_Name: Frog
   m_TagString: Frog
@@ -648,6 +649,19 @@ MonoBehaviour:
   maxSag: 0.5
   recoilWobble: 0.12
   tongueWeightSplit: 0.5
+--- !u!114 &5094990125865133694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960431495464794997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90d56fc8d42192645b98256a65b1b5f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FrogStats
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1001 &3303885819701114112
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -113,23 +113,7 @@ public static class GameSession
             return;
         leaving = true;
 
-        ISession session = Current;
-        Current = null;
-        IsOffline = false;
-        if (session != null)
-        {
-            try
-            {
-                if (session.IsHost)
-                    await session.AsHost().DeleteAsync(); // the game is over for everyone
-                else
-                    await session.LeaveAsync();
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"Leaving the session failed: {e.Message}");
-            }
-        }
+        await LeaveSessionAsync();
 
         NetworkManager manager = NetworkManager.Singleton;
         if (manager != null)
@@ -140,6 +124,44 @@ public static class GameSession
         SceneManager.LoadScene(MenuScene);
         leaving = false;
     }
+
+    // Quit to the desktop. Online, tell the session service first, so the game doesn't
+    // linger in other players' Browse list after we're gone.
+    public static async void QuitGame()
+    {
+        if (leaving)
+            return;
+        leaving = true;
+
+        await LeaveSessionAsync();
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    static async Task LeaveSessionAsync()
+    {
+        ISession session = Current;
+        Current = null;
+        IsOffline = false;
+        if (session == null)
+            return;
+        try
+        {
+            if (session.IsHost)
+                await session.AsHost().DeleteAsync(); // the game is over for everyone
+            else
+                await session.LeaveAsync();
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Leaving the session failed: {e.Message}");
+        }
+    }
+
 
     static SessionOptions NewSessionOptions(string sessionName)
     {
