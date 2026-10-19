@@ -28,7 +28,7 @@ public class settingsController : MonoBehaviour
         mouseSensSlider.minValue = 0.1f;
         mouseSensSlider.maxValue = 10f;
         mouseSensSlider.SetValueWithoutNotify(
-            PlayerPrefs.GetFloat("Sensitivity", 2f));
+            PlayerPrefs.GetFloat("Sensitivity", 50f));
         mouseSensSlider.onValueChanged.AddListener(SetSensitivity);
 
         volumeSlider.minValue = 0f;
