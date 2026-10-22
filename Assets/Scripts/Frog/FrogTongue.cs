@@ -188,14 +188,26 @@ public class FrogTongue : NetworkBehaviour
     void Attach(TongueTarget newTarget, Vector3 point)
     {
         target = newTarget;
-        //added to attach to buttons
+        //added to attach to buttons -Tim
         if (newTarget.TryGetComponent(out WallButton button))
             button.Activate();
+        //added for food pile prefab -Tim
+        if (newTarget.TryGetComponent(out FoodPile pile))
+        {
+            pile.OnTongueHit(this, point);
+            return;
+        }
         localAnchor = target.transform.InverseTransformPoint(point);
         restLength = Vector3.Distance(mouth.position, point); // no sudden yank on contact
         tipDistance = restLength;
         blockedTime = 0f;
         SetState(TongueState.Attached);
+    }
+    //needed for food pile -Tim
+    public void ForceAttach(TongueTarget target, Vector3 point)
+    {
+        if (!IsServer) return;
+        Attach(target, point);
     }
 
     void Hold(float dt)
