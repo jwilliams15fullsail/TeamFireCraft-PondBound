@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Unity.Netcode;
+using FishNet.Object;
 using UnityEngine;
 
 // The frog model's own tongue as a stretchy, bendy tongue (replaces the line).
@@ -156,12 +156,14 @@ public class FrogTongueBones : MonoBehaviour
                 break;
 
             case TongueState.Attached:
-                if (sync.Target.TryGet(out NetworkObject held))
+                NetworkObject held = sync.Target;
+                if (held != null)
                     tip = held.transform.TransformPoint(sync.LocalAnchor);
                 tipDistance = Vector3.Distance(mouth, tip);
                 tension = sync.Tension;
                 attached = true;
                 break;
+                
 
             case TongueState.Retracting:
                 Vector3 back = tip - mouth;

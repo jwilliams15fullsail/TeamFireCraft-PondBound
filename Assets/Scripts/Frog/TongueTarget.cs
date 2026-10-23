@@ -1,5 +1,5 @@
 using System;
-using Unity.Netcode;
+using FishNet.Object;
 using UnityEngine;
 
 public enum TongueTargetKind { Object, Food, Frog }
@@ -9,7 +9,7 @@ public enum TongueTargetKind { Object, Food, Frog }
 public class TongueTarget : MonoBehaviour
 {
     public TongueTargetKind kind = TongueTargetKind.Object;
-    [Tooltip("Food only: hunger restored when eaten (SurvivalState will use this later).")]
+    [Tooltip("Food only: hunger restored when eaten.")]
     public float nutrition = 10f;
 
     // Host only: raised once when a frog swallows this food.
@@ -33,7 +33,7 @@ public class TongueTarget : MonoBehaviour
         if (eaten || !NetObject.IsSpawned)
             return; // can never be eaten twice
         eaten = true;
-        Debug.Log($"{name} eaten by player {eater.OwnerClientId}");
+        Debug.Log($"{name} eaten by player {eater.OwnerId}");
         Eaten?.Invoke(eater, this);
         NetObject.Despawn();
     }

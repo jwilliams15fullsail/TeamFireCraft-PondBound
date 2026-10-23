@@ -1,4 +1,4 @@
-using Unity.Netcode;
+using FishNet.Object;
 using UnityEngine;
 
 public class FoodPile : NetworkBehaviour
@@ -8,13 +8,13 @@ public class FoodPile : NetworkBehaviour
     public void OnTongueHit(FrogTongue tongue, Vector3 hitpoint)
     {
         Debug.Log("FoodPile hit!");
-        if (!IsServer) return;
+        if (!IsServerInitialized) return;
         if (foodRemaining <= 0) return;
         foodRemaining--;
 
         NetworkObject food = Instantiate(foodPrefab, hitpoint, Quaternion.identity);
 
-        food.Spawn();
+        Spawn(food, null, gameObject.scene);
         TongueTarget target = food.GetComponent<TongueTarget>();
         tongue.ForceAttach(target, hitpoint);
     }

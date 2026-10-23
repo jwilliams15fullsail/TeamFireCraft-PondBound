@@ -1,5 +1,5 @@
 using UnityEngine;
-using Unity.Netcode;
+using FishNet.Object;
 [RequireComponent(typeof(NetworkObject))]
 public class WaterDrop : NetworkBehaviour
 {
@@ -7,15 +7,15 @@ public class WaterDrop : NetworkBehaviour
     float maxTravelDistance;
     Vector3 spawnPosition;
     float maxTravelDistanceSqr;
-    public override void OnNetworkSpawn()
+    public override void OnStartServer()
     {
-        if (!IsServer) return;
+        base.OnStartServer();
         spawnPosition = transform.position;
         maxTravelDistanceSqr = maxTravelDistance * maxTravelDistance;
     }
     private void Update()
     {
-        if (!IsServer) return;
+        if (!IsServerInitialized) return;
         float distanceSqr = (transform.position - spawnPosition).sqrMagnitude;
 
         if (distanceSqr > maxTravelDistanceSqr)
@@ -25,7 +25,7 @@ public class WaterDrop : NetworkBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (!IsServer) return;
+        if (!IsServerInitialized) return;
         FrogStats frog = other.GetComponentInParent<FrogStats>();
         if (frog != null)
         {
@@ -35,8 +35,8 @@ public class WaterDrop : NetworkBehaviour
     }
     void DestroyDrop()
     {
-        if (NetworkObject != null && NetworkObject.IsSpawned)
-            NetworkObject.Despawn();
+        if (IsSpawned)
+            Despawn();
         else
             Destroy(gameObject);
     }

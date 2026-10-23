@@ -25,10 +25,12 @@ public class settingsController : MonoBehaviour
 
     private void Start()
     {
-        mouseSensSlider.minValue = 0.1f;
-        mouseSensSlider.maxValue = 10f;
+        // Mouse sensitivity as a percentage: 50% is the normal camera speed.
+        mouseSensSlider.minValue = 1f;
+        mouseSensSlider.maxValue = 100f;
+        mouseSensSlider.wholeNumbers = true;
         mouseSensSlider.SetValueWithoutNotify(
-            PlayerPrefs.GetFloat("Sensitivity", 50f));
+            PlayerPrefs.GetFloat("MouseSensitivity", 50f));
         mouseSensSlider.onValueChanged.AddListener(SetSensitivity);
 
         volumeSlider.minValue = 0f;
@@ -50,7 +52,7 @@ public class settingsController : MonoBehaviour
 
     public void SetSensitivity(float mouseSensValue)
     {
-        PlayerPrefs.SetFloat("Sensitivity", mouseSensValue);
+        PlayerPrefs.SetFloat("MouseSensitivity", mouseSensValue);
     }
 
     public void SetVolume(float volumeValue)

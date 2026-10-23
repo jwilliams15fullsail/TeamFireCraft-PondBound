@@ -1,4 +1,5 @@
-using Unity.Netcode;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 
 // Host-side sticking and climbing. FrogMotor decides when to call it, so there is
@@ -8,7 +9,7 @@ public class FrogClimb : NetworkBehaviour
     [SerializeField] LayerMask surfaceMask = ~0;
 
     // 0 = relaxed, 1 = at the grip limit, above 1 = slipping. Every machine reads it for visuals.
-    public readonly NetworkVariable<float> GripStrain = new();
+    public readonly SyncVar<float> GripStrain = new();
 
     public Vector3 SurfaceNormal { get; private set; } = Vector3.up;
     public bool IsAttached => surface != null;
