@@ -1,12 +1,33 @@
-using Unity.Netcode;
-using Unity.Netcode.Components;
+using System;
+using FishNet.Component.Transforming;
+using FishNet.Managing.Timing;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 
 public enum FrogMode : byte { Grounded, Airborne, Climbing, Disabled }
 
+// The shared hop clock for hop locomotion. The host starts and chains hops and writes
+// this once per hop; every machine works out the same Jump2 frame from it, so the
+// animation stays in step with the body without streaming any animation data.
+// FishNet writes this struct over the network automatically (its public fields).
+public struct HopSync : IEquatable<HopSync>
+{
+    public double StartTime;   // network time at which this hop's phase was 0
+    public float Duration;     // seconds for the whole hop
+    public float PrevDuration; // the hop chained just before this one (0 = started from standing)
+    public double StopTime;    // network time hopping stops (double.MaxValue while it carries on)
+
+    public bool Equals(HopSync other)
+    {
+        return StartTime == other.StartTime && Duration == other.Duration
+            && PrevDuration == other.PrevDuration && StopTime == other.StopTime;
+    }
+}
+
 // Host-side frog physics: ground probe, movement, charged jumps and the movement
 // state machine. Clients never run the simulation; they see the result through
-// NetworkTransform and the NetworkVariables below.
+// NetworkTransform and the SyncVars below.
 [RequireComponent(typeof(Rigidbody), typeof(SphereCollider))]
 public class FrogMotor : NetworkBehaviour
 {
@@ -14,15 +35,25 @@ public class FrogMotor : NetworkBehaviour
     [SerializeField] LayerMask groundMask = ~0;
     [SerializeField] float respawnHeight = -20f;
 
+    // FishNet's NetworkTransform shows other frogs this many ticks late (its Interpolation setting).
+    const int TransformInterpolationTicks = 2;
+
     // Replicated state. The host writes it, every machine reads it for visuals.
-    public readonly NetworkVariable<FrogMode> Mode = new(FrogMode.Airborne);
-    public readonly NetworkVariable<bool> IsCharging = new();
-    public readonly NetworkVariable<double> ChargeStartTime = new();
+    // Send rate 0.001 s rounds up to every tick, so jumps and hops show without extra delay.
+    // (Exactly 0 would count as "use the default", which is only every 0.1 s.)
+    public readonly SyncVar<FrogMode> Mode = new(FrogMode.Airborne, new SyncTypeSettings(0.001f));
+    public readonly SyncVar<bool> IsCharging = new(new SyncTypeSettings(0.001f));
+    public readonly SyncVar<double> ChargeStartTime = new(new SyncTypeSettings(0.001f));
+    public readonly SyncVar<HopSync> Hop = new(new SyncTypeSettings(0.001f));
 
     public FrogTuning Tuning => tuning;
     public Rigidbody Body => rb;
     public float Radius => sphere.radius;
     public Vector3 GroundNormal { get; private set; } = Vector3.up;
+
+    // The host's clock (seconds), the same on every machine: FishNet's tick plus how far
+    // into the next tick we are, so it moves smoothly every frame.
+    public double NetworkTime => TimeManager.TicksToTime(TimeManager.GetPreciseTick(TickType.Tick));
 
     Rigidbody rb;
     SphereCollider sphere;
@@ -36,6 +67,9 @@ public class FrogMotor : NetworkBehaviour
     Rigidbody support;
     Vector3 spawnPosition;
 
+    bool hopping;                           // host only: the hop being simulated
+    float hopPhase, hopDuration, hopStride;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -45,10 +79,10 @@ public class FrogMotor : NetworkBehaviour
         networkTransform = GetComponent<NetworkTransform>();
     }
 
-    public override void OnNetworkSpawn()
+    public override void OnStartServer()
     {
-        if (IsServer)
-            spawnPosition = transform.position;
+        base.OnStartServer();
+        spawnPosition = transform.position;
     }
 
     // Jump charge as 0..1. Works on every machine because it uses network time.
@@ -56,8 +90,37 @@ public class FrogMotor : NetworkBehaviour
     {
         if (!IsCharging.Value)
             return 0f;
-        double held = NetworkManager.ServerTime.Time - ChargeStartTime.Value;
+        double held = NetworkTime - ChargeStartTime.Value;
         return Mathf.Clamp01((float)held / tuning.fullChargeTime);
+    }
+
+    // Where this frog is in its current hop (0..1), on any machine; false when not hopping.
+    // The host reads its own simulation. Everyone else runs the shared hop clock as far
+    // behind as their copy of the frog is drawn (half a round trip for the update to
+    // arrive, plus the NetworkTransform's interpolation), so the feet stay planted.
+    public bool TryGetHopPhase(out float phase)
+    {
+        phase = hopPhase;
+        if (IsServerInitialized)
+            return hopping;
+
+        HopSync hop = Hop.Value;
+        double clock = NetworkTime
+            - TimeManager.HalfRoundTripTime / 1000.0
+            - TransformInterpolationTicks * TimeManager.TickDelta
+            - tuning.remoteHopDelay;
+        if (hop.Duration <= 0f || clock >= hop.StopTime)
+            return false;
+        if (clock >= hop.StartTime)
+        {
+            phase = Mathf.Min(1f, (float)((clock - hop.StartTime) / hop.Duration)); // next hop late: hold the landing
+            return true;
+        }
+        // Our clock is behind the host's: still finishing the hop before this one.
+        if (hop.PrevDuration <= 0f)
+            return false;
+        phase = 1f - (float)((hop.StartTime - clock) / hop.PrevDuration);
+        return phase >= 0f;
     }
 
     // ---- Commands (host only). Queued now, applied in FixedUpdate. ----
@@ -80,7 +143,7 @@ public class FrogMotor : NetworkBehaviour
 
     void FixedUpdate()
     {
-        if (!IsServer || !IsSpawned)
+        if (!IsServerInitialized || !IsSpawned)
             return;
 
         float dt = Time.fixedDeltaTime;
@@ -98,6 +161,8 @@ public class FrogMotor : NetworkBehaviour
         if (Mode.Value != FrogMode.Climbing)
             UpdateGroundState();
         UpdateJump(input);
+        if (Mode.Value != FrogMode.Grounded)
+            EndHop(); // stuck to a wall, jumped or fell: the hop is over
 
         if (Mode.Value == FrogMode.Climbing)
         {
@@ -180,7 +245,7 @@ public class FrogMotor : NetworkBehaviour
         if ((jumpPressQueued || jumpHeld) && onSupport && !IsCharging.Value)
         {
             IsCharging.Value = true;
-            ChargeStartTime.Value = NetworkManager.ServerTime.Time;
+            ChargeStartTime.Value = NetworkTime;
         }
         jumpPressQueued = false;
 
@@ -238,12 +303,23 @@ public class FrogMotor : NetworkBehaviour
             // (moving platforms) so tongue pulls and collisions are not wiped out instantly.
             Vector3 supportVelocity = support != null ? support.GetPointVelocity(rb.position) : Vector3.zero;
             Vector3 planar = Vector3.ProjectOnPlane(rb.linearVelocity - supportVelocity, up);
-            Vector3 target = Vector3.ProjectOnPlane(wish, up).normalized * (wish.magnitude * tuning.moveSpeed);
-            Vector3 change = Vector3.ClampMagnitude(target - planar, tuning.groundAcceleration * dt);
+            Vector3 target;
+            float acceleration = tuning.groundAcceleration;
+            if (tuning.hopLocomotion)
+            {
+                target = HopVelocity(wish, up, dt);
+                if (hopping)
+                    acceleration = tuning.hopAcceleration;
+            }
+            else
+            {
+                target = Vector3.ProjectOnPlane(wish, up).normalized * (wish.magnitude * tuning.moveSpeed);
+            }
+            Vector3 change = Vector3.ClampMagnitude(target - planar, acceleration * dt);
             rb.AddForce(change, ForceMode.VelocityChange);
 
             // The body is frictionless, so cancel gravity's slide when standing still on a slope.
-            if (!hasInput)
+            if (target.sqrMagnitude < 0.0001f)
                 rb.AddForce(-Vector3.ProjectOnPlane(Physics.gravity, up), ForceMode.Acceleration);
         }
         else if (hasInput)
@@ -256,11 +332,87 @@ public class FrogMotor : NetworkBehaviour
         }
 
         // Which way the body faces is set by FrogTuning > Facing. While aiming a charged
-        // jump it always faces the camera, whatever the setting.
+        // jump it always faces the camera, whatever the setting. Hopping always turns
+        // toward the stick: a hop can only go the way the frog faces.
         bool faceCamera = IsCharging.Value
-            || tuning.facing == FrogFacing.AlwaysCamera
-            || (tuning.facing == FrogFacing.CameraWhenMoving && hasInput);
+            || (!tuning.hopLocomotion && tuning.facing == FrogFacing.AlwaysCamera)
+            || (!tuning.hopLocomotion && tuning.facing == FrogFacing.CameraWhenMoving && hasInput);
         FaceTowards(faceCamera ? input.ViewForward : wish, up, dt, Vector3.zero);
+    }
+
+    // ---- Hop locomotion (host only) ----
+    // The body moves forward exactly as far as Jump2 carries the feet at the same moment
+    // of the hop, so the animation never slides: root motion worked out on the host and
+    // kept in step on every screen through the Hop variable.
+
+    Vector3 HopVelocity(Vector3 wish, Vector3 up, float dt)
+    {
+        float amount = Mathf.Clamp01(wish.magnitude);
+        bool wantsMove = amount > 0.1f;
+        Vector3 forward = Vector3.ProjectOnPlane(rb.rotation * Vector3.forward, up);
+        if (forward.sqrMagnitude < 0.0001f)
+            return Vector3.zero;
+        forward.Normalize();
+
+        if (!hopping)
+        {
+            // Standing: hop once facing roughly the right way, otherwise turn on the spot first.
+            if (!wantsMove || Vector3.Angle(forward, Vector3.ProjectOnPlane(wish, up)) > tuning.hopMaxStartAngle)
+                return Vector3.zero;
+            BeginHop(amount, tuning.hopStartPhase, 0f, chained: false);
+        }
+        else if (!wantsMove && hopPhase < tuning.hopCancelBefore)
+        {
+            EndHop(); // let go while still crouching: don't leap
+            return Vector3.zero;
+        }
+
+        float from = hopPhase;
+        float stride = hopStride;
+        hopPhase += dt / hopDuration;
+        float travel;
+        if (hopPhase < 1f)
+        {
+            travel = HopTravel(hopPhase) - HopTravel(from);
+        }
+        else
+        {
+            travel = 1f - HopTravel(from); // finish this hop
+            float secondsIntoNext = (hopPhase - 1f) * hopDuration;
+            if (wantsMove)
+                BeginHop(amount, 0f, secondsIntoNext, chained: true); // Jump2 ends in its own start pose
+            else
+                EndHop();
+        }
+        return forward * (travel * stride / dt);
+    }
+
+    float HopTravel(float phase) => tuning.hopTravel.Evaluate(Mathf.Clamp01(phase));
+
+    void BeginHop(float amount, float startPhase, float extraSeconds, bool chained)
+    {
+        float previousDuration = chained ? hopDuration : 0f;
+        hopping = true;
+        hopDuration = Mathf.Max(0.2f, Mathf.Lerp(tuning.slowHopDuration, tuning.hopDuration, amount));
+        hopStride = tuning.hopStride * Mathf.Lerp(tuning.minHopStride, 1f, amount);
+        hopPhase = startPhase + extraSeconds / hopDuration;
+        Hop.Value = new HopSync
+        {
+            StartTime = NetworkTime - hopPhase * hopDuration,
+            Duration = hopDuration,
+            PrevDuration = previousDuration,
+            StopTime = double.MaxValue,
+        };
+    }
+
+    void EndHop()
+    {
+        if (!hopping)
+            return;
+        hopping = false;
+        HopSync hop = Hop.Value;
+        hop.StopTime = NetworkTime;
+        Hop.Value = hop;
     }
 
     // Turns the body with a speed limit (never snaps the physics body).
@@ -284,10 +436,14 @@ public class FrogMotor : NetworkBehaviour
     {
         if (Mode.Value == FrogMode.Climbing)
             climb.Detach();
+        EndHop();
         IsCharging.Value = false;
         Mode.Value = FrogMode.Airborne;
         rb.linearVelocity = Vector3.zero;
-        // Teleport (instead of setting the position) so clients don't watch the frog fly back.
-        networkTransform.Teleport(spawnPosition, Quaternion.identity, transform.localScale);
+        rb.position = spawnPosition;
+        rb.rotation = Quaternion.identity;
+        transform.SetPositionAndRotation(spawnPosition, Quaternion.identity);
+        // Tell the NetworkTransform this move is a teleport, so clients don't watch the frog fly back.
+        networkTransform.Teleport();
     }
 }

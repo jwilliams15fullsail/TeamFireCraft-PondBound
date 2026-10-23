@@ -1,18 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
+using FishNet;
+using FishNet.Managing;
+using FishNet.Managing.Scened;
+using FishNet.Transporting.UTP;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Multiplayer;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
 // Starting and leaving games, shared by the main menu and the in-game panel.
 // Online games are Unity Multiplayer Services sessions over Relay, so they work across
-// the internet with no port forwarding. Offline is a host that only listens on this
-// computer. Either way the frog scripts run exactly as they do in a hosted game.
+// the internet with no port forwarding; FishNetSessionHandler starts FishNet for them.
+// Offline is a host that only listens on this computer. Either way the frog scripts run
+// exactly as they do in a hosted game.
 public static class GameSession
 {
     public const int MaxPlayers = 4;
@@ -20,9 +23,8 @@ public static class GameSession
 
     public static ISession Current { get; private set; }
     public static bool IsOffline { get; private set; }
+    public static bool IsLeaving { get; private set; } // leaving on purpose, so the disconnect isn't an error
     public static string LastMessage { get; set; } // shown by the menu after we get sent back to it
-
-    static bool leaving;
 
     // Enter Play Mode Options skip the domain reload, so these values would survive from
     // the last Play session. Clear them at the start of every run.
@@ -31,8 +33,8 @@ public static class GameSession
     {
         Current = null;
         IsOffline = false;
+        IsLeaving = false;
         LastMessage = null;
-        leaving = false;
     }
 
     // Online games need a Unity Services player ID. Anonymous sign-in, done once.
@@ -49,7 +51,7 @@ public static class GameSession
     {
         await SignInAsync();
         Current = await MultiplayerService.Instance.CreateSessionAsync(NewSessionOptions(sessionName));
-        LoadGameScene(gameScene);
+        LoadLevel(gameScene);
     }
 
     // Join any game with a free slot. If none turns up in a few seconds, host a new one.
@@ -59,7 +61,7 @@ public static class GameSession
         var quickJoin = new QuickJoinOptions { CreateSession = true, Timeout = TimeSpan.FromSeconds(5) };
         Current = await MultiplayerService.Instance.MatchmakeSessionAsync(quickJoin, NewSessionOptions(DefaultSessionName()));
         if (Current.IsHost)
-            LoadGameScene(gameScene); // nobody to join, so we became the host
+            LoadLevel(gameScene); // nobody to join, so we became the host
     }
 
     // Public games with a free slot, newest first.
@@ -76,62 +78,75 @@ public static class GameSession
         return results.Sessions;
     }
 
-    // Joiners don't load the level themselves: Netcode moves them into the host's scene.
+    // Joiners don't load the level themselves: FishNet moves them into the host's level.
     public static async Task JoinByIdAsync(string sessionId)
     {
         await SignInAsync();
-        Current = await MultiplayerService.Instance.JoinSessionByIdAsync(sessionId);
+        Current = await MultiplayerService.Instance.JoinSessionByIdAsync(sessionId, JoinOptions());
     }
 
     public static async Task JoinByCodeAsync(string code)
     {
         await SignInAsync();
-        Current = await MultiplayerService.Instance.JoinSessionByCodeAsync(code.Trim().ToUpperInvariant());
+        Current = await MultiplayerService.Instance.JoinSessionByCodeAsync(code.Trim().ToUpperInvariant(), JoinOptions());
     }
 
-    // Single player: a normal host, but it only listens on this computer and the
-    // NetworkManager's approval turns everyone else away. No internet or sign-in needed.
+    // Single player: a normal host, but it only listens on this computer and lets
+    // one player in (us). No internet or sign-in needed.
     public static bool StartOffline(string gameScene)
     {
-        NetworkManager manager = NetworkManager.Singleton;
-        manager.GetComponent<UnityTransport>().SetConnectionData("127.0.0.1", 7777, "127.0.0.1"); // also undoes any Relay setup from an earlier online game
+        NetworkManager manager = InstanceFinder.NetworkManager;
+        UnityTransport transport = TransportOf(manager);
+        if (transport == null)
+            return false;
+        transport.SetConnectionData("127.0.0.1", 7777, "127.0.0.1"); // also undoes any Relay setup from an earlier online game
+        transport.SetMaximumClients(1);
         IsOffline = true;
-        if (!manager.StartHost())
+        if (!manager.ServerManager.StartConnection())
         {
             IsOffline = false;
             return false;
         }
-        LoadGameScene(gameScene);
+        manager.ClientManager.StartConnection();
+        LoadLevel(gameScene);
         return true;
+    }
+
+    // Host only: moves everyone to a level. Global = players who join later load it too.
+    // ReplaceScenes All = the menu or the previous level is unloaded.
+    public static void LoadLevel(string sceneName)
+    {
+        var level = new SceneLoadData(sceneName) { ReplaceScenes = ReplaceOption.All };
+        InstanceFinder.NetworkManager.SceneManager.LoadGlobalScenes(level);
     }
 
     // Back to the main menu from anywhere. The NetworkManager we carried into the level
     // is destroyed, because MainMenuScene brings a fresh one.
     public static async void LeaveToMenu()
     {
-        if (leaving)
+        if (IsLeaving)
             return;
-        leaving = true;
+        IsLeaving = true;
 
         await LeaveSessionAsync();
 
-        NetworkManager manager = NetworkManager.Singleton;
+        NetworkManager manager = InstanceFinder.NetworkManager;
         if (manager != null)
         {
-            manager.Shutdown();
+            StopNetwork(manager);
             UnityEngine.Object.Destroy(manager.gameObject);
         }
-        SceneManager.LoadScene(MenuScene);
-        leaving = false;
+        UnitySceneManager.LoadScene(MenuScene);
+        IsLeaving = false;
     }
 
     // Quit to the desktop. Online, tell the session service first, so the game doesn't
     // linger in other players' Browse list after we're gone.
     public static async void QuitGame()
     {
-        if (leaving)
+        if (IsLeaving)
             return;
-        leaving = true;
+        IsLeaving = true;
 
         await LeaveSessionAsync();
 
@@ -140,6 +155,24 @@ public static class GameSession
 #else
         Application.Quit();
 #endif
+    }
+
+    // Stops hosting and/or playing. Safe to call when nothing is running.
+    public static void StopNetwork(NetworkManager manager)
+    {
+        if (manager == null)
+            return;
+        manager.ClientManager.StopConnection();
+        manager.ServerManager.StopConnection(true);
+    }
+
+    // The FishyUnityTransport "Unity Transport" component on the NetworkManager.
+    public static UnityTransport TransportOf(NetworkManager manager)
+    {
+        UnityTransport transport = manager != null ? manager.TransportManager.GetTransport<UnityTransport>() : null;
+        if (transport == null)
+            Debug.LogError("The scene needs a FishNet NetworkManager with FishyUnityTransport's Unity Transport component.");
+        return transport;
     }
 
     static async Task LeaveSessionAsync()
@@ -162,22 +195,16 @@ public static class GameSession
         }
     }
 
-
     static SessionOptions NewSessionOptions(string sessionName)
     {
         return new SessionOptions
         {
             Name = string.IsNullOrWhiteSpace(sessionName) ? DefaultSessionName() : sessionName.Trim(),
             MaxPlayers = MaxPlayers,
-        }.WithRelayNetwork();
+        }.WithRelayNetwork().WithNetworkHandler(new FishNetSessionHandler());
     }
+
+    static JoinSessionOptions JoinOptions() => new JoinSessionOptions().WithNetworkHandler(new FishNetSessionHandler());
 
     static string DefaultSessionName() => $"Pond {UnityEngine.Random.Range(1000, 10000)}";
-
-    static void LoadGameScene(string gameScene)
-    {
-        SceneEventProgressStatus status = NetworkManager.Singleton.SceneManager.LoadScene(gameScene, LoadSceneMode.Single);
-        if (status != SceneEventProgressStatus.Started)
-            Debug.LogError($"Couldn't load '{gameScene}' ({status}). Is it in the Build Profiles scene list?");
-    }
 }

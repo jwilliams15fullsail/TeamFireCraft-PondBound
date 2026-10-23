@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Unity.Netcode;
+using FishNet;
 using UnityEngine;
 
 // Holds its door open while enough mass rests on it: drop or tongue-drag a box onto it.
@@ -21,7 +21,7 @@ public class PressurePlate : MonoBehaviour
     // Host only: what's on the plate right now (handy for debugging or a gauge).
     public float MassOnPlate { get; private set; }
 
-    static bool IsHost => NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
+    static bool IsHost => InstanceFinder.IsServerStarted;
 
     void OnTriggerEnter(Collider other)
     {

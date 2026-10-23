@@ -1,14 +1,14 @@
-using Unity.Netcode;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
 
 // Collects the local player's input and hands it to the host.
 // Only the host simulates frogs. Every other machine only displays them.
 public class FrogNetworkDriver : NetworkBehaviour
 {
-    readonly NetworkVariable<FrogInputState> input = new(
-        default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    // The host's copy of this player's input, shared with everyone (animation reads it).
+    readonly SyncVar<FrogInputState> input = new(new SyncTypeSettings(0.001f));
 
     // Read by the host's FrogMotor / FrogTongue every physics step.
     public FrogInputState CurrentInput => input.Value;
@@ -23,6 +23,8 @@ public class FrogNetworkDriver : NetworkBehaviour
     FrogTongue tongue;
     FrogCamera frogCamera;
     InputAction moveAction, jumpAction, tongueAction, reelAction, stickAction, breakFreeAction;
+    FrogInputState lastSent;
+    uint lastSentTick;
 
     void Awake()
     {
@@ -31,8 +33,9 @@ public class FrogNetworkDriver : NetworkBehaviour
         tongue = GetComponent<FrogTongue>();
     }
 
-    public override void OnNetworkSpawn()
+    public override void OnStartClient()
     {
+        base.OnStartClient();
         if (!IsOwner)
             return;
 
@@ -57,7 +60,7 @@ public class FrogNetworkDriver : NetworkBehaviour
 
     void Update()
     {
-        if (!IsSpawned || !IsOwner)
+        if (!IsSpawned || !IsOwner || moveAction == null)
             return;
 
         // Ignore input while the window is unfocused (two Multiplayer Play Mode
@@ -70,8 +73,13 @@ public class FrogNetworkDriver : NetworkBehaviour
             ViewYaw = frogCamera != null ? Mathf.Round(frogCamera.Yaw) : transform.eulerAngles.y,
             Reel = active && reelAction.IsPressed(),
         };
-        if (!state.Equals(input.Value))
-            input.Value = state;
+        // Send changes at most once per tick. A change held back this tick goes out next tick.
+        if (!state.Equals(lastSent) && TimeManager.LocalTick != lastSentTick)
+        {
+            lastSent = state;
+            lastSentTick = TimeManager.LocalTick;
+            SubmitInput(state);
+        }
 
         if (!active)
         {
@@ -87,7 +95,7 @@ public class FrogNetworkDriver : NetworkBehaviour
         {
             LocalJumpHeld = true;
             LocalJumpHeldTime = 0f;
-            JumpPressedRpc();
+            JumpPressed();
         }
         if (jumpAction.WasReleasedThisFrame() && LocalJumpHeld)
             ReleaseJumpLocally();
@@ -95,35 +103,39 @@ public class FrogNetworkDriver : NetworkBehaviour
         if (tongueAction.WasPressedThisFrame())
         {
             Ray aim = frogCamera != null ? frogCamera.AimRay : new Ray(transform.position, transform.forward);
-            TonguePressedRpc(aim.origin, aim.direction);
+            TonguePressed(aim.origin, aim.direction);
         }
         if (stickAction.WasPressedThisFrame())
-            StickPressedRpc();
+            StickPressed();
         if (breakFreeAction.WasPressedThisFrame())
-            BreakFreePressedRpc();
+            BreakFreePressed();
     }
 
     void ReleaseJumpLocally()
     {
         LocalJumpHeld = false;
-        JumpReleasedRpc();
+        JumpReleased();
     }
 
     // ---- Owner -> host commands. The host only queues them; FrogMotor and
     // ---- FrogTongue apply them inside FixedUpdate (one simulation path).
+    // ---- [ServerRpc] only accepts calls from this frog's owner by default.
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
-    void JumpPressedRpc() => motor.PressJump();
+    [ServerRpc]
+    void SubmitInput(FrogInputState state) => input.Value = state;
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
-    void JumpReleasedRpc() => motor.ReleaseJump();
+    [ServerRpc]
+    void JumpPressed() => motor.PressJump();
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
-    void TonguePressedRpc(Vector3 aimOrigin, Vector3 aimDirection) => tongue.PressTongue(aimOrigin, aimDirection);
+    [ServerRpc]
+    void JumpReleased() => motor.ReleaseJump();
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
-    void StickPressedRpc() => motor.PressStick();
+    [ServerRpc]
+    void TonguePressed(Vector3 aimOrigin, Vector3 aimDirection) => tongue.PressTongue(aimOrigin, aimDirection);
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
-    void BreakFreePressedRpc() => FrogTongue.ReleaseEverythingHolding(NetworkObject);
+    [ServerRpc]
+    void StickPressed() => motor.PressStick();
+
+    [ServerRpc]
+    void BreakFreePressed() => FrogTongue.ReleaseEverythingHolding(NetworkObject);
 }

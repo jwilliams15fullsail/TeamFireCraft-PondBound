@@ -1,5 +1,4 @@
-using GameKit.Dependencies.Utilities.Types;
-using Unity.Netcode;
+using FishNet.Object;
 using UnityEngine;
 
 public class HydrationDrip : NetworkBehaviour
@@ -14,10 +13,10 @@ public class HydrationDrip : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!IsServer) return;
+        if (!IsServerInitialized) return;
         timer += Time.deltaTime;
 
-        if(timer >= dropRate)
+        if (timer >= dropRate)
         {
             timer = 0f;
             SpawnDrop();
@@ -25,9 +24,9 @@ public class HydrationDrip : NetworkBehaviour
     }
     void SpawnDrop()
     {
-        WaterDrop drop = Instantiate( dropPrefab, transform.position, Quaternion.identity);
+        WaterDrop drop = Instantiate(dropPrefab, transform.position, Quaternion.identity);
         drop.Initialize(hydrationAmount, maxTravelDistance);
 
-        drop.GetComponent<NetworkObject>().Spawn();
+        Spawn(drop.gameObject, null, gameObject.scene);
     }
 }

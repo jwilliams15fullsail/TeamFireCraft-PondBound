@@ -245,6 +245,22 @@ public class FrogAnimatorDriver : MonoBehaviour
         if (driver.IsOwner && driver.LocalJumpHeld)
             charge = Mathf.Max(charge, Mathf.Clamp01(driver.LocalJumpHeldTime / motor.Tuning.fullChargeTime));
 
+        // Hop locomotion: while this frog hops along the ground, the running jump plays
+        // straight from the shared hop clock, so it lines up with the body on every screen.
+        // Jump2 ends in its own start pose, so chained hops loop without a seam.
+        if (supported && jumpStep != JumpStep.Takeoff && jumpStep != JumpStep.Air && motor.TryGetHopPhase(out float hop))
+        {
+            jumpStep = JumpStep.None;
+            runJump = true;
+            jumpPhase = targetPhase = hop;
+            wasCharging = charging;
+            animator.SetBool(InJumpId, true);
+            animator.SetBool(RunJumpId, true);
+            animator.SetFloat(JumpPhaseId, hop);
+            return;
+        }
+
+
         bool leftSupport = mode == FrogMode.Airborne && lastMode != FrogMode.Airborne;
         float upSpeed = Vector3.Dot(velocity, Vector3.up);
         JumpStep before = jumpStep;

@@ -1,4 +1,5 @@
-using Unity.Netcode;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 
 // Health, hunger (doubles as stamina) and hydration. The host runs the numbers and
@@ -9,9 +10,9 @@ using UnityEngine;
 [RequireComponent(typeof(FrogMotor))]
 public class FrogStats : NetworkBehaviour
 {
-    public readonly NetworkVariable<float> Health = new();
-    public readonly NetworkVariable<float> Hunger = new();
-    public readonly NetworkVariable<float> Hydration = new();
+    public readonly SyncVar<float> Health = new();
+    public readonly SyncVar<float> Hunger = new();
+    public readonly SyncVar<float> Hydration = new();
 
     public float HealthFraction => Health.Value / Tuning.maxHealth;
     public float HungerFraction => Hunger.Value / Tuning.maxHunger;
@@ -19,7 +20,7 @@ public class FrogStats : NetworkBehaviour
 
     FrogMotor motor;
     FrogTuning Tuning => motor.Tuning;
-    float health, hunger, hydration; // the host's exact values; the NetworkVariables are rounded copies
+    float health, hunger, hydration; // the host's exact values; the SyncVars are rounded copies
     bool wasCharging;
     float lastCharge;
 
@@ -28,23 +29,22 @@ public class FrogStats : NetworkBehaviour
         motor = GetComponent<FrogMotor>();
     }
 
-    public override void OnNetworkSpawn()
+    public override void OnStartServer()
     {
-        if (!IsServer)
-            return;
+        base.OnStartServer();
         TongueTarget.Eaten += OnEaten;
         RefillAll();
     }
 
-    public override void OnNetworkDespawn()
+    public override void OnStopServer()
     {
-        if (IsServer)
-            TongueTarget.Eaten -= OnEaten;
+        base.OnStopServer();
+        TongueTarget.Eaten -= OnEaten;
     }
 
     void FixedUpdate()
     {
-        if (!IsServer || !IsSpawned)
+        if (!IsServerInitialized || !IsSpawned)
             return;
         FrogTuning t = Tuning;
         float dt = Time.fixedDeltaTime;
@@ -82,7 +82,7 @@ public class FrogStats : NetworkBehaviour
 
     public void Damage(float amount)
     {
-        if (!IsServer)
+        if (!IsServerInitialized)
             return;
         health -= amount; // FixedUpdate respawns the frog if this reaches zero
         Publish();
@@ -90,7 +90,7 @@ public class FrogStats : NetworkBehaviour
 
     public void Restore(float healthAmount, float hungerAmount, float hydrationAmount)
     {
-        if (!IsServer)
+        if (!IsServerInitialized)
             return;
         FrogTuning t = Tuning;
         health = Mathf.Min(t.maxHealth, health + healthAmount);
@@ -101,7 +101,7 @@ public class FrogStats : NetworkBehaviour
 
     public void RefillAll()
     {
-        if (!IsServer)
+        if (!IsServerInitialized)
             return;
         FrogTuning t = Tuning;
         health = t.maxHealth;
