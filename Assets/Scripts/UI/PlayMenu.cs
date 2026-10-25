@@ -9,8 +9,8 @@ using UnityEngine;
 // Join by code and the Browse list. Button OnClick events call the public methods.
 public class PlayMenu : MonoBehaviour
 {
-    [Tooltip("The level to load. It must be in the Build Profiles scene list and must not contain its own NetworkManager.")]
-    [SerializeField] string gameScene = "FrogTestScene";
+    [Tooltip("The level to load: drag its scene file here. It must be in the Build Profiles scene list and must not contain its own NetworkManager.")]
+    [SerializeField] SceneField gameScene;
 
     [Header("Multiplayer panel")]
     [SerializeField] CanvasGroup multiplayerPanel;  // greyed out while a request is running
@@ -34,21 +34,33 @@ public class PlayMenu : MonoBehaviour
 
     public void PlayOffline()
     {
-        if (busy)
+        if (busy || !LevelPicked())
             return;
-        if (!GameSession.StartOffline(gameScene))
+        if (!GameSession.StartOffline(gameScene.SceneName))
             SetStatus("Couldn't start the offline game.");
     }
 
     public async void QuickMatch()
     {
-        await Run("Looking for a game...", () => GameSession.QuickMatchAsync(gameScene));
+        if (!LevelPicked())
+            return;
+        await Run("Looking for a game...", () => GameSession.QuickMatchAsync(gameScene.SceneName));
     }
 
     public async void HostGame()
     {
+        if (!LevelPicked())
+            return;
         string sessionName = sessionNameInput != null ? sessionNameInput.text : "";
-        await Run("Creating game...", () => GameSession.HostAsync(sessionName, gameScene));
+        await Run("Creating game...", () => GameSession.HostAsync(sessionName, gameScene.SceneName));
+    }
+
+    bool LevelPicked()
+    {
+        if (gameScene != null && gameScene.IsSet)
+            return true;
+        SetStatus("No level picked. Drag a scene into PlayMenu's Game Scene slot.");
+        return false;
     }
 
     public async void JoinByCode()

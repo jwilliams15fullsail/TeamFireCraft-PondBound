@@ -226,6 +226,11 @@ public class FrogAnimatorDriver : MonoBehaviour
 
         // Speed up or slow down the run cycle so the feet match the body's speed.
         float playback = speed > 0.2f ? Mathf.Clamp(speed / Mathf.Max(0.01f, clipSpeed), minRunPlayback, maxRunPlayback) : 1f;
+
+        // Facing the camera, the frog can back up: play the run cycle in reverse then,
+        // so it doesn't moonwalk.
+        if (speed > 0.2f && Vector3.Dot(Vector3.ProjectOnPlane(velocity, transform.up), transform.forward) < -0.5f * speed)
+            playback = -playback;
         animator.SetFloat(MoveAnimSpeedId, playback);
     }
 
@@ -239,6 +244,22 @@ public class FrogAnimatorDriver : MonoBehaviour
         float charge = motor.ChargeFraction();
         if (driver.IsOwner && driver.LocalJumpHeld)
             charge = Mathf.Max(charge, Mathf.Clamp01(driver.LocalJumpHeldTime / motor.Tuning.fullChargeTime));
+
+        // Hop locomotion: while this frog hops along the ground, the running jump plays
+        // straight from the shared hop clock, so it lines up with the body on every screen.
+        // Jump2 ends in its own start pose, so chained hops loop without a seam.
+        if (supported && jumpStep != JumpStep.Takeoff && jumpStep != JumpStep.Air && motor.TryGetHopPhase(out float hop))
+        {
+            jumpStep = JumpStep.None;
+            runJump = true;
+            jumpPhase = targetPhase = hop;
+            wasCharging = charging;
+            animator.SetBool(InJumpId, true);
+            animator.SetBool(RunJumpId, true);
+            animator.SetFloat(JumpPhaseId, hop);
+            return;
+        }
+
 
         bool leftSupport = mode == FrogMode.Airborne && lastMode != FrogMode.Airborne;
         float upSpeed = Vector3.Dot(velocity, Vector3.up);

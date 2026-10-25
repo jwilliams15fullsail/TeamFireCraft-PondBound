@@ -1,22 +1,15 @@
 using System;
-using Unity.Netcode;
 using UnityEngine;
 
-// The continuous part of a player's input. The owner writes it every frame and the
-// host reads it during simulation. Button presses are sent separately as RPCs so a
-// quick tap can never fall between two network ticks.
-public struct FrogInputState : INetworkSerializable, IEquatable<FrogInputState>
+// The continuous part of a player's input. The owner sends it to the host whenever it
+// changes (at most once per tick) and the host keeps it in a SyncVar, so every machine
+// can read it. Button presses go separately as RPCs so a quick tap can never be lost.
+// FishNet writes this struct over the network automatically (its public fields).
+public struct FrogInputState : IEquatable<FrogInputState>
 {
     public Vector2 Move;   // WASD / left stick, each axis -1..1
     public float ViewYaw;  // camera yaw in degrees, so "forward" means "where my camera looks"
     public bool Reel;      // right mouse / left trigger held
-
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref Move);
-        serializer.SerializeValue(ref ViewYaw);
-        serializer.SerializeValue(ref Reel);
-    }
 
     public bool Equals(FrogInputState other)
     {

@@ -306,9 +306,6 @@ GameObject:
   - component: {fileID: 7991004424646530616}
   - component: {fileID: 200029197358658368}
   - component: {fileID: 423540121738797485}
-  - component: {fileID: 2271886301948768974}
-  - component: {fileID: 9034354210081583041}
-  - component: {fileID: 2283869435657376540}
   - component: {fileID: 5147156237453912536}
   - component: {fileID: 5780482537121213717}
   - component: {fileID: 744265398517051220}
@@ -317,6 +314,9 @@ GameObject:
   - component: {fileID: 2501737555277548509}
   - component: {fileID: 8596617574870936090}
   - component: {fileID: 1705107463119049175}
+  - component: {fileID: 5094990125865133694}
+  - component: {fileID: 4653001287088918300}
+  - component: {fileID: 5962963085824486735}
   m_Layer: 6
   m_Name: Frog
   m_TagString: Frog
@@ -391,96 +391,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.23
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2271886301948768974
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6960431495464794997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4012153730
-  InScenePlacedSourceGlobalObjectIdHash: 4012153730
-  m_InScenePlacedDisabledByDefault: 0
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  m_InScenePlaced: 0
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
---- !u!114 &9034354210081583041
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6960431495464794997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkTransform
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkTransformExpanded: 0
-  AutoOwnerAuthorityTickOffset: 1
-  PositionInterpolationType: 0
-  RotationInterpolationType: 0
-  ScaleInterpolationType: 0
-  PositionLerpSmoothing: 1
-  PositionMaxInterpolationTime: 0.1
-  RotationLerpSmoothing: 1
-  RotationMaxInterpolationTime: 0.1
-  ScaleLerpSmoothing: 1
-  ScaleMaxInterpolationTime: 0.1
-  AuthorityMode: 0
-  TickSyncChildren: 0
-  UseUnreliableDeltas: 0
-  SyncPositionX: 1
-  SyncPositionY: 1
-  SyncPositionZ: 1
-  SyncRotAngleX: 1
-  SyncRotAngleY: 1
-  SyncRotAngleZ: 1
-  SyncScaleX: 1
-  SyncScaleY: 1
-  SyncScaleZ: 1
-  PositionThreshold: 0.001
-  RotAngleThreshold: 0.01
-  ScaleThreshold: 0.01
-  UseQuaternionSynchronization: 0
-  UseQuaternionCompression: 0
-  UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
-  SlerpPosition: 0
---- !u!114 &2283869435657376540
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6960431495464794997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkRigidbody
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkRigidbodyBaseExpanded: 0
-  UseRigidBodyForMotion: 1
-  AutoUpdateKinematicState: 1
-  AutoSetKinematicOnDespawn: 1
 --- !u!114 &5147156237453912536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -493,7 +403,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e696d7d00066620438043fc8b818daab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogNetworkDriver
-  ShowTopMostFoldoutHeaderGroup: 1
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 4653001287088918300}
+  _networkObjectCache: {fileID: 4653001287088918300}
 --- !u!114 &5780482537121213717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -506,7 +418,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70e59b022adf2e54abeb79814bc7a5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogMotor
-  ShowTopMostFoldoutHeaderGroup: 1
+  _componentIndexCache: 1
+  _addedNetworkObject: {fileID: 4653001287088918300}
+  _networkObjectCache: {fileID: 4653001287088918300}
   tuning: {fileID: 11400000, guid: a03566250a3000046900f6ee44c4d017, type: 2}
   groundMask:
     serializedVersion: 2
@@ -524,7 +438,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61018cfa32b180d48881e920d95af0f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogClimb
-  ShowTopMostFoldoutHeaderGroup: 1
+  _componentIndexCache: 2
+  _addedNetworkObject: {fileID: 4653001287088918300}
+  _networkObjectCache: {fileID: 4653001287088918300}
   surfaceMask:
     serializedVersion: 2
     m_Bits: 55
@@ -540,7 +456,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b536946338337894dbd06f40f4376bea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogTongue
-  ShowTopMostFoldoutHeaderGroup: 1
+  _componentIndexCache: 3
+  _addedNetworkObject: {fileID: 4653001287088918300}
+  _networkObjectCache: {fileID: 4653001287088918300}
   mouth: {fileID: 4381684784194746175}
   hitMask:
     serializedVersion: 2
@@ -648,6 +566,130 @@ MonoBehaviour:
   maxSag: 0.5
   recoilWobble: 0.12
   tongueWeightSplit: 0.5
+--- !u!114 &5094990125865133694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960431495464794997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90d56fc8d42192645b98256a65b1b5f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FrogStats
+  _componentIndexCache: 4
+  _addedNetworkObject: {fileID: 4653001287088918300}
+  _networkObjectCache: {fileID: 4653001287088918300}
+--- !u!114 &4653001287088918300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960431495464794997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Object.NetworkObject
+  _localLevelOfDetailCalculationType: 0
+  _useLevelOfDetail: 0
+  _useRootLevelOfDetail: 1
+  NetworkObserver: {fileID: 0}
+  _enablePrediction: 0
+  _predictionType: 0
+  _localReconcileCorrectionType: 2
+  _graphicalObject: {fileID: 0}
+  _detachGraphicalObject: 0
+  _enableStateForwarding: 1
+  _networkTransform: {fileID: 0}
+  _ownerInterpolation: 1
+  _ownerSmoothedProperties: 255
+  _adaptiveInterpolation: 3
+  _spectatorSmoothedProperties: 255
+  _spectatorInterpolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  <PrefabId>k__BackingField: 8
+  <SpawnableCollectionId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 7470963074175291217
+  SceneId: 0
+  SerializedTransformProperties:
+    Position: {x: 0, y: 0.42, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    Scale: {x: 1, y: 1, z: 1}
+    IsValid: 1
+  <IsNested>k__BackingField: 0
+  WasActiveDuringEdit: 0
+  WasActiveDuringEdit_Set1: 1
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 0}
+  NetworkBehaviours:
+  - {fileID: 5147156237453912536}
+  - {fileID: 5780482537121213717}
+  - {fileID: 744265398517051220}
+  - {fileID: 6495230529249112660}
+  - {fileID: 5094990125865133694}
+  - {fileID: 5962963085824486735}
+  InitializedParentNetworkBehaviour: {fileID: 0}
+  InitializedNestedNetworkObjects: []
+  RuntimeParentNetworkBehaviour: {fileID: 0}
+  RuntimeChildNetworkBehaviours: []
+  _isNetworked: 1
+  _isSpawnable: 1
+  _isGlobal: 0
+  _initializeOrder: 0
+  _preventDespawnOnDisconnect: 0
+  _defaultDespawnType: 0
+  _initializedTimestamp: -8584088816688450223
+--- !u!114 &5962963085824486735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960431495464794997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.NetworkTransform
+  _componentIndexCache: 5
+  _addedNetworkObject: {fileID: 4653001287088918300}
+  _networkObjectCache: {fileID: 4653001287088918300}
+  _componentConfiguration: 2
+  _synchronizeParent: 0
+  _packing:
+    Position: 1
+    Rotation: 1
+    Scale: 0
+  _useScaledTime: 1
+  _interpolation: 2
+  _extrapolation: 2
+  _enableTeleport: 1
+  _teleportThreshold: 3
+  _clientAuthoritative: 0
+  _sendToOwner: 1
+  _interval: 1
+  _synchronizePosition: 1
+  _positionSensitivity: 0.001
+  _positionSnapping:
+    X: 0
+    Y: 0
+    Z: 0
+  _synchronizeRotation: 1
+  _rotationSnapping:
+    X: 0
+    Y: 0
+    Z: 0
+  _synchronizeScale: 0
+  _scaleSensitivity: 0.001
+  _scaleSnapping:
+    X: 0
+    Y: 0
+    Z: 0
 --- !u!1001 &3303885819701114112
 PrefabInstance:
   m_ObjectHideFlags: 0

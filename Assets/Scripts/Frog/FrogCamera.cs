@@ -1,46 +1,107 @@
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
-// Local third-person orbit camera. Pure presentation: it only tells the host which
-// way "forward" is (Yaw) and where the crosshair points (AimRay).
+// Connects the local frog to a Cinemachine camera: a Spyro / Ratchet & Clank style orbit
+// that trails the frog and swings in behind it while it hops (Orbital Follow recentering).
+// Lives on the Main Camera, next to the Cinemachine Brain. Pure presentation: it tells the
+// host which way "forward" is (Yaw) and where the crosshair points (AimRay). It reads
+// mouse / stick look itself, so the Settings sensitivity and the pause menu still apply.
+[RequireComponent(typeof(Camera))]
 public class FrogCamera : MonoBehaviour
 {
-    [SerializeField] float distance = 3.5f;
-    [SerializeField] float minDistance = 0.6f;
-    [SerializeField] float pivotHeight = 0.4f;
+    [Tooltip("The Cinemachine Camera that follows the frog (it needs Orbital Follow). Found automatically if empty.")]
+    [SerializeField] CinemachineCamera followCamera;
+
+    [Header("Look")]
     [SerializeField] float mouseSensitivity = 0.12f; // degrees per pixel
     [SerializeField] float stickSensitivity = 160f;  // degrees per second at full tilt
-    [SerializeField] float minPitch = -35f;
-    [SerializeField] float maxPitch = 70f;
-    [SerializeField] float followSmoothTime = 0.06f;
-    [SerializeField] float collisionRadius = 0.2f;
-    [Tooltip("Untick the Frog layer so teammates don't push the camera around.")]
-    [SerializeField] LayerMask collisionMask = ~0;
+    [SerializeField] bool invertY;
 
-    public float Yaw => yaw;
-    public Ray AimRay => new Ray(transform.position, transform.forward);
+    [Header("Zoom (scroll wheel)")]
+    [SerializeField] float minRadius = 2.5f;
+    [SerializeField] float maxRadius = 8f;
+    [SerializeField] float zoomStep = 0.5f;          // metres per scroll notch
+    [SerializeField] float zoomSmoothTime = 0.15f;
 
+    [Header("Swing in behind the frog")]
+    [Tooltip("Only swing behind the frog while it moves (Spyro style). Standing still, the camera stays where you put it.")]
+    [SerializeField] bool recenterOnlyWhileMoving = true;
+    [SerializeField] float movingSpeed = 0.4f;       // m/s that counts as moving
+
+    [Header("Own frog")]
+    [Tooltip("Hide our own frog (its shadow stays) when the camera is pushed this close.")]
+    [SerializeField] float hideFrogWithin = 0.6f;
+    [Tooltip("The frog moved this far in one frame (a respawn): cut to it instead of flying across the level.")]
+    [SerializeField] float teleportDistance = 5f;
+
+    public float Yaw => transform.eulerAngles.y;
+
+    // The crosshair ray. It starts level with the frog rather than at the lens, so
+    // anything between the camera and the frog can't steal the tongue's aim.
+    public Ray AimRay
+    {
+        get
+        {
+            Vector3 forward = transform.forward;
+            float skip = target != null ? Mathf.Max(0f, Vector3.Dot(target.position - transform.position, forward)) : 0f;
+            return new Ray(transform.position + forward * skip, forward);
+        }
+    }
+
+    CinemachineOrbitalFollow orbit;
     Transform target;
+    Renderer[] frogRenderers;
+    ShadowCastingMode[] frogShadowModes;
+    bool frogHidden;
     bool hadTarget;
     InputAction lookAction;
-    float yaw;
-    float pitch = 15f;
-    float currentDistance;
-    Vector3 pivot, pivotVelocity;
+    float sensitivityScale = 1f; // from the Settings menu's Mouse Sensitivity slider
+    float radius, radiusVelocity;
+    Vector3 lastTargetPosition;
+    float smoothSpeed;
 
     void Start()
     {
         lookAction = InputSystem.actions.FindAction("Player/Look", true);
-        currentDistance = distance;
+        FindFollowCamera();
     }
 
     public void SetTarget(Transform newTarget)
     {
         target = newTarget;
         hadTarget = true;
-        pivot = target.position + Vector3.up * pivotHeight;
-        yaw = target.eulerAngles.y;
+        frogRenderers = target.GetComponentsInChildren<Renderer>(true);
+        frogShadowModes = new ShadowCastingMode[frogRenderers.Length];
+        for (int i = 0; i < frogRenderers.Length; i++)
+            frogShadowModes[i] = frogRenderers[i].shadowCastingMode;
+        frogHidden = false;
+        lastTargetPosition = target.position;
+
+        FindFollowCamera();
+        if (followCamera != null)
+        {
+            followCamera.Follow = target;
+            followCamera.LookAt = target;
+            if (orbit != null)
+                orbit.HorizontalAxis.Value = Mathf.DeltaAngle(0f, target.eulerAngles.y); // start right behind it
+            followCamera.PreviousStateIsValid = false; // cut there, no fly-in
+        }
+        ReadSettings();
         LockCursor(true);
+    }
+
+    void FindFollowCamera()
+    {
+        if (followCamera == null)
+            followCamera = FindAnyObjectByType<CinemachineCamera>();
+        if (followCamera != null && orbit == null)
+        {
+            orbit = followCamera.GetComponent<CinemachineOrbitalFollow>();
+            if (orbit != null)
+                radius = orbit.Radius;
+        }
     }
 
     void Update()
@@ -56,36 +117,77 @@ public class FrogCamera : MonoBehaviour
             return;
         }
 
-        // Tab frees the mouse (to click Leave), Tab again captures it.
-        if (Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
+        // Tab frees the mouse, Tab again captures it. Not while paused: the pause menu owns it then.
+        if (!PauseMenu.IsOpen && Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
             LockCursor(Cursor.lockState != CursorLockMode.Locked);
-    }
 
-    void LateUpdate()
-    {
-        if (target == null)
+        // While the mouse is free a menu may be changing the settings: pick them up.
+        if (Cursor.lockState != CursorLockMode.Locked)
+            ReadSettings();
+
+        if (orbit == null)
             return;
+        float dt = Time.deltaTime;
 
         if (Cursor.lockState == CursorLockMode.Locked && Application.isFocused)
         {
             Vector2 look = lookAction.ReadValue<Vector2>();
             bool fromStick = lookAction.activeControl != null && lookAction.activeControl.device is Gamepad;
-            look *= fromStick ? stickSensitivity * Time.deltaTime : mouseSensitivity;
-            yaw += look.x;
-            pitch = Mathf.Clamp(pitch - look.y, minPitch, maxPitch);
+            look *= (fromStick ? stickSensitivity * dt : mouseSensitivity) * sensitivityScale;
+
+            // Only touch the axes when there really is look input: Cinemachine treats any
+            // change of value as input and holds off swinging behind the frog.
+            if (look.x != 0f)
+                orbit.HorizontalAxis.Value = Mathf.Repeat(orbit.HorizontalAxis.Value + look.x + 180f, 360f) - 180f;
+            if (look.y != 0f)
+            {
+                Vector2 pitchRange = orbit.VerticalAxis.Range;
+                orbit.VerticalAxis.Value = Mathf.Clamp(orbit.VerticalAxis.Value + (invertY ? look.y : -look.y), pitchRange.x, pitchRange.y);
+            }
+
+            if (Mouse.current != null)
+            {
+                float scroll = Mouse.current.scroll.ReadValue().y;
+                if (Mathf.Abs(scroll) > 0.01f)
+                    radius = Mathf.Clamp(radius - Mathf.Sign(scroll) * zoomStep, minRadius, maxRadius);
+            }
         }
+        orbit.Radius = Mathf.SmoothDamp(orbit.Radius, radius, ref radiusVelocity, zoomSmoothTime);
 
-        pivot = Vector3.SmoothDamp(pivot, target.position + Vector3.up * pivotHeight, ref pivotVelocity, followSmoothTime);
-        Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f); // no roll: stable horizon while climbing
-        Vector3 back = rotation * Vector3.back;
+        // Respawn teleport: cut to the frog. Otherwise note how fast it's moving.
+        Vector3 moved = target.position - lastTargetPosition;
+        lastTargetPosition = target.position;
+        if (moved.magnitude > teleportDistance)
+            followCamera.PreviousStateIsValid = false;
+        moved.y = 0f;
+        float speed = dt > 0f ? moved.magnitude / dt : 0f;
+        smoothSpeed = Mathf.Lerp(smoothSpeed, speed, 1f - Mathf.Exp(-6f * dt));
 
-        // Pull in instantly when a wall is in the way, ease back out afterwards.
-        float wanted = distance;
-        if (Physics.SphereCast(pivot, collisionRadius, back, out RaycastHit hit, distance, collisionMask, QueryTriggerInteraction.Ignore))
-            wanted = Mathf.Max(minDistance, hit.distance);
-        currentDistance = wanted < currentDistance ? wanted : Mathf.MoveTowards(currentDistance, wanted, 4f * Time.deltaTime);
+        // Spyro style: swing in behind the frog only while it's going somewhere.
+        if (recenterOnlyWhileMoving)
+            orbit.HorizontalAxis.Recentering.Enabled = smoothSpeed > movingSpeed;
 
-        transform.SetPositionAndRotation(pivot + back * currentDistance, rotation);
+        // Pushed right up against the frog (by a wall): hide it so it doesn't fill the screen.
+        float distance = Vector3.Distance(transform.position, target.position);
+        if (!frogHidden && distance < hideFrogWithin)
+            SetFrogHidden(true);
+        else if (frogHidden && distance > hideFrogWithin + 0.1f)
+            SetFrogHidden(false);
+    }
+
+    // The Settings menu saves Mouse Sensitivity as a percentage (1 to 100, default 50).
+    // 50% is the normal speed, 100% twice as fast, 25% half as fast.
+    void ReadSettings()
+    {
+        sensitivityScale = PlayerPrefs.GetFloat("MouseSensitivity", 50f) / 50f;
+    }
+
+    void SetFrogHidden(bool hidden)
+    {
+        frogHidden = hidden;
+        for (int i = 0; i < frogRenderers.Length; i++)
+            if (frogRenderers[i] != null)
+                frogRenderers[i].shadowCastingMode = hidden ? ShadowCastingMode.ShadowsOnly : frogShadowModes[i];
     }
 
     void OnGUI()
