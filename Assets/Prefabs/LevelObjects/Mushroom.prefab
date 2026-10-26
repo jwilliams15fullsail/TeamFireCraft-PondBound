@@ -827,6 +827,7 @@ GameObject:
   - component: {fileID: 6614096429424009648}
   - component: {fileID: 909925766266219982}
   - component: {fileID: 4824883605293856028}
+  - component: {fileID: 8321781714209509975}
   m_Layer: 0
   m_Name: Mushroom
   m_TagString: Untagged
@@ -928,3 +929,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8321781714209509975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7111095074693981138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47a33009436106742bf7b14f9e228a00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ClimbableSurface
+  gripMultiplier: 1
