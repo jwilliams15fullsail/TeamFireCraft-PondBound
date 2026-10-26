@@ -59,6 +59,7 @@ public class FrogMotor : NetworkBehaviour
     SphereCollider sphere;
     FrogNetworkDriver driver;
     FrogClimb climb;
+    FrogStats stats;
     NetworkTransform networkTransform;
 
     bool jumpHeld, jumpPressQueued, jumpReleaseQueued, stickQueued;
@@ -66,6 +67,7 @@ public class FrogMotor : NetworkBehaviour
     float ignoreGroundUntil;
     Rigidbody support;
     Vector3 spawnPosition;
+    bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
 
     bool hopping;                           // host only: the hop being simulated
     float hopPhase, hopDuration, hopStride;
@@ -76,6 +78,7 @@ public class FrogMotor : NetworkBehaviour
         sphere = GetComponent<SphereCollider>();
         driver = GetComponent<FrogNetworkDriver>();
         climb = GetComponent<FrogClimb>();
+        stats = GetComponent<FrogStats>();
         networkTransform = GetComponent<NetworkTransform>();
     }
 
@@ -143,6 +146,7 @@ public class FrogMotor : NetworkBehaviour
 
     void FixedUpdate()
     {
+       
         if (!IsServerInitialized || !IsSpawned)
             return;
 
@@ -160,6 +164,7 @@ public class FrogMotor : NetworkBehaviour
         HandleStick(input);
         if (Mode.Value != FrogMode.Climbing)
             UpdateGroundState();
+        HandleAutoClimb(input);
         UpdateJump(input);
         if (Mode.Value != FrogMode.Grounded)
             EndHop(); // stuck to a wall, jumped or fell: the hop is over
@@ -182,12 +187,31 @@ public class FrogMotor : NetworkBehaviour
         stickQueued = false;
 
         if (Mode.Value == FrogMode.Climbing)
+        {
             LeaveSurface();
+            autoClimbBlocked = true; // let go on purpose: don't grab the wall again on the way down
+        }
         else if (climb.TryAttach(input))
         {
-            IsCharging.Value = false;
-            Mode.Value = FrogMode.Climbing;
+            StartClimbing();
         }
+    }
+
+    // Jumped (or fell) into a climbable wall: grab it without pressing Stick.
+    void HandleAutoClimb(FrogInputState input)
+    {
+        if (Mode.Value == FrogMode.Grounded)
+            autoClimbBlocked = false;
+        if (!tuning.autoClimb || autoClimbBlocked || Mode.Value != FrogMode.Airborne)
+            return;
+        if (climb.TryAutoAttach(input))
+            StartClimbing();
+    }
+
+    void StartClimbing()
+    {
+        IsCharging.Value = false;
+        Mode.Value = FrogMode.Climbing;
     }
 
     void LeaveSurface()
@@ -261,10 +285,14 @@ public class FrogMotor : NetworkBehaviour
     {
         float charge = tuning.chargeCurve.Evaluate(ChargeFraction());
         float speed = Mathf.Lerp(tuning.minJumpSpeed, tuning.maxJumpSpeed, charge);
+        // A hungry frog jumps lower. Height grows with the square of launch speed.
+        if (stats != null)
+            speed *= Mathf.Sqrt(stats.JumpHeightMultiplier);
         IsCharging.Value = false;
 
         // Holding a direction = leap that way. No direction = straight up.
-        Vector3 aim = input.Move.sqrMagnitude > 0.04f ? input.WorldMove.normalized : Vector3.zero;
+        bool aiming = input.Move.sqrMagnitude > 0.04f;
+        Vector3 aim = aiming ? input.WorldMove.normalized : Vector3.zero;
 
         Vector3 surfaceNormal;
         Vector3 direction;
@@ -278,6 +306,9 @@ public class FrogMotor : NetworkBehaviour
         else
         {
             surfaceNormal = GroundNormal;
+            // On the ground the leap goes the way the frog faces (the stick turns it while charging).
+            if (aiming)
+                aim = Vector3.ProjectOnPlane(rb.rotation * Vector3.forward, surfaceNormal).normalized;
             direction = (surfaceNormal * (1f - tuning.forwardJumpRatio) + aim * tuning.forwardJumpRatio).normalized;
         }
 
@@ -334,10 +365,13 @@ public class FrogMotor : NetworkBehaviour
         // Which way the body faces is set by FrogTuning > Facing. While aiming a charged
         // jump it always faces the camera, whatever the setting. Hopping always turns
         // toward the stick: a hop can only go the way the frog faces.
-        bool faceCamera = IsCharging.Value
-            || (!tuning.hopLocomotion && tuning.facing == FrogFacing.AlwaysCamera)
-            || (!tuning.hopLocomotion && tuning.facing == FrogFacing.CameraWhenMoving && hasInput);
-        FaceTowards(faceCamera ? input.ViewForward : wish, up, dt, Vector3.zero);
+        // Which way the body faces is set by FrogTuning > Facing. Hopping always turns
+        // toward the stick: a hop can only go the way the frog faces. While charging a
+        // jump the frog keeps its facing; holding a direction turns it to aim the leap.
+        bool faceCamera = !IsCharging.Value && !tuning.hopLocomotion
+            && (tuning.facing == FrogFacing.AlwaysCamera || (tuning.facing == FrogFacing.CameraWhenMoving && hasInput));
+        Vector3 faceDirection = IsCharging.Value ? input.WorldMove : faceCamera ? input.ViewForward : wish;
+        FaceTowards(faceDirection, up, dt, Vector3.zero);
     }
 
     // ---- Hop locomotion (host only) ----

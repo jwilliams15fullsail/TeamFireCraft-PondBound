@@ -309,6 +309,10 @@ MonoBehaviour:
   cornerLookAhead: 0.15
   minWallUpDot: -0.25
   maxWallUpDot: 0.75
+  autoClimb: 1
+  autoClimbReach: 0.25
+  autoClimbMinApproach: 1
+  autoClimbCooldown: 0.5
   tongueRange: 7
   tongueExtendSpeed: 35
   tongueRetractSpeed: 45
@@ -329,6 +333,9 @@ MonoBehaviour:
   hungerDrainPerSecond: 0.5
   hydrationDrainPerSecond: 0.2
   jumpHungerCost: 3
+  hopHungerCost: 0.3
   climbHungerPerSecond: 1
   starvingDamagePerSecond: 2
   healthRegenPerSecond: 0.5
+  hungryJumpHeight: 0.5
+  tiredBelowHunger: 0.25

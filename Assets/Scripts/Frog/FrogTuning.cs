@@ -84,6 +84,16 @@ public class FrogTuning : ScriptableObject
     public float cornerLookAhead = 0.15f;     // how far ahead (m) to look for an inside corner or the floor
     [Range(-1f, 1f)] public float minWallUpDot = -0.25f; // below this = ceiling, not allowed yet
     [Range(-1f, 1f)] public float maxWallUpDot = 0.75f;  // above this = floor, just walk on it
+    
+    [Tooltip("Jumping or falling into a climbable wall grabs it without pressing Stick.")]
+    public bool autoClimb = true;
+    [Tooltip("How far ahead (m) a frog in the air looks for a wall to grab. It looks further when flying fast.")]
+    public float autoClimbReach = 0.25f;
+    [Tooltip("Speed (m/s) into the wall needed to grab it when the stick isn't pushing toward it.")]
+    public float autoClimbMinApproach = 1f;
+    [Tooltip("Seconds after letting go of a wall before grabbing in the air works again.")]
+    public float autoClimbCooldown = 0.5f;
+
 
     [Header("Tongue")]
     public float tongueRange = 7f;
@@ -109,7 +119,12 @@ public class FrogTuning : ScriptableObject
     public float hungerDrainPerSecond = 0.5f;
     public float hydrationDrainPerSecond = 0.8f;
     public float jumpHungerCost = 3f;         // for a full-charge jump; small hops cost less
+    public float hopHungerCost = 0.3f;        // each step of hop locomotion
     public float climbHungerPerSecond = 1f;
-    public float starvingDamagePerSecond = 2f; // for each empty bar (hunger, hydration)
+    public float starvingDamagePerSecond = 2f; // while hydration is empty (empty hunger weakens jumps instead)
     public float healthRegenPerSecond = 0.5f; // while hunger and hydration are both above half
+    [Tooltip("Jump height when hunger is empty, as a fraction of normal (0.5 = half as high).")]
+    [Range(0.1f, 1f)] public float hungryJumpHeight = 0.5f;
+    [Tooltip("Jumps start getting lower below this much hunger (0.25 = a quarter full). 0 = only once it's empty.")]
+    [Range(0f, 1f)] public float tiredBelowHunger = 0.25f;
 }

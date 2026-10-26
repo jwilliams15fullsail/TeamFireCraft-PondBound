@@ -5,8 +5,9 @@ using UnityEngine;
 // Health, hunger (doubles as stamina) and hydration. The host runs the numbers and
 // every machine can read them; the HUD shows your own.
 // Hunger and hydration drain over time, hunger faster while climbing and on every jump.
-// An empty bar drains health; being well fed and watered slowly heals. At zero health
-// the frog respawns with full bars. Eating a fly adds its nutrition to hunger.
+// Running out of water drains health; running low on food makes jumps lower instead.
+// Being well fed and watered slowly heals. At zero health the frog respawns with full
+// bars. Eating a fly adds its nutrition to hunger.
 [RequireComponent(typeof(FrogMotor))]
 public class FrogStats : NetworkBehaviour
 {
@@ -18,11 +19,28 @@ public class FrogStats : NetworkBehaviour
     public float HungerFraction => Hunger.Value / Tuning.maxHunger;
     public float HydrationFraction => Hydration.Value / Tuning.maxHydration;
 
+
+    // Host only: how high this frog's jumps go, 1 = normal. Below Tired Below Hunger the
+    // frog runs out of puff, down to Hungry Jump Height when hunger is empty.
+    public float JumpHeightMultiplier
+    {
+        get
+        {
+            FrogTuning t = Tuning;
+            if (hunger <= 0f)
+                return t.hungryJumpHeight;
+            if (t.tiredBelowHunger <= 0f)
+                return 1f;
+            return Mathf.Lerp(t.hungryJumpHeight, 1f, hunger / (t.maxHunger * t.tiredBelowHunger));
+        }
+    }
+
     FrogMotor motor;
     FrogTuning Tuning => motor.Tuning;
     float health, hunger, hydration; // the host's exact values; the SyncVars are rounded copies
     bool wasCharging;
     float lastCharge;
+    double lastHopStart; // each new hop has a new start time on the hop clock
 
     void Awake()
     {
@@ -59,14 +77,20 @@ public class FrogStats : NetworkBehaviour
         if (charging)
             lastCharge = motor.ChargeFraction();
         wasCharging = charging;
+        double hopStart = motor.Hop.Value.StartTime;
+        if (hopStart != lastHopStart)
+        {
+            lastHopStart = hopStart;
+            burn += t.hopHungerCost; // hop locomotion: every hop is a little effort too
+        }
 
         hunger = Mathf.Max(0f, hunger - burn);
         hydration = Mathf.Max(0f, hydration - t.hydrationDrainPerSecond * dt);
 
-        // Each empty bar hurts; with both bars over half full the frog slowly heals.
-        int emptyBars = (hunger <= 0f ? 1 : 0) + (hydration <= 0f ? 1 : 0);
-        if (emptyBars > 0)
-            health -= t.starvingDamagePerSecond * emptyBars * dt;
+        // No water hurts. No food doesn't (it weakens jumps, see JumpHeightMultiplier).
+        // With both bars over half full the frog slowly heals.
+        if (hydration <= 0f)
+            health -= t.starvingDamagePerSecond * dt;
         else if (hunger > t.maxHunger * 0.5f && hydration > t.maxHydration * 0.5f)
             health = Mathf.Min(t.maxHealth, health + t.healthRegenPerSecond * dt);
 

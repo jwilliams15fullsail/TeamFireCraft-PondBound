@@ -22,6 +22,7 @@ public class FrogClimb : NetworkBehaviour
     float overloadTime;
     float cooldownUntil;
     float wallUpSign = 1f;  // +1: W climbs up the wall, -1: W climbs down (camera looking over the top)
+    float detachedAt = float.NegativeInfinity; // when we last let go (auto-climb waits a moment)
 
     void Awake()
     {
@@ -57,15 +58,55 @@ public class FrogClimb : NetworkBehaviour
         }
         if (!found)
             return false;
+        Grab(best);
+        return true;
+    }
 
-        surface = best.collider.GetComponentInParent<ClimbableSurface>();
-        surfaceBody = best.rigidbody;
-        SurfaceNormal = best.normal;
+    // In the air: grab a climbable wall the frog is flying into, without pressing Stick.
+    // Looks the way the frog is flying and the way the stick points, further when it's fast.
+    public bool TryAutoAttach(FrogInputState input)
+    {
+        FrogTuning t = motor.Tuning;
+        if (Time.time < cooldownUntil || Time.time < detachedAt + t.autoClimbCooldown)
+            return false;
+
+        Vector3 velocity = rb.linearVelocity;
+        Vector3 flying = Vector3.ProjectOnPlane(velocity, Vector3.up);
+        float reach = t.autoClimbReach + flying.magnitude * Time.fixedDeltaTime;
+        Vector3[] directions = { flying, input.WorldMove };
+        foreach (Vector3 dir in directions)
+        {
+            if (dir.sqrMagnitude < 0.01f)
+                continue;
+            if (!CastForSurface(dir.normalized, reach, true, out RaycastHit hit))
+                continue;
+
+            float approach = Vector3.Dot(velocity, -hit.normal);     // speed into the wall
+            float push = Vector3.Dot(input.WorldMove, -hit.normal);  // stick toward the wall
+            bool flyingIn = approach > t.autoClimbMinApproach;
+            bool pushingIn = push > 0.5f && approach > -0.5f;         // not while flying away (wall jumps)
+            if (!flyingIn && !pushingIn)
+                continue;
+
+            Grab(hit);
+            // Keep the slide along the wall, lose the part that slams into it.
+            rb.linearVelocity = velocity + hit.normal * Mathf.Max(0f, approach);
+            return true;
+        }
+        return false;
+    }
+
+    void Grab(RaycastHit hit)
+    {
+        surface = hit.collider.GetComponentInParent<ClimbableSurface>();
+        surfaceBody = hit.rigidbody;
+        SurfaceNormal = hit.normal;
         rb.useGravity = false; // the pads carry our weight now (see Simulate)
         overloadTime = 0f;
         externalForce = Vector3.zero;
-        return true;
     }
+
+
 
     public void Detach()
     {
@@ -73,7 +114,8 @@ public class FrogClimb : NetworkBehaviour
         surfaceBody = null;
         rb.useGravity = true;
         cooldownUntil = Time.time + motor.Tuning.reattachCooldown;
-        externalForce = Vector3.zero;
+    detachedAt = Time.time;
+    externalForce = Vector3.zero;
         GripStrain.Value = 0f;
     }
 
