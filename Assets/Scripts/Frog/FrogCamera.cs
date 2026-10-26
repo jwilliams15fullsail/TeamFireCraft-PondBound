@@ -179,7 +179,7 @@ public class FrogCamera : MonoBehaviour
     // 50% is the normal speed, 100% twice as fast, 25% half as fast.
     void ReadSettings()
     {
-        sensitivityScale = PlayerPrefs.GetFloat("MouseSensitivity", 50f) / 50f;
+        sensitivityScale = settingsController.GetMouseSensitivity() / settingsController.DefaultMouseSensitivity;
     }
 
     void SetFrogHidden(bool hidden)

@@ -13,6 +13,8 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(NetworkManager))]
 public class NetworkSessionUI : MonoBehaviour
 {
+    [Tooltip("Show the small Mode / Players / Leave box during a game (handy while testing). The pause menu shows the same info.")]
+    [SerializeField] bool showInGamePanel;
     string address = "127.0.0.1";
     string status = "";
 
@@ -68,6 +70,8 @@ public class NetworkSessionUI : MonoBehaviour
         bool running = manager.ServerManager.Started || manager.ClientManager.Started;
         if (!running && SceneManager.GetActiveScene().name == GameSession.MenuScene)
             return; // the menu has its own buttons
+        if (running && !showInGamePanel)
+            return; // in a game: the pause menu has the join code, Leave and the controls
 
         GUILayout.BeginArea(new Rect(10, 10, 260, 260), GUI.skin.box);
 
