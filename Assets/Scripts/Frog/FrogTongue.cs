@@ -1,33 +1,25 @@
 using System;
 using System.Collections.Generic;
-using Unity.Netcode;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 
 public enum TongueState : byte { Idle, Extending, Attached, Retracting }
 
 // Everything a client needs to draw the tongue, packed in one variable so it always arrives together.
-public struct TongueSync : INetworkSerializable, IEquatable<TongueSync>
+// FishNet writes this struct over the network automatically, including the object reference.
+public struct TongueSync : IEquatable<TongueSync>
 {
     public TongueState State;
     public Vector3 Direction;              // firing direction while extending
-    public NetworkObjectReference Target;  // what the tongue is stuck to
+    public NetworkObject Target;           // what the tongue is stuck to (null when not attached)
     public Vector3 LocalAnchor;            // hit point in the target's local space
     public float RestLength;
     public float Tension;                  // 0..1, drives thinning and sag
 
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref State);
-        serializer.SerializeValue(ref Direction);
-        serializer.SerializeValue(ref Target);
-        serializer.SerializeValue(ref LocalAnchor);
-        serializer.SerializeValue(ref RestLength);
-        serializer.SerializeValue(ref Tension);
-    }
-
     public bool Equals(TongueSync other)
     {
-        return State == other.State && Direction == other.Direction && Target.Equals(other.Target)
+        return State == other.State && Direction == other.Direction && Target == other.Target
             && LocalAnchor == other.LocalAnchor && Mathf.Approximately(RestLength, other.RestLength)
             && Mathf.Approximately(Tension, other.Tension);
     }
@@ -41,7 +33,7 @@ public class FrogTongue : NetworkBehaviour
     [SerializeField] Transform mouth;
     [SerializeField] LayerMask hitMask = ~0;
 
-    public readonly NetworkVariable<TongueSync> Sync = new();
+    public readonly SyncVar<TongueSync> Sync = new(new SyncTypeSettings(0.001f));
     public Transform Mouth => mouth;
 
     // Host: every spawned tongue, for "one grab per target" and "break free".
@@ -74,14 +66,15 @@ public class FrogTongue : NetworkBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-    public override void OnNetworkSpawn()
+    public override void OnStartServer()
     {
-        if (IsServer)
-            spawned.Add(this);
+        base.OnStartServer();
+        spawned.Add(this);
     }
 
-    public override void OnNetworkDespawn()
+    public override void OnStopServer()
     {
+        base.OnStopServer();
         spawned.Remove(this);
     }
 
@@ -120,7 +113,7 @@ public class FrogTongue : NetworkBehaviour
 
     void FixedUpdate()
     {
-        if (!IsServer || !IsSpawned)
+        if (!IsServerInitialized || !IsSpawned)
             return;
 
         float dt = Time.fixedDeltaTime;
@@ -188,18 +181,31 @@ public class FrogTongue : NetworkBehaviour
     void Attach(TongueTarget newTarget, Vector3 point)
     {
         target = newTarget;
-        //added to attach to buttons
+        //added to attach to buttons -Tim
         if (newTarget.TryGetComponent(out WallButton button))
             button.Activate();
+        //added for food pile prefab -Tim
+        if (newTarget.TryGetComponent(out FoodPile pile))
+        {
+            pile.OnTongueHit(this, point);
+            return;
+        }
         localAnchor = target.transform.InverseTransformPoint(point);
         restLength = Vector3.Distance(mouth.position, point); // no sudden yank on contact
         tipDistance = restLength;
         blockedTime = 0f;
         SetState(TongueState.Attached);
     }
+    //needed for food pile -Tim
+    public void ForceAttach(TongueTarget target, Vector3 point)
+    {
+        if (!IsServerInitialized) return;
+        Attach(target, point);
+    }
 
     void Hold(float dt)
     {
+       
         if (target == null || !target.NetObject.IsSpawned)
         {
             StartRetract(); // target was eaten, destroyed, or its player left
@@ -316,10 +322,11 @@ public class FrogTongue : NetworkBehaviour
         {
             State = state,
             Direction = direction,
-            Target = target != null ? new NetworkObjectReference(target.NetObject) : default,
+            
             LocalAnchor = localAnchor,
             RestLength = Mathf.Round(restLength * 50f) / 50f, // rounding = fewer network updates
             Tension = Mathf.Round(tension01 * 20f) / 20f,
+            Target = target != null ? target.NetObject : null,
         };
     }
 

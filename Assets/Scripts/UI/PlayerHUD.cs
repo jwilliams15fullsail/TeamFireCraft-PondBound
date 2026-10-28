@@ -1,5 +1,4 @@
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,7 +23,9 @@ public class PlayerHUD : MonoBehaviour
 
     void Start()
     {
-        exits = FindObjectsByType<LevelExit>();
+        // Include switched-off ones: FishNet keeps level network objects off on joining
+        // players until the host spawns them. BusiestExit skips any not spawned yet.
+        exits = FindObjectsByType<LevelExit>(FindObjectsInactive.Include);
     }
 
     void Update()
@@ -42,13 +43,15 @@ public class PlayerHUD : MonoBehaviour
         UpdateExitCounter();
     }
 
+    // Your own frog (the one you own), once PlayerSpawner has spawned it.
     static FrogStats FindLocalFrogStats()
     {
-        NetworkManager manager = NetworkManager.Singleton;
-        if (manager == null || !manager.IsClient || manager.SpawnManager == null)
-            return null;
-        NetworkObject player = manager.SpawnManager.GetLocalPlayerObject();
-        return player != null ? player.GetComponent<FrogStats>() : null;
+        foreach (FrogStats frog in FindObjectsByType<FrogStats>())
+        {
+            if (frog.IsOwner)
+                return frog;
+        }
+        return null;
     }
 
     void UpdateBar(Image fill, float value, float dt)

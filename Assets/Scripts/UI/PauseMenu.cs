@@ -11,6 +11,8 @@ public class PauseMenu : MonoBehaviour
 
     [SerializeField] GameObject pausePanel;
     [SerializeField] GameObject settingsPanel;
+    [Tooltip("Optional: the How to Play panel (with a HowToPlay component).")]
+    [SerializeField] GameObject howToPlayPanel;
     [Tooltip("Optional: shows the join code and player count in online games.")]
     [SerializeField] TMP_Text sessionInfo;
 
@@ -41,8 +43,8 @@ public class PauseMenu : MonoBehaviour
 
         if (!IsOpen)
             Open();
-        else if (settingsPanel.activeSelf)
-            ShowPause(); // Esc in Settings goes back one step
+        else if (settingsPanel.activeSelf || HowToPlayShowing())
+            ShowPause(); // Esc in Settings or How to Play goes back one step
         else
             Resume();
     }
@@ -52,6 +54,7 @@ public class PauseMenu : MonoBehaviour
         IsOpen = true;
         pausePanel.SetActive(true);
         settingsPanel.SetActive(false);
+        SetHowToPlay(false);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         if (GameSession.IsOffline)
@@ -69,12 +72,21 @@ public class PauseMenu : MonoBehaviour
     public void ShowSettings()
     {
         pausePanel.SetActive(false);
+        SetHowToPlay(false);
         settingsPanel.SetActive(true);
+    }
+
+    public void ShowHowToPlay()
+    {
+        pausePanel.SetActive(false);
+        settingsPanel.SetActive(false);
+        SetHowToPlay(true);
     }
 
     public void ShowPause()
     {
         settingsPanel.SetActive(false);
+        SetHowToPlay(false);
         pausePanel.SetActive(true);
         ShowSessionInfo();
     }
@@ -96,7 +108,16 @@ public class PauseMenu : MonoBehaviour
         IsOpen = false;
         pausePanel.SetActive(false);
         settingsPanel.SetActive(false);
+        SetHowToPlay(false);
         Time.timeScale = 1f;
+    }
+
+    bool HowToPlayShowing() => howToPlayPanel != null && howToPlayPanel.activeSelf;
+
+    void SetHowToPlay(bool show)
+    {
+        if (howToPlayPanel != null)
+            howToPlayPanel.SetActive(show);
     }
 
     void ShowSessionInfo()

@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using FishNet.Connection;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 // Level exit. When every player in the session is standing inside this trigger, a short
 // countdown starts and the host loads the next level for everyone. Someone stepping out
@@ -12,16 +13,16 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(NetworkObject))]
 public class LevelExit : NetworkBehaviour
 {
-    [Tooltip("The level everyone moves to. It needs a PlayerSpawner, no NetworkManager, and must be in the Build Profiles scene list.")]
+    [Tooltip("The level everyone moves to. It needs a PlayerSpawner and must be in the Build Profiles scene list.")]
     [SerializeField] SceneField nextLevel;
     [SerializeField] float countdown = 3f;
     [Tooltip("Optional: a TextMeshPro (3D) text above the exit.")]
     [SerializeField] TMP_Text label;
     [SerializeField] bool labelFacesCamera = true;
 
-    readonly NetworkVariable<int> playersInside = new();
-    readonly NetworkVariable<int> playersNeeded = new();
-    readonly NetworkVariable<float> secondsLeft = new(-1f);
+    readonly SyncVar<int> playersInside = new();
+    readonly SyncVar<int> playersNeeded = new();
+    readonly SyncVar<float> secondsLeft = new(-1f);
 
     // Read by the HUD on every machine.
     public int PlayersInside => playersInside.Value;
@@ -34,7 +35,7 @@ public class LevelExit : NetworkBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (!IsServer)
+        if (!IsServerInitialized)
             return;
         NetworkObject frog = PlayerFrog(other);
         if (frog == null)
@@ -45,7 +46,7 @@ public class LevelExit : NetworkBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (!IsServer)
+        if (!IsServerInitialized)
             return;
         NetworkObject frog = PlayerFrog(other);
         if (frog == null || !touching.TryGetValue(frog, out int count))
@@ -57,16 +58,17 @@ public class LevelExit : NetworkBehaviour
     }
 
     // The player frog a collider belongs to, or null for anything else (cubes, flies...).
+    // Player frogs are the only objects with an owner.
     static NetworkObject PlayerFrog(Collider other)
     {
         Rigidbody body = other.attachedRigidbody;
         NetworkObject netObject = body != null ? body.GetComponent<NetworkObject>() : null;
-        return netObject != null && netObject.IsPlayerObject ? netObject : null;
+        return netObject != null && netObject.Owner.IsValid ? netObject : null;
     }
 
     void Update()
     {
-        if (IsServer && !loading)
+        if (IsServerInitialized && !loading)
             CheckPlayers();
         ShowLabel();
     }
@@ -74,11 +76,11 @@ public class LevelExit : NetworkBehaviour
     void CheckPlayers()
     {
         // Everyone connected counts, including someone still loading in: we wait for them.
-        int needed = NetworkManager.ConnectedClientsIds.Count;
+        int needed = ServerManager.Clients.Count;
         int inside = 0;
-        foreach (ulong clientId in NetworkManager.ConnectedClientsIds)
+        foreach (NetworkConnection connection in ServerManager.Clients.Values)
         {
-            NetworkObject frog = NetworkManager.ConnectedClients[clientId].PlayerObject;
+            NetworkObject frog = connection.FirstObject; // the frog PlayerSpawner gave them
             if (frog != null && touching.ContainsKey(frog))
                 inside++;
         }
@@ -94,7 +96,7 @@ public class LevelExit : NetworkBehaviour
             timer = -1f;
         }
 
-        // NetworkVariables only send when the value changes, and whole seconds keep that rare.
+        // SyncVars only send when the value changes, and whole seconds keep that rare.
         playersInside.Value = inside;
         playersNeeded.Value = needed;
         secondsLeft.Value = timer < 0f ? -1f : Mathf.Ceil(timer);
@@ -108,9 +110,7 @@ public class LevelExit : NetworkBehaviour
             Debug.LogError("LevelExit: no Next Level picked.", this);
             return;
         }
-        SceneEventProgressStatus status = NetworkManager.SceneManager.LoadScene(nextLevel.SceneName, LoadSceneMode.Single);
-        if (status != SceneEventProgressStatus.Started)
-            Debug.LogError($"LevelExit: couldn't load '{nextLevel.SceneName}' ({status}). Is it in the Build Profiles scene list?", this);
+        GameSession.LoadLevel(nextLevel.SceneName);
     }
 
     void ShowLabel()

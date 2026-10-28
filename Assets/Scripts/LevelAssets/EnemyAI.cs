@@ -98,6 +98,7 @@ public class EnemyAI : MonoBehaviour
     /////   STATE BEHAVIOURS   /////
     void PerformPatrol()
     {
+        pathing.moveSpeed = patrolSpeed;
         pathing.canMove = true;     // Hand patrol movement back to WaypointMover script
     }
 

@@ -1,4 +1,4 @@
-using Unity.Netcode;
+using FishNet.Object;
 using UnityEngine;
 
 // Draws the tongue on every machine from FrogTongue.Sync. Purely cosmetic:
@@ -72,7 +72,8 @@ public class FrogTongueRenderer : MonoBehaviour
                 break;
 
             case TongueState.Attached:
-                if (sync.Target.TryGet(out NetworkObject held))
+                NetworkObject held = sync.Target;
+                if (held != null)
                     tip = held.transform.TransformPoint(sync.LocalAnchor);
                 tipDistance = Vector3.Distance(mouth, tip);
                 tension = sync.Tension;

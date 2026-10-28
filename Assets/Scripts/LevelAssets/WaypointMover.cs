@@ -6,7 +6,7 @@ public class WaypointMover : MonoBehaviour
     [SerializeField] private Waypoint waypoint;
     [SerializeField] bool isBoomerang = false;
     [SerializeField] private float distanceThreshold = .1f;
-    [Range(1f, 5f)] [SerializeField] private float moveSpeed;
+    [Range(1f, 10f)] [SerializeField] public float moveSpeed;
     [Range(.5f, 10f)] [SerializeField] private float pauseTime;
     [Range(1f, 15f)] [SerializeField] private float rotationSpeed;
 

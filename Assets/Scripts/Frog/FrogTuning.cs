@@ -20,6 +20,51 @@ public class FrogTuning : ScriptableObject
     public float groundProbeDistance = 0.12f;
     public float coyoteTime = 0.12f;          // grace period after walking off a ledge
 
+
+    [Header("Hop locomotion (Jump2 moves the frog)")]
+    [Tooltip("Move by hopping, carried by the Jump2 animation's own forward travel. Off = the old run.")]
+    public bool hopLocomotion = true;
+    [Tooltip("Seconds per hop at full stick. Jump2's own length is 0.9; bigger = slower, calmer hops.")]
+    public float hopDuration = 1.0f;
+    [Tooltip("Seconds per hop at a light stick tilt.")]
+    public float slowHopDuration = 1.4f;
+    [Tooltip("Metres per hop at full stick. Jump2's feet travel 1.43.")]
+    public float hopStride = 1.43f;
+    [Tooltip("Stride at a light stick tilt, as a fraction of Hop Stride.")]
+    [Range(0.2f, 1f)] public float minHopStride = 0.5f;
+    [Tooltip("Skip this much of the opening crouch so a hop reacts the moment you push.")]
+    [Range(0f, 0.2f)] public float hopStartPhase = 0.06f;
+    [Tooltip("Let go before this point of a hop (still crouching) and it's cancelled instead of leaping.")]
+    [Range(0f, 0.3f)] public float hopCancelBefore = 0.14f;
+    [Tooltip("Facing further than this from the stick direction: turn on the spot before hopping.")]
+    public float hopMaxStartAngle = 70f;
+    [Tooltip("How tightly the body follows the hop's speed (m/s per second).")]
+    public float hopAcceleration = 80f;
+    [Tooltip("Extra delay (s) for the hop animation on players' screens other than the host's, on top of the network delay. Raise it if remote feet slide forward, lower it if they slide back.")]
+    public float remoteHopDelay = 0.04f;
+    [Tooltip("Jump2's forward travel (0 to 1) across the clip (0 to 1), measured from the clip.")]
+    public AnimationCurve hopTravel = DefaultHopTravel();
+
+    // Feet travel of the Jump2 clip, sampled every 4% of its length (1.434 m in total).
+    static AnimationCurve DefaultHopTravel()
+    {
+        float[] travel =
+        {
+            0f, 0f, 0f, 0.0063f, 0.0209f, 0.0314f, 0.0628f, 0.1192f, 0.1960f, 0.2894f, 0.3724f, 0.4310f, 0.4874f,
+            0.5635f, 0.6653f, 0.7810f, 0.8905f, 0.9533f, 0.9819f, 0.9979f, 1f, 1f, 1f, 1f, 1f, 1f,
+        };
+        // Straight lines between samples: never overshoots, so the frog never steps backwards.
+        float step = 1f / (travel.Length - 1);
+        var keys = new Keyframe[travel.Length];
+        for (int i = 0; i < travel.Length; i++)
+        {
+            float inSlope = i > 0 ? (travel[i] - travel[i - 1]) / step : 0f;
+            float outSlope = i < travel.Length - 1 ? (travel[i + 1] - travel[i]) / step : 0f;
+            keys[i] = new Keyframe(i * step, travel[i], inSlope, outSlope);
+        }
+        return new AnimationCurve(keys);
+    }
+
     [Header("Charged jump")]
     public float fullChargeTime = 1f;
     public float minJumpSpeed = 3.5f;         // a quick tap
@@ -39,6 +84,16 @@ public class FrogTuning : ScriptableObject
     public float cornerLookAhead = 0.15f;     // how far ahead (m) to look for an inside corner or the floor
     [Range(-1f, 1f)] public float minWallUpDot = -0.25f; // below this = ceiling, not allowed yet
     [Range(-1f, 1f)] public float maxWallUpDot = 0.75f;  // above this = floor, just walk on it
+    
+    [Tooltip("Jumping or falling into a climbable wall grabs it without pressing Stick.")]
+    public bool autoClimb = true;
+    [Tooltip("How far ahead (m) a frog in the air looks for a wall to grab. It looks further when flying fast.")]
+    public float autoClimbReach = 0.25f;
+    [Tooltip("Speed (m/s) into the wall needed to grab it when the stick isn't pushing toward it.")]
+    public float autoClimbMinApproach = 1f;
+    [Tooltip("Seconds after letting go of a wall before grabbing in the air works again.")]
+    public float autoClimbCooldown = 0.5f;
+
 
     [Header("Tongue")]
     public float tongueRange = 7f;
@@ -64,7 +119,12 @@ public class FrogTuning : ScriptableObject
     public float hungerDrainPerSecond = 0.5f;
     public float hydrationDrainPerSecond = 0.8f;
     public float jumpHungerCost = 3f;         // for a full-charge jump; small hops cost less
+    public float hopHungerCost = 0.3f;        // each step of hop locomotion
     public float climbHungerPerSecond = 1f;
-    public float starvingDamagePerSecond = 2f; // for each empty bar (hunger, hydration)
+    public float starvingDamagePerSecond = 2f; // while hydration is empty (empty hunger weakens jumps instead)
     public float healthRegenPerSecond = 0.5f; // while hunger and hydration are both above half
+    [Tooltip("Jump height when hunger is empty, as a fraction of normal (0.5 = half as high).")]
+    [Range(0.1f, 1f)] public float hungryJumpHeight = 0.5f;
+    [Tooltip("Jumps start getting lower below this much hunger (0.25 = a quarter full). 0 = only once it's empty.")]
+    [Range(0f, 1f)] public float tiredBelowHunger = 0.25f;
 }

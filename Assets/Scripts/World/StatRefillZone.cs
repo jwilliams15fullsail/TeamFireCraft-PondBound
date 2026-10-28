@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Unity.Netcode;
+using FishNet;
 using UnityEngine;
 
 // A trigger that refills health, hunger and hydration for every frog inside it (a spring,
@@ -16,7 +16,7 @@ public class StatRefillZone : MonoBehaviour
     readonly Dictionary<FrogStats, int> inside = new(); // frog -> its colliders inside
     readonly List<FrogStats> gone = new();
 
-    static bool IsHost => NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
+    static bool IsHost => InstanceFinder.IsServerStarted;
 
     void OnTriggerEnter(Collider other)
     {

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8423d1b93e7aa54a929e93db8195c95, type: 3}
   m_Name: FrogTuning
   m_EditorClassIdentifier: Assembly-CSharp::FrogTuning
-  moveSpeed: 2.5
+  moveSpeed: 3.5
   groundAcceleration: 30
   airAcceleration: 6
   turnSpeed: 400
@@ -20,6 +20,256 @@ MonoBehaviour:
   maxSlopeAngle: 50
   groundProbeDistance: 0.12
   coyoteTime: 0.12
+  hopLocomotion: 1
+  hopDuration: 0.5
+  slowHopDuration: 1.4
+  hopStride: 1.43
+  minHopStride: 0.5
+  hopStartPhase: 0.06
+  hopCancelBefore: 0.14
+  hopMaxStartAngle: 70
+  hopAcceleration: 80
+  remoteHopDelay: 0.04
+  hopTravel:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.04
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.08
+      value: 0
+      inSlope: 0
+      outSlope: 0.1575
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.12
+      value: 0.0063
+      inSlope: 0.1575
+      outSlope: 0.365
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.16
+      value: 0.0209
+      inSlope: 0.365
+      outSlope: 0.2625
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.19999999
+      value: 0.0314
+      inSlope: 0.2625
+      outSlope: 0.78499997
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.24
+      value: 0.0628
+      inSlope: 0.78499997
+      outSlope: 1.4100001
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.28
+      value: 0.1192
+      inSlope: 1.4100001
+      outSlope: 1.92
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.32
+      value: 0.196
+      inSlope: 1.92
+      outSlope: 2.3350005
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.35999998
+      value: 0.2894
+      inSlope: 2.3350005
+      outSlope: 2.0749993
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.39999998
+      value: 0.3724
+      inSlope: 2.0749993
+      outSlope: 1.4650003
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.44
+      value: 0.431
+      inSlope: 1.4650003
+      outSlope: 1.4100001
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.48
+      value: 0.4874
+      inSlope: 1.4100001
+      outSlope: 1.9024998
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.52
+      value: 0.5635
+      inSlope: 1.9024998
+      outSlope: 2.5450006
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.56
+      value: 0.6653
+      inSlope: 2.5450006
+      outSlope: 2.8925002
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.59999996
+      value: 0.781
+      inSlope: 2.8925002
+      outSlope: 2.7375
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.64
+      value: 0.8905
+      inSlope: 2.7375
+      outSlope: 1.5699998
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.68
+      value: 0.9533
+      inSlope: 1.5699998
+      outSlope: 0.71499944
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.71999997
+      value: 0.9819
+      inSlope: 0.71499944
+      outSlope: 0.4000008
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.76
+      value: 0.9979
+      inSlope: 0.4000008
+      outSlope: 0.05249977
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.79999995
+      value: 1
+      inSlope: 0.05249977
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.84
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.88
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.91999996
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.96
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   fullChargeTime: 1
   minJumpSpeed: 3.5
   maxJumpSpeed: 9
@@ -59,6 +309,10 @@ MonoBehaviour:
   cornerLookAhead: 0.15
   minWallUpDot: -0.25
   maxWallUpDot: 0.75
+  autoClimb: 1
+  autoClimbReach: 0.25
+  autoClimbMinApproach: 1
+  autoClimbCooldown: 0.5
   tongueRange: 7
   tongueExtendSpeed: 35
   tongueRetractSpeed: 45
@@ -66,9 +320,22 @@ MonoBehaviour:
   tongueStiffness: 60
   tongueDamping: 6
   tongueMaxTension: 60
+  tongueBraceForce: 60
   tongueBreakDistance: 7
   reelSpeed: 3
   minRestLength: 0.6
   foodReelSpeed: 8
   eatDistance: 0.45
   blockedBreakTime: 0.15
+  maxHealth: 100
+  maxHunger: 100
+  maxHydration: 100
+  hungerDrainPerSecond: 0
+  hydrationDrainPerSecond: 0.2
+  jumpHungerCost: 5
+  hopHungerCost: 0
+  climbHungerPerSecond: 0
+  starvingDamagePerSecond: 2
+  healthRegenPerSecond: 0.5
+  hungryJumpHeight: 0.5
+  tiredBelowHunger: 0.25
