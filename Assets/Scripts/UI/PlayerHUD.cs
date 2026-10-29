@@ -18,7 +18,21 @@ public class PlayerHUD : MonoBehaviour
     [Tooltip("Hidden automatically in levels without a Level Exit.")]
     [SerializeField] TMP_Text exitCounter;
 
+    [Header("Charge jump meter (optional)")]
+    [Tooltip("The meter's root object. Shown only while charging a jump.")]
+    [SerializeField] GameObject chargeMeter;
+    [Tooltip("Image Type: Filled. Fills with the jump's power.")]
+    [SerializeField] Image chargeFill;
+    [Tooltip("Optional: how high and how far this charge will go.")]
+    [SerializeField] TMP_Text chargeText;
+    [Tooltip("Optional: shows RUN or HOP.")]
+    [SerializeField] TMP_Text moveModeText;
+
     FrogStats stats;
+    FrogMotor motor;
+    FrogNetworkDriver driver;
+
+   
     LevelExit[] exits;
 
     void Start()
@@ -31,7 +45,14 @@ public class PlayerHUD : MonoBehaviour
     void Update()
     {
         if (stats == null)
+        {
             stats = FindLocalFrogStats();
+            if (stats != null)
+            {
+                motor = stats.GetComponent<FrogMotor>();
+                driver = stats.GetComponent<FrogNetworkDriver>();
+            }
+        }
 
         if (stats != null && stats.IsSpawned)
         {
@@ -40,8 +61,52 @@ public class PlayerHUD : MonoBehaviour
             UpdateBar(hungerFill, stats.HungerFraction, dt);
             UpdateBar(hydrationFill, stats.HydrationFraction, dt);
         }
+        UpdateChargeMeter();
+        UpdateMoveMode();
         UpdateExitCounter();
     }
+
+    // While charging: fills with the jump's power and says how high and far it will go.
+    // Reads the button on this machine, so it reacts the instant Space goes down.
+    void UpdateChargeMeter()
+    {
+        if (chargeMeter == null)
+            return;
+        bool ready = stats != null && stats.IsSpawned;
+        bool supported = ready && (motor.Mode.Value == FrogMode.Grounded || motor.Mode.Value == FrogMode.Climbing);
+        bool charging = ready && (motor.IsCharging.Value || (driver.LocalJumpHeld && supported));
+        if (chargeMeter.activeSelf != charging)
+            chargeMeter.SetActive(charging);
+        if (!charging)
+            return;
+
+        float charge01 = motor.ChargeFraction();
+        if (driver.LocalJumpHeld)
+            charge01 = Mathf.Max(charge01, Mathf.Clamp01(driver.LocalJumpHeldTime / motor.Tuning.fullChargeTime));
+        if (chargeFill != null)
+            chargeFill.fillAmount = motor.Tuning.chargeCurve.Evaluate(charge01);
+        if (chargeText == null)
+            return;
+        if (motor.Mode.Value == FrogMode.Climbing)
+        {
+            chargeText.text = "Wall jump";
+            return;
+        }
+        float heightScale = stats.JumpHeightMultiplier;
+        Vector2 reach = motor.GroundJumpReach(charge01, heightScale);
+        float share = motor.AimToward(driver.LocalJumpTarget, charge01, heightScale).magnitude;
+        chargeText.text = share > 0.01f
+            ? $"Height {reach.x:0.0} m   Distance {reach.y * share:0.0} m"
+            : $"Height {reach.x:0.0} m";
+    }
+
+    void UpdateMoveMode()
+    {
+        if (moveModeText == null || driver == null)
+            return;
+        moveModeText.text = motor.Tuning.hopLocomotion && driver.HopModeOn ? "HOP" : "RUN";
+    }
+
 
     // Your own frog (the one you own), once PlayerSpawner has spawned it.
     static FrogStats FindLocalFrogStats()
