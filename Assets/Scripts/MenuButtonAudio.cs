@@ -25,6 +25,7 @@ public class MenuButtonAudio : MonoBehaviour,
 
         audioSource.playOnAwake = false;
         audioSource.loop = false;
+        audioSource.spatialBlend = 0f;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -35,7 +36,15 @@ public class MenuButtonAudio : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        Debug.Log("BUTTON CLICK DETECTED!");
+
         if (clickSound != null)
-            audioSource.PlayOneShot(clickSound, volume);
+        {
+            AudioSource.PlayClipAtPoint(
+                clickSound,
+                Vector3.zero,
+                volume
+            );
+        }
     }
 }
