@@ -12,6 +12,9 @@ public class PauseMenuController : MonoBehaviour
 
     [Header("Game settings")]
     [SerializeField] private bool isOnlineGame;
+
+    [Header("HUD")]
+    [SerializeField] private GameObject hud;
    private GameObject currentMenu;
 
     private bool isPaused;
@@ -95,6 +98,10 @@ public class PauseMenuController : MonoBehaviour
 
         if (howToPlayPanel != null)
             howToPlayPanel.SetActive(false);
+
+        //Deactivates HUD when in Pause Menu
+        if (hud != null)
+            hud.SetActive(!show);
 
         // Offline: freeze time. Online: leave the simulation running.
         Time.timeScale = show && !isOnlineGame ? 0f : 1f;
