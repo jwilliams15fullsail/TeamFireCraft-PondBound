@@ -87,10 +87,7 @@ public class FrogProceduralBody : MonoBehaviour
             lastMode = mode;
         }
 
-        // ---- Charge (the owner sees it instantly from local input) ----
-        float charge = motor.ChargeFraction();
-        if (driver.IsOwner && driver.LocalJumpHeld && supported)
-            charge = Mathf.Max(charge, Mathf.Clamp01(driver.LocalJumpHeldTime / motor.Tuning.fullChargeTime));
+        float charge = driver.IsOwner && driver.LocalJumpHeld && supported ? driver.LocalCharge : motor.ChargeFraction();
 
         // ---- Hop-crawl: a little hop every hopLength metres while walking ----
         Vector3 localVelocity = transform.InverseTransformDirection(velocity);

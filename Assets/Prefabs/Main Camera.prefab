@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FrogCamera
   followCamera: {fileID: 0}
-  mouseSensitivity: 0.12
+  mouseSensitivity: 0.25
   stickSensitivity: 160
   invertY: 0
   minRadius: 2.5
@@ -163,6 +163,11 @@ MonoBehaviour:
   movingSpeed: 0.4
   hideFrogWithin: 0.6
   teleportDistance: 5
+  aimZoomOut: 1
+  aimLookAtMarker: 0.6
+  aimBlendTime: 0.35
+  aimFocusSmoothTime: 0.15
+  keepFrogOnScreen: 0.7
 --- !u!114 &8510036722087431436
 MonoBehaviour:
   m_ObjectHideFlags: 0

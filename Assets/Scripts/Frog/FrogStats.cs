@@ -22,16 +22,20 @@ public class FrogStats : NetworkBehaviour
 
     // Host only: how high this frog's jumps go, 1 = normal. Below Tired Below Hunger the
     // frog runs out of puff, down to Hungry Jump Height when hunger is empty.
+    // How high (and far) this frog's jumps go, 1 = normal. Works on every machine, so the
+    // owner's charge meter and jump preview match the host. Below Tired Below Hunger the
+    // frog runs out of puff, down to Hungry Jump Height when hunger is empty.
     public float JumpHeightMultiplier
     {
         get
         {
             FrogTuning t = Tuning;
-            if (hunger <= 0f)
+            float fed = Hunger.Value;
+            if (fed <= 0f)
                 return t.hungryJumpHeight;
             if (t.tiredBelowHunger <= 0f)
                 return 1f;
-            return Mathf.Lerp(t.hungryJumpHeight, 1f, hunger / (t.maxHunger * t.tiredBelowHunger));
+            return Mathf.Lerp(t.hungryJumpHeight, 1f, fed / (t.maxHunger * t.tiredBelowHunger));
         }
     }
 
