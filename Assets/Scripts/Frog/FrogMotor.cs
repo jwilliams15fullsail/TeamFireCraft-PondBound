@@ -7,8 +7,8 @@ using UnityEngine;
 
 public enum FrogMode : byte { Grounded, Airborne, Climbing, Disabled }
 
-// The shared hop clock for hop locomotion. The host starts and chains hops and writes
-// this once per hop; every machine works out the same Jump2 frame from it, so the
+// The shared hop clock for hop mode. The host starts and chains hops and writes
+// this once per hop; every machine works out the same jump-clip frame from it, so the
 // animation stays in step with the body without streaming any animation data.
 // FishNet writes this struct over the network automatically (its public fields).
 public struct HopSync : IEquatable<HopSync>
@@ -68,7 +68,8 @@ public class FrogMotor : NetworkBehaviour
     Rigidbody support;
     Vector3 spawnPosition;
     bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
-
+    float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
+    Vector3 releaseTarget;  // where the player put the landing marker when letting go of jump
     bool hopping;                           // host only: the hop being simulated
     float hopPhase, hopDuration, hopStride;
 
@@ -95,6 +96,40 @@ public class FrogMotor : NetworkBehaviour
             return 0f;
         double held = NetworkTime - ChargeStartTime.Value;
         return Mathf.Clamp01((float)held / tuning.fullChargeTime);
+    }
+
+    // Height and forward distance (m, landing on flat ground) of a ground jump with this
+    // much charge (0..1). heightScale shrinks both for a hungry frog (1 = normal).
+    public Vector2 GroundJumpReach(float charge01, float heightScale)
+    {
+        float charge = tuning.chargeCurve.Evaluate(charge01);
+        return new Vector2(
+            Mathf.Lerp(tuning.minJumpHeight, tuning.maxJumpHeight, charge),
+            Mathf.Lerp(tuning.minJumpDistance, tuning.maxJumpDistance, charge)) * heightScale;
+    }
+
+    // The launch velocity of a ground jump. aimFlat points the way to leap and its length
+    // (0 to 1) is how much of this charge's reach to use: 0 = straight up. Worked out from
+    // the height and distance it should reach, so a jump always lands where the meter and
+    // the preview say. Any machine can call it.
+    public Vector3 GroundJumpVelocity(float charge01, Vector3 aimFlat, float heightScale)
+    {
+        Vector2 reach = GroundJumpReach(charge01, heightScale);
+        float gravity = -Physics.gravity.y;
+        float up = Mathf.Sqrt(2f * gravity * reach.x);
+        aimFlat = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(aimFlat, Vector3.up), 1f);
+        if (aimFlat.sqrMagnitude < 0.0001f)
+            return Vector3.up * up;
+        float flightTime = 2f * up / gravity;
+        return Vector3.up * up + aimFlat * (reach.y / flightTime);
+    }
+
+    // A landing spot (flat offset from the frog, in metres) as GroundJumpVelocity's aim: the
+    // same direction, as a share of this charge's reach. Spots out of reach are cut short.
+    public Vector3 AimToward(Vector3 target, float charge01, float heightScale)
+    {
+        float reach = GroundJumpReach(charge01, heightScale).y;
+        return reach > 0.001f ? Vector3.ClampMagnitude(target / reach, 1f) : Vector3.zero;
     }
 
     // Where this frog is in its current hop (0..1), on any machine; false when not hopping.
@@ -134,10 +169,12 @@ public class FrogMotor : NetworkBehaviour
         jumpPressQueued = true;
     }
 
-    public void ReleaseJump()
+    // target: where the player put the landing marker (world x/z offset from the frog, metres).
+    public void ReleaseJump(Vector2 target)
     {
         jumpHeld = false;
         jumpReleaseQueued = true;
+        releaseTarget = Vector3.ClampMagnitude(new Vector3(target.x, 0f, target.y), tuning.maxJumpDistance);
     }
 
     public void PressStick() => stickQueued = true;
@@ -146,7 +183,6 @@ public class FrogMotor : NetworkBehaviour
 
     void FixedUpdate()
     {
-       
         if (!IsServerInitialized || !IsSpawned)
             return;
 
@@ -219,6 +255,7 @@ public class FrogMotor : NetworkBehaviour
         climb.Detach();
         IsCharging.Value = false;
         Mode.Value = FrogMode.Airborne;
+        airSpeedLimit = FlatSpeed();
     }
 
     void UpdateGroundState()
@@ -234,6 +271,7 @@ public class FrogMotor : NetworkBehaviour
         if (Mode.Value == FrogMode.Airborne && hitGround)
         {
             Mode.Value = FrogMode.Grounded;
+            StickLanding();
         }
         else if (Mode.Value == FrogMode.Grounded && Time.time - lastGroundedTime > tuning.coyoteTime)
         {
@@ -242,7 +280,19 @@ public class FrogMotor : NetworkBehaviour
             IsCharging.Value = false;
             GroundNormal = Vector3.up;
             support = null;
+            airSpeedLimit = FlatSpeed(); // walked off a ledge: steering can't speed the fall up
         }
+    }
+
+    // Landing drops most of the jump's sideways speed (Landing Keep Speed), so the frog
+    // stays on the platform it lands on instead of sliding off it. Running or hopping
+    // picks the speed up again from there.
+    void StickLanding()
+    {
+        Vector3 supportVelocity = support != null ? support.GetPointVelocity(rb.position) : Vector3.zero;
+        Vector3 relative = rb.linearVelocity - supportVelocity;
+        Vector3 vertical = Vector3.Project(relative, Vector3.up);
+        rb.linearVelocity = supportVelocity + vertical + (relative - vertical) * tuning.landingKeepSpeed;
     }
 
     bool ProbeGround(out RaycastHit hit)
@@ -258,6 +308,21 @@ public class FrogMotor : NetworkBehaviour
             return false;
         if (hit.rigidbody == rb)
             return false;
+
+        // On a ledge the cast touches the corner, and the corner's normal leans out over the
+        // drop, so the frog would slide off. Look straight down just inside the edge for the
+        // flat top instead, and stand on it while the centre isn't too far past the edge.
+        Vector3 toContact = Vector3.ProjectOnPlane(hit.point - rb.position, Vector3.up);
+        if (toContact.sqrMagnitude > 0.0001f
+            && Physics.Raycast(hit.point + toContact.normalized * 0.02f + Vector3.up * 0.05f, Vector3.down,
+                               out RaycastHit top, 0.1f, groundMask, QueryTriggerInteraction.Ignore)
+            && top.rigidbody != rb
+            && Vector3.Angle(top.normal, hit.normal) > 5f)
+        {
+            if (toContact.magnitude > Radius * tuning.ledgeSupport)
+                return false; // hanging too far over: fall
+            hit.normal = top.normal;
+        }
         return Vector3.Angle(hit.normal, Vector3.up) <= tuning.maxSlopeAngle;
     }
 
@@ -283,43 +348,51 @@ public class FrogMotor : NetworkBehaviour
 
     void Launch(FrogInputState input)
     {
-        float charge = tuning.chargeCurve.Evaluate(ChargeFraction());
-        float speed = Mathf.Lerp(tuning.minJumpSpeed, tuning.maxJumpSpeed, charge);
-        // A hungry frog jumps lower. Height grows with the square of launch speed.
-        if (stats != null)
-            speed *= Mathf.Sqrt(stats.JumpHeightMultiplier);
+        float charge01 = ChargeFraction();
+        // A hungry frog jumps lower and shorter.
+        float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
         IsCharging.Value = false;
 
         // Holding a direction = leap that way. No direction = straight up.
         bool aiming = input.Move.sqrMagnitude > 0.04f;
-        Vector3 aim = aiming ? input.WorldMove.normalized : Vector3.zero;
 
-        Vector3 surfaceNormal;
-        Vector3 direction;
         if (Mode.Value == FrogMode.Climbing)
         {
             // Wall jump: let go first, then push out from the wall and up.
-            surfaceNormal = climb.SurfaceNormal;
+            float speed = Mathf.Lerp(tuning.minJumpSpeed, tuning.maxJumpSpeed, tuning.chargeCurve.Evaluate(charge01));
+            speed *= Mathf.Sqrt(heightScale); // height grows with the square of launch speed
+            Vector3 aim = aiming ? input.WorldMove.normalized : Vector3.zero;
+            Vector3 surfaceNormal = climb.SurfaceNormal;
             climb.Detach();
-            direction = (surfaceNormal + Vector3.up * tuning.wallJumpUpBias + aim * 0.5f).normalized;
+            Vector3 direction = (surfaceNormal + Vector3.up * tuning.wallJumpUpBias + aim * 0.5f).normalized;
+
+            // Remove any velocity pushing into the wall, then launch exactly once.
+            float into = Mathf.Min(0f, Vector3.Dot(rb.linearVelocity, surfaceNormal));
+            rb.AddForce(direction * speed - surfaceNormal * into, ForceMode.VelocityChange);
         }
         else
         {
-            surfaceNormal = GroundNormal;
-            // On the ground the leap goes the way the frog faces (the stick turns it while charging).
-            if (aiming)
-                aim = Vector3.ProjectOnPlane(rb.rotation * Vector3.forward, surfaceNormal).normalized;
-            direction = (surfaceNormal * (1f - tuning.forwardJumpRatio) + aim * tuning.forwardJumpRatio).normalized;
+           
+            // On the ground the leap goes to the landing marker the player aimed with the mouse,
+            // or (with mouse aiming off) the way the frog faces as far as the charge allows.
+            // It replaces any run speed, so it lands exactly where the preview shows.
+            Vector3 aim = tuning.aimJumpsWithMouse ? AimToward(releaseTarget, charge01, heightScale)
+                : aiming ? Vector3.ProjectOnPlane(rb.rotation * Vector3.forward, Vector3.up).normalized
+                : Vector3.zero;
+            Vector3 supportVelocity = support != null ? support.GetPointVelocity(rb.position) : Vector3.zero;
+            rb.linearVelocity = supportVelocity + GroundJumpVelocity(charge01, aim, heightScale);
         }
 
-        // Remove any velocity pushing into the surface, then launch exactly once.
-        float into = Mathf.Min(0f, Vector3.Dot(rb.linearVelocity, surfaceNormal));
-        rb.AddForce(direction * speed - surfaceNormal * into, ForceMode.VelocityChange);
-
+        airSpeedLimit = FlatSpeed();
         Mode.Value = FrogMode.Airborne;
         ignoreGroundUntil = Time.time + 0.15f;
         support = null;
     }
+
+    float FlatSpeed() => Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up).magnitude;
+
+    // Hop mode needs both the tuning switch and the player's Sprint toggle.
+    bool HopMode(FrogInputState input) => tuning.hopLocomotion && input.Hop;
 
     void Move(FrogInputState input, float dt)
     {
@@ -335,17 +408,18 @@ public class FrogMotor : NetworkBehaviour
             Vector3 supportVelocity = support != null ? support.GetPointVelocity(rb.position) : Vector3.zero;
             Vector3 planar = Vector3.ProjectOnPlane(rb.linearVelocity - supportVelocity, up);
             Vector3 target;
-            float acceleration = tuning.groundAcceleration;
-            if (tuning.hopLocomotion)
+            if (HopMode(input))
             {
                 target = HopVelocity(wish, up, dt);
-                if (hopping)
-                    acceleration = tuning.hopAcceleration;
             }
             else
             {
-                target = Vector3.ProjectOnPlane(wish, up).normalized * (wish.magnitude * tuning.moveSpeed);
+                EndHop(); // switched back to running mid-hop
+                target = RunVelocity(wish, up);
             }
+            // Speeding up uses Ground Acceleration, slowing down or stopping uses Ground Braking.
+            float acceleration = hopping ? tuning.hopAcceleration
+                : target.sqrMagnitude > planar.sqrMagnitude ? tuning.groundAcceleration : tuning.groundBraking;
             Vector3 change = Vector3.ClampMagnitude(target - planar, acceleration * dt);
             rb.AddForce(change, ForceMode.VelocityChange);
 
@@ -355,29 +429,41 @@ public class FrogMotor : NetworkBehaviour
         }
         else if (hasInput)
         {
-            // Air control can steer and slow a leap but never pushes past moveSpeed.
-            Vector3 dir = wish.normalized;
-            float along = Vector3.Dot(rb.linearVelocity, dir);
-            float add = Mathf.Clamp(tuning.moveSpeed * wish.magnitude - along, 0f, tuning.airAcceleration * dt);
-            rb.AddForce(dir * add, ForceMode.VelocityChange);
+            // Air steering can turn and slow a leap but never stretch it past its takeoff
+            // speed (a straight-up jump or a fall may drift a little), so jumps land where
+            // the preview shows.
+            Vector3 planar = Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up);
+            Vector3 target = wish * Mathf.Max(airSpeedLimit, tuning.airDriftSpeed);
+            Vector3 change = Vector3.ClampMagnitude(target - planar, tuning.airAcceleration * dt);
+            rb.AddForce(change, ForceMode.VelocityChange);
         }
 
-        // Which way the body faces is set by FrogTuning > Facing. While aiming a charged
-        // jump it always faces the camera, whatever the setting. Hopping always turns
-        // toward the stick: a hop can only go the way the frog faces.
-        // Which way the body faces is set by FrogTuning > Facing. Hopping always turns
-        // toward the stick: a hop can only go the way the frog faces. While charging a
-        // jump the frog keeps its facing; holding a direction turns it to aim the leap.
-        bool faceCamera = !IsCharging.Value && !tuning.hopLocomotion
-            && (tuning.facing == FrogFacing.AlwaysCamera || (tuning.facing == FrogFacing.CameraWhenMoving && hasInput));
-        Vector3 faceDirection = IsCharging.Value ? input.WorldMove : faceCamera ? input.ViewForward : wish;
-        FaceTowards(faceDirection, up, dt, Vector3.zero);
+        // The frog turns toward the stick (on the spot when it points far away). While
+        // charging a jump it turns to face the landing marker (or, with mouse aiming off,
+        // the stick); with neither it keeps its facing.
+        Vector3 face = wish;
+        if (IsCharging.Value)
+            face = tuning.aimJumpsWithMouse ? new Vector3(input.JumpTarget.x, 0f, input.JumpTarget.y) : input.WorldMove;
+        FaceTowards(face, up, dt, Vector3.zero);
     }
 
-    // ---- Hop locomotion (host only) ----
-    // The body moves forward exactly as far as Jump2 carries the feet at the same moment
-    // of the hop, so the animation never slides: root motion worked out on the host and
-    // kept in step on every screen through the Hop variable.
+    // Running: the frog only ever moves the way it faces, so it never skates sideways.
+    // Pushing further than Turn In Place Angle from its facing turns it on the spot
+    // first; speed builds up as it comes round. Speed follows how far the stick is pushed.
+    Vector3 RunVelocity(Vector3 wish, Vector3 up)
+    {
+        Vector3 forward = Vector3.ProjectOnPlane(rb.rotation * Vector3.forward, up);
+        Vector3 wishFlat = Vector3.ProjectOnPlane(wish, up);
+        if (forward.sqrMagnitude < 0.0001f || wishFlat.sqrMagnitude < 0.0001f)
+            return Vector3.zero;
+        float facing = Mathf.InverseLerp(tuning.turnInPlaceAngle, 0f, Vector3.Angle(forward, wishFlat));
+        return forward.normalized * (tuning.moveSpeed * Mathf.Clamp01(wish.magnitude) * facing);
+    }
+
+    // ---- Hop mode (host only) ----
+    // The body moves forward exactly as far as the hop clip carries the feet at the same
+    // moment of the hop, so the animation never slides: root motion worked out on the
+    // host and kept in step on every screen through the Hop variable.
 
     Vector3 HopVelocity(Vector3 wish, Vector3 up, float dt)
     {
@@ -414,14 +500,14 @@ public class FrogMotor : NetworkBehaviour
             travel = 1f - HopTravel(from); // finish this hop
             float secondsIntoNext = (hopPhase - 1f) * hopDuration;
             if (wantsMove)
-                BeginHop(amount, 0f, secondsIntoNext, chained: true); // Jump2 ends in its own start pose
+                BeginHop(amount, 0f, secondsIntoNext, chained: true); // both hop clips end in their start pose
             else
                 EndHop();
         }
         return forward * (travel * stride / dt);
     }
 
-    float HopTravel(float phase) => tuning.hopTravel.Evaluate(Mathf.Clamp01(phase));
+    float HopTravel(float phase) => tuning.HopTravelCurve.Evaluate(Mathf.Clamp01(phase));
 
     void BeginHop(float amount, float startPhase, float extraSeconds, bool chained)
     {
@@ -473,6 +559,7 @@ public class FrogMotor : NetworkBehaviour
         EndHop();
         IsCharging.Value = false;
         Mode.Value = FrogMode.Airborne;
+        airSpeedLimit = 0f;
         rb.linearVelocity = Vector3.zero;
         rb.position = spawnPosition;
         rb.rotation = Quaternion.identity;

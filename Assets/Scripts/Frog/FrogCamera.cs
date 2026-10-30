@@ -38,6 +38,29 @@ public class FrogCamera : MonoBehaviour
 
     public float Yaw => transform.eulerAngles.y;
 
+
+    // Set by our frog while it aims a jump: mouse / stick look then moves the landing marker
+    // instead of the camera, and the camera holds still.
+    public bool LookAimsJump
+    {
+        get => lookAimsJump;
+        set
+        {
+            if (!value)
+                jumpAimLook = Vector2.zero;
+            lookAimsJump = value;
+        }
+    }
+
+    // Look gathered while LookAimsJump is on (degrees, Settings sensitivity included).
+    // The frog takes it every frame.
+    public Vector2 TakeJumpAimLook()
+    {
+        Vector2 look = jumpAimLook;
+        jumpAimLook = Vector2.zero;
+        return look;
+    }
+
     // The crosshair ray. It starts level with the frog rather than at the lens, so
     // anything between the camera and the frog can't steal the tongue's aim.
     public Ray AimRay
@@ -57,7 +80,9 @@ public class FrogCamera : MonoBehaviour
     bool frogHidden;
     bool hadTarget;
     InputAction lookAction;
-    float sensitivityScale = 1f; // from the Settings menu's Mouse Sensitivity slider
+    float sensitivityScale = 50f; // from the Settings menu's Mouse Sensitivity slider
+    bool lookAimsJump;
+    Vector2 jumpAimLook;
     float radius, radiusVelocity;
     Vector3 lastTargetPosition;
     float smoothSpeed;
@@ -135,14 +160,21 @@ public class FrogCamera : MonoBehaviour
             bool fromStick = lookAction.activeControl != null && lookAction.activeControl.device is Gamepad;
             look *= (fromStick ? stickSensitivity * dt : mouseSensitivity) * sensitivityScale;
 
-            // Only touch the axes when there really is look input: Cinemachine treats any
-            // change of value as input and holds off swinging behind the frog.
-            if (look.x != 0f)
-                orbit.HorizontalAxis.Value = Mathf.Repeat(orbit.HorizontalAxis.Value + look.x + 180f, 360f) - 180f;
-            if (look.y != 0f)
+            if (LookAimsJump)
             {
-                Vector2 pitchRange = orbit.VerticalAxis.Range;
-                orbit.VerticalAxis.Value = Mathf.Clamp(orbit.VerticalAxis.Value + (invertY ? look.y : -look.y), pitchRange.x, pitchRange.y);
+                jumpAimLook += look; // the frog moves its landing marker with it; the camera holds still
+            }
+            else
+            {
+                // Only touch the axes when there really is look input: Cinemachine treats any
+                // change of value as input and holds off swinging behind the frog.
+                if (look.x != 0f)
+                    orbit.HorizontalAxis.Value = Mathf.Repeat(orbit.HorizontalAxis.Value + look.x + 180f, 360f) - 180f;
+                if (look.y != 0f)
+                {
+                    Vector2 pitchRange = orbit.VerticalAxis.Range;
+                    orbit.VerticalAxis.Value = Mathf.Clamp(orbit.VerticalAxis.Value + (invertY ? look.y : -look.y), pitchRange.x, pitchRange.y);
+                }
             }
 
             if (Mouse.current != null)

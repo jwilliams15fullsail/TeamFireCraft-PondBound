@@ -251,11 +251,11 @@ public class FrogAnimatorDriver : MonoBehaviour
         if (supported && jumpStep != JumpStep.Takeoff && jumpStep != JumpStep.Air && motor.TryGetHopPhase(out float hop))
         {
             jumpStep = JumpStep.None;
-            runJump = true;
+            runJump = motor.Tuning.hopClip == HopClip.Jump2Running;
             jumpPhase = targetPhase = hop;
             wasCharging = charging;
             animator.SetBool(InJumpId, true);
-            animator.SetBool(RunJumpId, true);
+            animator.SetBool(RunJumpId, runJump);
             animator.SetFloat(JumpPhaseId, hop);
             return;
         }
