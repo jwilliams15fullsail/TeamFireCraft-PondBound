@@ -69,7 +69,9 @@ public class FrogMotor : NetworkBehaviour
     Vector3 spawnPosition;
     bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
     float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
-    Vector3 releaseTarget;  // where the player put the landing marker when letting go of jump
+    Vector3 releaseVelocity; // the launch the owner worked out when letting go of jump
+    bool followingArc;      // a charged jump in flight: no air steering, so it follows its preview
+
     bool hopping;                           // host only: the hop being simulated
     float hopPhase, hopDuration, hopStride;
 
@@ -88,14 +90,21 @@ public class FrogMotor : NetworkBehaviour
         base.OnStartServer();
         spawnPosition = transform.position;
     }
+    // Charge (0..1) after holding jump this many seconds. With Charge Ping Pong it swings up
+    // to full and back down again while held, so the player picks the moment to let go.
+    public float ChargeFromSeconds(float held)
+    {
+        float t = held / tuning.fullChargeTime;
+        return tuning.chargePingPong ? Mathf.PingPong(t, 1f) : Mathf.Clamp01(t);
+    }
 
-    // Jump charge as 0..1. Works on every machine because it uses network time.
+    // This frog's charge as the host has it (0..1). Works on every machine because it uses
+    // network time; other players' frogs crouch with it. The owner shows its own (LocalCharge).
     public float ChargeFraction()
     {
         if (!IsCharging.Value)
             return 0f;
-        double held = NetworkTime - ChargeStartTime.Value;
-        return Mathf.Clamp01((float)held / tuning.fullChargeTime);
+        return ChargeFromSeconds((float)(NetworkTime - ChargeStartTime.Value));
     }
 
     // Height and forward distance (m, landing on flat ground) of a ground jump with this
@@ -108,29 +117,61 @@ public class FrogMotor : NetworkBehaviour
             Mathf.Lerp(tuning.minJumpDistance, tuning.maxJumpDistance, charge)) * heightScale;
     }
 
-    // The launch velocity of a ground jump. aimFlat points the way to leap and its length
-    // (0 to 1) is how much of this charge's reach to use: 0 = straight up. Worked out from
-    // the height and distance it should reach, so a jump always lands where the meter and
-    // the preview say. Any machine can call it.
-    public Vector3 GroundJumpVelocity(float charge01, Vector3 aimFlat, float heightScale)
+    // How high (m, above the frog) a jump toward target peaks: the charge's height, but always
+    // at least Jump Clearance above the target, so it comes down on it. Only a target higher
+    // than any jump can reach is out of reach.
+    public float JumpApex(float charge01, Vector3 target, float heightScale)
     {
-        Vector2 reach = GroundJumpReach(charge01, heightScale);
-        float gravity = -Physics.gravity.y;
-        float up = Mathf.Sqrt(2f * gravity * reach.x);
-        aimFlat = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(aimFlat, Vector3.up), 1f);
-        if (aimFlat.sqrMagnitude < 0.0001f)
-            return Vector3.up * up;
-        float flightTime = 2f * up / gravity;
-        return Vector3.up * up + aimFlat * (reach.y / flightTime);
+        float charged = GroundJumpReach(charge01, heightScale).x;
+        float highest = tuning.maxJumpHeight * heightScale;
+        return Mathf.Min(Mathf.Max(charged, target.y + tuning.jumpClearance), highest);
     }
 
-    // A landing spot (flat offset from the frog, in metres) as GroundJumpVelocity's aim: the
-    // same direction, as a share of this charge's reach. Spots out of reach are cut short.
-    public Vector3 AimToward(Vector3 target, float charge01, float heightScale)
+    // The launch velocity of a jump with this much charge (0..1) toward target: an offset
+    // from the frog to where its centre should come down, at any height (zero = straight
+    // up). It always comes down exactly on the target; the charge only sets how high the
+    // arc goes (JumpApex). It counts time the way the physics engine does, so the frog
+    // really lands there. wallNormal: jumping off a wall (zero on the ground), which always
+    // pushes away from it.
+    public Vector3 JumpVelocity(float charge01, Vector3 target, float heightScale, Vector3 wallNormal)
     {
-        float reach = GroundJumpReach(charge01, heightScale).y;
-        return reach > 0.001f ? Vector3.ClampMagnitude(target / reach, 1f) : Vector3.zero;
+        float gravity = -Physics.gravity.y;
+        float up = Mathf.Sqrt(2f * gravity * Mathf.Max(0.01f, JumpApex(charge01, target, heightScale)));
+        // Physics adds gravity before moving each step, so a body flies as if launched half
+        // a step's worth of gravity slower than the textbook arc.
+        float stepUp = up - 0.5f * gravity * Time.fixedDeltaTime;
+        Vector3 velocity = Vector3.up * up;
+
+        Vector3 flat = new Vector3(target.x, 0f, target.z);
+        float distance = flat.magnitude;
+        if (distance > 0.05f)
+        {
+            float under = stepUp * stepUp - 2f * gravity * target.y; // below 0: higher than the peak
+            float time = under > 0f ? (stepUp + Mathf.Sqrt(under)) / gravity : stepUp / gravity;
+            velocity += flat / distance * (distance / time);
+        }
+
+        if (wallNormal.sqrMagnitude > 0.5f)
+        {
+            float away = Vector3.Dot(velocity, wallNormal);
+            if (away < tuning.wallJumpPush)
+                velocity += wallNormal * (tuning.wallJumpPush - away);
+        }
+        return velocity;
     }
+
+    // The fastest launch any jump can have: the furthest jump on the lowest arc, or the
+    // highest one, plus the wall push and slack for a hungry frog's lower arcs. The host
+    // never launches faster than this.
+    float MaxJumpSpeed()
+    {
+        float gravity = -Physics.gravity.y;
+        float low = Mathf.Sqrt(2f * gravity * Mathf.Max(0.01f, tuning.minJumpHeight));
+        float high = Mathf.Sqrt(2f * gravity * tuning.maxJumpHeight);
+        float across = tuning.maxJumpDistance * gravity / (2f * low);
+        return (Mathf.Max(high, new Vector2(low, across).magnitude) + tuning.wallJumpPush) * 1.5f;
+    }
+
 
     // Where this frog is in its current hop (0..1), on any machine; false when not hopping.
     // The host reads its own simulation. Everyone else runs the shared hop clock as far
@@ -170,13 +211,14 @@ public class FrogMotor : NetworkBehaviour
     }
 
     // target: where the player put the landing marker (world x/z offset from the frog, metres).
-    public void ReleaseJump(Vector2 target)
+    // velocity: the launch the owner worked out from what its preview showed (its charge,
+    // crosshair and wall), so the frog flies exactly the arc that player saw.
+    public void ReleaseJump(Vector3 velocity)
     {
         jumpHeld = false;
         jumpReleaseQueued = true;
-        releaseTarget = Vector3.ClampMagnitude(new Vector3(target.x, 0f, target.y), tuning.maxJumpDistance);
+        releaseVelocity = Vector3.ClampMagnitude(velocity, MaxJumpSpeed());
     }
-
     public void PressStick() => stickQueued = true;
 
     // ---- Simulation (host only) ----
@@ -248,6 +290,7 @@ public class FrogMotor : NetworkBehaviour
     {
         IsCharging.Value = false;
         Mode.Value = FrogMode.Climbing;
+        followingArc = false;
     }
 
     void LeaveSurface()
@@ -256,6 +299,7 @@ public class FrogMotor : NetworkBehaviour
         IsCharging.Value = false;
         Mode.Value = FrogMode.Airborne;
         airSpeedLimit = FlatSpeed();
+        followingArc = false;
     }
 
     void UpdateGroundState()
@@ -271,6 +315,7 @@ public class FrogMotor : NetworkBehaviour
         if (Mode.Value == FrogMode.Airborne && hitGround)
         {
             Mode.Value = FrogMode.Grounded;
+            followingArc = false;
             StickLanding();
         }
         else if (Mode.Value == FrogMode.Grounded && Time.time - lastGroundedTime > tuning.coyoteTime)
@@ -342,48 +387,27 @@ public class FrogMotor : NetworkBehaviour
         {
             jumpReleaseQueued = false;
             if (IsCharging.Value)
-                Launch(input);
+                Launch();
         }
     }
 
-    void Launch(FrogInputState input)
+    void Launch()
     {
-        float charge01 = ChargeFraction();
-        // A hungry frog jumps lower and shorter.
-        float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
         IsCharging.Value = false;
-
-        // Holding a direction = leap that way. No direction = straight up.
-        bool aiming = input.Move.sqrMagnitude > 0.04f;
-
         if (Mode.Value == FrogMode.Climbing)
         {
-            // Wall jump: let go first, then push out from the wall and up.
-            float speed = Mathf.Lerp(tuning.minJumpSpeed, tuning.maxJumpSpeed, tuning.chargeCurve.Evaluate(charge01));
-            speed *= Mathf.Sqrt(heightScale); // height grows with the square of launch speed
-            Vector3 aim = aiming ? input.WorldMove.normalized : Vector3.zero;
-            Vector3 surfaceNormal = climb.SurfaceNormal;
-            climb.Detach();
-            Vector3 direction = (surfaceNormal + Vector3.up * tuning.wallJumpUpBias + aim * 0.5f).normalized;
-
-            // Remove any velocity pushing into the wall, then launch exactly once.
-            float into = Mathf.Min(0f, Vector3.Dot(rb.linearVelocity, surfaceNormal));
-            rb.AddForce(direction * speed - surfaceNormal * into, ForceMode.VelocityChange);
+            climb.Detach(); // let go of the wall first
+            rb.linearVelocity = releaseVelocity;
         }
         else
         {
-           
-            // On the ground the leap goes to the landing marker the player aimed with the mouse,
-            // or (with mouse aiming off) the way the frog faces as far as the charge allows.
-            // It replaces any run speed, so it lands exactly where the preview shows.
-            Vector3 aim = tuning.aimJumpsWithMouse ? AimToward(releaseTarget, charge01, heightScale)
-                : aiming ? Vector3.ProjectOnPlane(rb.rotation * Vector3.forward, Vector3.up).normalized
-                : Vector3.zero;
+            // Replaces any run speed, so the jump lands exactly where the preview showed.
             Vector3 supportVelocity = support != null ? support.GetPointVelocity(rb.position) : Vector3.zero;
-            rb.linearVelocity = supportVelocity + GroundJumpVelocity(charge01, aim, heightScale);
+            rb.linearVelocity = supportVelocity + releaseVelocity;
         }
 
         airSpeedLimit = FlatSpeed();
+        followingArc = tuning.followJumpArc;
         Mode.Value = FrogMode.Airborne;
         ignoreGroundUntil = Time.time + 0.15f;
         support = null;
@@ -427,7 +451,7 @@ public class FrogMotor : NetworkBehaviour
             if (target.sqrMagnitude < 0.0001f)
                 rb.AddForce(-Vector3.ProjectOnPlane(Physics.gravity, up), ForceMode.Acceleration);
         }
-        else if (hasInput)
+        else if (hasInput && !followingArc)
         {
             // Air steering can turn and slow a leap but never stretch it past its takeoff
             // speed (a straight-up jump or a fall may drift a little), so jumps land where
@@ -444,6 +468,8 @@ public class FrogMotor : NetworkBehaviour
         Vector3 face = wish;
         if (IsCharging.Value)
             face = tuning.aimJumpsWithMouse ? new Vector3(input.JumpTarget.x, 0f, input.JumpTarget.y) : input.WorldMove;
+        else if (followingArc)
+            face = Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up); // look where it's flying
         FaceTowards(face, up, dt, Vector3.zero);
     }
 
@@ -560,6 +586,7 @@ public class FrogMotor : NetworkBehaviour
         IsCharging.Value = false;
         Mode.Value = FrogMode.Airborne;
         airSpeedLimit = 0f;
+        followingArc = false;
         rb.linearVelocity = Vector3.zero;
         rb.position = spawnPosition;
         rb.rotation = Quaternion.identity;

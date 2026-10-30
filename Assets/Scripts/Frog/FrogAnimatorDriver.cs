@@ -241,9 +241,8 @@ public class FrogAnimatorDriver : MonoBehaviour
     void UpdateJump(FrogMode mode, bool supported, float dt)
     {
         bool charging = motor.IsCharging.Value || (driver.IsOwner && driver.LocalJumpHeld && supported);
-        float charge = motor.ChargeFraction();
-        if (driver.IsOwner && driver.LocalJumpHeld)
-            charge = Mathf.Max(charge, Mathf.Clamp01(driver.LocalJumpHeldTime / motor.Tuning.fullChargeTime));
+        // Our own frog shows our own charge (it swings with Charge Ping Pong); others the host's.
+        float charge = driver.IsOwner && driver.LocalJumpHeld ? driver.LocalCharge : motor.ChargeFraction();
 
         // Hop locomotion: while this frog hops along the ground, the running jump plays
         // straight from the shared hop clock, so it lines up with the body on every screen.

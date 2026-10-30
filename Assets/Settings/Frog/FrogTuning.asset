@@ -541,14 +541,17 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   minJumpHeight: 0.3
-  maxJumpHeight: 1.5
+  maxJumpHeight: 2.5
   minJumpDistance: 0.5
-  maxJumpDistance: 2.5
+  maxJumpDistance: 4
+  aimJumpsWithMouse: 1
+  jumpAimPerDegree: 0.05
+  followJumpArc: 1
   airAcceleration: 6
   airDriftSpeed: 1
   minJumpSpeed: 3.5
-  maxJumpSpeed: 9
-  wallJumpUpBias: 0.8
+  maxJumpSpeed: 11
+  wallJumpUpBias: 1
   stickReach: 0.3
   climbSpeed: 2
   gripStrength: 25

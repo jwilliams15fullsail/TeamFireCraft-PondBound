@@ -99,31 +99,34 @@ public class FrogTuning : ScriptableObject
         }
         return new AnimationCurve(keys);
     }
-
     [Header("Charged jump")]
+    [Tooltip("Seconds for the charge to go from empty to full.")]
     public float fullChargeTime = 1f;
+    [Tooltip("On: holding jump swings the charge up to full and back down again, over and over, so you pick the moment to let go. Off: it fills up and stays full.")]
+    public bool chargePingPong = true;
     public AnimationCurve chargeCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-    [Tooltip("Jump height (m) for a quick tap.")]
+    [Tooltip("Jump height (m) with an empty charge.")]
     public float minJumpHeight = 0.3f;
-    [Tooltip("Jump height (m) for a full charge.")]
+    [Tooltip("Jump height (m) with a full charge.")]
     public float maxJumpHeight = 1.5f;
-    [Tooltip("How far (m) a forward jump lands on flat ground, for a quick tap.")]
+    [Tooltip("Without mouse aiming: how far (m) a jump reaches on flat ground with an empty charge.")]
     public float minJumpDistance = 0.5f;
-    [Tooltip("How far (m) a forward jump lands on flat ground, for a full charge.")]
+    [Tooltip("Without mouse aiming: how far (m) a jump reaches with a full charge. With mouse aiming: how far from the frog the landing marker can go.")]
     public float maxJumpDistance = 2.5f;
-    [Tooltip("Steering in the air (m/s per second). It can turn and slow a jump, never stretch it.")]
-    
+    [Tooltip("On: while charging, the mouse moves a landing marker freely (left / right sideways, up / down further or closer) and the camera looks at it. The jump always comes down on the marker; the charge only sets how high the arc goes. Off: jumps go the way the frog faces, as far as the charge allows.")]
     public bool aimJumpsWithMouse = true;
-    [Tooltip("How far (m) the landing marker moves per degree of mouse look.")]
+    [Tooltip("How far (m) the landing marker moves per degree of mouse movement.")]
     public float jumpAimPerDegree = 0.05f;
+    [Tooltip("A jump always peaks at least this high (m) above where it lands, so it clears the edge of a higher landing spot.")]
+    public float jumpClearance = 0.25f;
+    [Tooltip("Charged jumps fly exactly along the previewed arc: no steering in the air. Off: WASD can steer and slow a jump.")]
+    public bool followJumpArc = true;
+    [Tooltip("Steering in the air (m/s per second): after falls, or jumps when Follow Jump Arc is off.")]
     public float airAcceleration = 6f;
     [Tooltip("Speed (m/s) air steering may still reach after a straight-up jump or a fall.")]
     public float airDriftSpeed = 1f;
-    [Tooltip("Wall jumps: launch speed (m/s) for a quick tap.")]
-    public float minJumpSpeed = 3.5f;
-    [Tooltip("Wall jumps: launch speed (m/s) for a full charge.")]
-    public float maxJumpSpeed = 9f;
-    public float wallJumpUpBias = 0.8f;       // how much "up" is mixed into a wall jump
+    [Tooltip("Wall jumps always push away from the wall at least this fast (m/s), wherever they're aimed.")]
+    public float wallJumpPush = 2.5f;
 
     [Header("Sticking and climbing")]
     public float stickReach = 0.3f;           // how far from the body a surface can be grabbed

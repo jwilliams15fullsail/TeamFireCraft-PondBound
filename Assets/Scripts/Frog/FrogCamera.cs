@@ -8,7 +8,9 @@ using UnityEngine.Rendering;
 // Lives on the Main Camera, next to the Cinemachine Brain. Pure presentation: it tells the
 // host which way "forward" is (Yaw) and where the crosshair points (AimRay). It reads
 // mouse / stick look itself, so the Settings sensitivity and the pause menu still apply.
+// Runs before other scripts, so its LateUpdate comes before the Cinemachine Brain's.
 [RequireComponent(typeof(Camera))]
+[DefaultExecutionOrder(-100)]
 public class FrogCamera : MonoBehaviour
 {
     [Tooltip("The Cinemachine Camera that follows the frog (it needs Orbital Follow). Found automatically if empty.")]
@@ -36,23 +38,42 @@ public class FrogCamera : MonoBehaviour
     [Tooltip("The frog moved this far in one frame (a respawn): cut to it instead of flying across the level.")]
     [SerializeField] float teleportDistance = 5f;
 
+    [Header("Aiming a jump")]
+    [Tooltip("Extra camera distance (m) while charging a jump, so you can see round the frog and where it will land. Never past Max Radius, and walls still pull the camera in.")]
+    [SerializeField] float aimZoomOut = 1f;
+    [Tooltip("Where the camera looks while you place the landing marker: 0 = at the frog, 1 = right at the marker.")]
+    [SerializeField, Range(0f, 1f)] float aimLookAtMarker = 1f;
+    [Tooltip("Seconds to ease the camera out (and onto the marker) when you start charging, and back after the jump.")]
+    [SerializeField] float aimBlendTime = 0.35f;
+    [Tooltip("Seconds the camera takes to glide after the landing marker as it moves (and hops up onto or down off platforms).")]
+    [SerializeField] float aimFocusSmoothTime = 0.15f;
+    [Tooltip("While you place the landing marker, the camera turns toward it only as far as keeps the frog on screen: 1 = the frog may reach the edge, 0.5 = it stays in the middle half.")]
+    [SerializeField, Range(0.1f, 1f)] float keepFrogOnScreen = 0.7f;
+
     public float Yaw => transform.eulerAngles.y;
 
+    // Which way the camera sits behind the frog (degrees, like a compass). It holds still
+    // while you aim, so the landing marker moves left / right / forward / back as seen from it.
+    public float AimYaw => orbit != null ? orbit.HorizontalAxis.Value : Yaw;
 
-    // Set by our frog while it aims a jump: mouse / stick look then moves the landing marker
-    // instead of the camera, and the camera holds still.
-    public bool LookAimsJump
+    // Set by our frog while it charges a jump: the camera pulls back so more of the level is
+    // on screen.
+    public bool AimingJump { get; set; }
+
+    // Set by our frog while it places a landing marker: the camera holds its place and looks
+    // at the marker, and mouse / stick look moves the marker (TakeJumpAimLook) instead.
+    public bool AimingMarker
     {
-        get => lookAimsJump;
+        get => aimingMarker;
         set
         {
             if (!value)
                 jumpAimLook = Vector2.zero;
-            lookAimsJump = value;
+            aimingMarker = value;
         }
     }
 
-    // Look gathered while LookAimsJump is on (degrees, Settings sensitivity included).
+    // Look gathered while AimingMarker is on (degrees, Settings sensitivity included).
     // The frog takes it every frame.
     public Vector2 TakeJumpAimLook()
     {
@@ -62,7 +83,7 @@ public class FrogCamera : MonoBehaviour
     }
 
     // The crosshair ray. It starts level with the frog rather than at the lens, so
-    // anything between the camera and the frog can't steal the tongue's aim.
+    // anything between the camera and the frog can't steal the tongue's (or a jump's) aim.
     public Ray AimRay
     {
         get
@@ -74,21 +95,29 @@ public class FrogCamera : MonoBehaviour
     }
 
     CinemachineOrbitalFollow orbit;
+    CinemachineRotationComposer composer;
+    Vector3 composerOffset;      // the composer's own Target Offset, restored after aiming
+    Camera lens;
     Transform target;
+    FrogNetworkDriver frogDriver;
+    JumpPreview frogPreview;
     Renderer[] frogRenderers;
     ShadowCastingMode[] frogShadowModes;
     bool frogHidden;
     bool hadTarget;
     InputAction lookAction;
-    float sensitivityScale = 50f; // from the Settings menu's Mouse Sensitivity slider
-    bool lookAimsJump;
-    Vector2 jumpAimLook;
+    float sensitivityScale = 1f; // from the Settings menu's Mouse Sensitivity slider (1 = 50%)
     float radius, radiusVelocity;
+    bool aimingMarker;
+    Vector2 jumpAimLook;
+    float zoomBlend, markerBlend; // 0 = normal, 1 = fully into aiming
+    Vector3 markerFocus, markerFocusVelocity; // where the camera looks while (and just after) aiming
     Vector3 lastTargetPosition;
     float smoothSpeed;
 
     void Start()
     {
+        lens = GetComponent<Camera>();
         lookAction = InputSystem.actions.FindAction("Player/Look", true);
         FindFollowCamera();
     }
@@ -97,12 +126,15 @@ public class FrogCamera : MonoBehaviour
     {
         target = newTarget;
         hadTarget = true;
+        frogDriver = target.GetComponent<FrogNetworkDriver>();
+        frogPreview = target.GetComponent<JumpPreview>();
         frogRenderers = target.GetComponentsInChildren<Renderer>(true);
         frogShadowModes = new ShadowCastingMode[frogRenderers.Length];
         for (int i = 0; i < frogRenderers.Length; i++)
             frogShadowModes[i] = frogRenderers[i].shadowCastingMode;
         frogHidden = false;
         lastTargetPosition = target.position;
+        zoomBlend = markerBlend = 0f;
 
         FindFollowCamera();
         if (followCamera != null)
@@ -121,12 +153,27 @@ public class FrogCamera : MonoBehaviour
     {
         if (followCamera == null)
             followCamera = FindAnyObjectByType<CinemachineCamera>();
-        if (followCamera != null && orbit == null)
+        if (followCamera == null)
+            return;
+        if (orbit == null)
         {
             orbit = followCamera.GetComponent<CinemachineOrbitalFollow>();
             if (orbit != null)
                 radius = orbit.Radius;
         }
+        if (composer == null)
+        {
+            composer = followCamera.GetComponent<CinemachineRotationComposer>();
+            if (composer != null)
+                composerOffset = composer.TargetOffset;
+        }
+
+        // Camera collision must keep the frog in sight, not the spot the camera looks at:
+        // while aiming that's the landing marker, and the line to it grazes platform edges
+        // and the floor, which would drag the camera down toward it.
+        var deoccluder = followCamera.GetComponent<CinemachineDeoccluder>();
+        if (deoccluder != null)
+            deoccluder.AvoidObstacles.UseFollowTarget.Enabled = true;
     }
 
     void Update()
@@ -160,9 +207,9 @@ public class FrogCamera : MonoBehaviour
             bool fromStick = lookAction.activeControl != null && lookAction.activeControl.device is Gamepad;
             look *= (fromStick ? stickSensitivity * dt : mouseSensitivity) * sensitivityScale;
 
-            if (LookAimsJump)
+            if (AimingMarker)
             {
-                jumpAimLook += look; // the frog moves its landing marker with it; the camera holds still
+                jumpAimLook += look; // the frog moves its landing marker with it; the camera holds its place
             }
             else
             {
@@ -184,7 +231,14 @@ public class FrogCamera : MonoBehaviour
                     radius = Mathf.Clamp(radius - Mathf.Sign(scroll) * zoomStep, minRadius, maxRadius);
             }
         }
-        orbit.Radius = Mathf.SmoothDamp(orbit.Radius, radius, ref radiusVelocity, zoomSmoothTime);
+
+        // Charging a jump: ease the camera back so the frog's surroundings are on screen, but
+        // never further than the furthest scroll zoom. The Deoccluder on the Frog Follow Camera
+        // then pulls it in front of any wall or object between it and the frog, and eases it
+        // back out once there's room again.
+        zoomBlend = Mathf.MoveTowards(zoomBlend, AimingJump ? 1f : 0f, dt / Mathf.Max(0.01f, aimBlendTime));
+        float zoomOut = aimZoomOut * Mathf.SmoothStep(0f, 1f, zoomBlend);
+        orbit.Radius = Mathf.SmoothDamp(orbit.Radius, Mathf.Min(radius + zoomOut, maxRadius), ref radiusVelocity, zoomSmoothTime);
 
         // Respawn teleport: cut to the frog. Otherwise note how fast it's moving.
         Vector3 moved = target.position - lastTargetPosition;
@@ -205,6 +259,53 @@ public class FrogCamera : MonoBehaviour
             SetFrogHidden(true);
         else if (frogHidden && distance > hideFrogWithin + 0.1f)
             SetFrogHidden(false);
+    }
+
+    // After everything has moved this frame and before the Cinemachine Brain places the
+    // camera, so the look below matches exactly where the frog is and which way it faces.
+    void LateUpdate()
+    {
+        if (target != null && orbit != null)
+            UpdateMarkerLook(Time.deltaTime);
+    }
+
+    // Placing a landing marker: the camera holds its place (no swinging round or levelling
+    // out on its own) and turns toward the marker, as far as it can while keeping the frog on
+    // screen. It eases back onto the frog after the jump (while it flies there).
+    void UpdateMarkerLook(float dt)
+    {
+        markerBlend = Mathf.MoveTowards(markerBlend, AimingMarker ? 1f : 0f, dt / Mathf.Max(0.01f, aimBlendTime));
+        if (AimingMarker && frogDriver != null)
+        {
+            // Glide after the marker, so it hopping up onto a platform or down off one
+            // doesn't jerk the camera.
+            Vector3 marker = frogDriver.HasMarker ? frogDriver.MarkerPoint
+                : frogPreview != null && frogPreview.HasLanding ? frogPreview.LandingPoint
+                : target.position + frogDriver.LocalJumpTarget;
+            markerFocus = Vector3.SmoothDamp(markerFocus, marker, ref markerFocusVelocity, aimFocusSmoothTime);
+            orbit.HorizontalAxis.CancelRecentering();
+            orbit.VerticalAxis.CancelRecentering();
+        }
+        else if (markerBlend <= 0f)
+        {
+            markerFocus = target.position;
+            markerFocusVelocity = Vector3.zero;
+        }
+        if (composer == null)
+            return;
+
+        float blend = Mathf.SmoothStep(0f, 1f, markerBlend) * aimLookAtMarker;
+        Vector3 frogPoint = target.position + target.rotation * composerOffset;
+        Vector3 look = frogPoint + (markerFocus - target.position) * blend;
+
+        // Turn toward it only so far that the frog stays on screen.
+        Vector3 toFrog = frogPoint - transform.position;
+        Vector3 toLook = look - transform.position;
+        float limit = lens.fieldOfView * 0.5f * keepFrogOnScreen;
+        if (Vector3.Angle(toFrog, toLook) > limit)
+            look = transform.position + Vector3.RotateTowards(toFrog, toLook, limit * Mathf.Deg2Rad, 0f).normalized * toLook.magnitude;
+
+        composer.TargetOffset = composerOffset + Quaternion.Inverse(target.rotation) * (look - frogPoint);
     }
 
     // The Settings menu saves Mouse Sensitivity as a percentage (1 to 100, default 50).
