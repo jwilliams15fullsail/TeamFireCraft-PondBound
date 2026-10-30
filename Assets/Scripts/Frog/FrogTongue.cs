@@ -40,7 +40,7 @@ public class FrogTongue : NetworkBehaviour
     static readonly List<FrogTongue> spawned = new();
 
     FrogMotor motor;
-    
+
     FrogNetworkDriver driver;
     FrogClimb climb;
     Rigidbody rb;
@@ -190,6 +190,10 @@ public class FrogTongue : NetworkBehaviour
             pile.OnTongueHit(this, point);
             return;
         }
+        // Stop a firefly wandering while the tongue is holding it.
+        if (target.TryGetComponent(out FireflyWander firefly))
+            firefly.SetCaught(true);
+
         localAnchor = target.transform.InverseTransformPoint(point);
         restLength = Vector3.Distance(mouth.position, point); // no sudden yank on contact
         tipDistance = restLength;
@@ -205,7 +209,7 @@ public class FrogTongue : NetworkBehaviour
 
     void Hold(float dt)
     {
-       
+
         if (target == null || !target.NetObject.IsSpawned)
         {
             StartRetract(); // target was eaten, destroyed, or its player left
@@ -304,6 +308,10 @@ public class FrogTongue : NetworkBehaviour
 
     void StartRetract()
     {
+        // Let a released firefly resume wandering, if it still exists.
+        if (target != null && target.TryGetComponent(out FireflyWander firefly))
+            firefly.SetCaught(false);
+
         target = null;
         SetState(TongueState.Retracting);
     }
@@ -322,7 +330,7 @@ public class FrogTongue : NetworkBehaviour
         {
             State = state,
             Direction = direction,
-            
+
             LocalAnchor = localAnchor,
             RestLength = Mathf.Round(restLength * 50f) / 50f, // rounding = fewer network updates
             Tension = Mathf.Round(tension01 * 20f) / 20f,
