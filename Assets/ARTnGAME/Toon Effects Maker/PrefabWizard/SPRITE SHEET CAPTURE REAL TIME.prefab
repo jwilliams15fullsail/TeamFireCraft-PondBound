@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 400000}
+  - component: {fileID: 11400000}
+  m_Layer: 0
+  m_Name: SPRITE SHEET CAPTURE REAL TIME
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &400000
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 444.98196, y: 13.424788, z: 23.590675}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec477ce1ac00d71479453cb1f5e474c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Save_debug_frames: 0
+  Unity_packer: 0
+  grad_edge_fade: 1
+  Cut_off_dist: 0.21
+  Check_Cut_off: 0.21
+  Remove_init_check: 1
+  Text_debug: 0
+  TextObjects: []
+  Objects:
+  - {fileID: 0}
+  Cam_init_col: {r: 0, g: 0, b: 0, a: 0}
+  Cut_off_color: {r: 0, g: 0, b: 0, a: 1}
+  Check_color: {r: 0.1397059, g: 0.015897563, b: 0.059594605, a: 0.8235294}
+  Use_unity_atlas: 1
+  atlasTextures: []
+  atlasTextures2: []
+  rects: []
+  Row_count: 2
+  Col_count: 2
+  Remove_border: {x: 7, y: 7, z: 7, w: 7}
+  StartCreatingSheet: 0
+  CaptureEvery: 18
+  MaxTime: 5
+  RenderLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  real_time_use: 1
+  Test_mat: {fileID: 2100000, guid: dce2e44e67a02744fb069b0abd8333f2, type: 2}
+  Test_obj: {fileID: 0}
+  Atlas_created: 0
+  Upscale_factor: 2
+  TEM_Layer_set: 1
+  Counters: 
+  Use_GUI: 1
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 100000}
+  m_IsPrefabParent: 1
