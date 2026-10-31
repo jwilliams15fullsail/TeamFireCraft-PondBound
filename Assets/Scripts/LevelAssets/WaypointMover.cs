@@ -18,6 +18,7 @@ public class WaypointMover : MonoBehaviour
     private Quaternion targetRotation;
     private Rigidbody rigidBody;
     private Coroutine patrolRoutine;
+    private EnemyStun enemyStun;
 
     /////   FOR ANIMATION INTEGRATION   /////
     private Animator animator;
@@ -35,6 +36,7 @@ public class WaypointMover : MonoBehaviour
     {
         // Get rigidBody component
         rigidBody = GetComponent<Rigidbody>();
+        enemyStun = GetComponent<EnemyStun>();
         // Get the animator component
         animator = GetComponent<Animator>();
         animation = GetComponent<Animation>();  // Legacy spider animation
@@ -66,8 +68,8 @@ public class WaypointMover : MonoBehaviour
     {
         while (true)
         {
-            // If EnemyAI is taking over, stop this loop
-            if (!canMove || isWaiting)
+            // If EnemyAI is taking over or the enemy is stunned, stop this loop
+            if (!canMove || isWaiting || (enemyStun != null && enemyStun.IsStunned))
             {
                 yield return null;
                 continue;
@@ -85,7 +87,9 @@ public class WaypointMover : MonoBehaviour
                 animation["walk"].speed = 1f;   // Adjust walk animation speed
             }
 
-            while (canMove && !isWaiting && Vector3.Distance(flatSelf, flatTarget) >= distanceThreshold)
+            while (canMove && !isWaiting &&
+        (enemyStun == null || !enemyStun.IsStunned) &&
+        Vector3.Distance(flatSelf, flatTarget) >= distanceThreshold)
             {
                 Vector3 nextPosition = Vector3.MoveTowards(transform.position, currentWaypoint.position, moveSpeed * Time.deltaTime);
                 if (rigidBody != null)      // If we have a rigidBody use rigidBody movement
@@ -150,14 +154,23 @@ public class WaypointMover : MonoBehaviour
 
         // Perform a searching sweep at waypoint
         elapsedTime = 0;
+
         while (elapsedTime < pauseTime)
         {
+            // Pause the waypoint timer and rotation while stunned.
+            if (enemyStun != null && enemyStun.IsStunned)
+            {
+                yield return null;
+                continue;
+            }
+
             float sweepSpeed = Mathf.Sin(Time.time * 4f) * 45f;  // Oscillates between -45 to +45 degrees
             transform.Rotate(0, sweepSpeed * Time.deltaTime, 0);
 
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+
 
         Vector3 lookDirection = currentWaypoint.position - transform.position;
         lookDirection.y = 0;
@@ -168,8 +181,16 @@ public class WaypointMover : MonoBehaviour
 
         elapsedTime = 0;
         bool isRotationFinished = false;
+
         while (elapsedTime < pauseTime && !isRotationFinished)
         {
+            // Stop waypoint rotation while stunned.
+            if (enemyStun != null && enemyStun.IsStunned)
+            {
+                yield return null;
+                continue;
+            }
+
             if (!canMove) { yield break; }      // AI INTEGRATION: Stop rotating if player is found and chase starts
 
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
@@ -180,6 +201,7 @@ public class WaypointMover : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+
         transform.rotation = targetRotation;
 
         isWaiting = false;

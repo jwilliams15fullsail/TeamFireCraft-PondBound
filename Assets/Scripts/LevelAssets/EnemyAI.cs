@@ -32,6 +32,7 @@ public class EnemyAI : MonoBehaviour
     private Transform player;
     private WaypointMover pathing;
     private Rigidbody rigidBody;
+    private EnemyStun enemyStun;
 
     /////   ANIMATION INTEGRATION   /////
     private Animator animator;
@@ -48,6 +49,7 @@ public class EnemyAI : MonoBehaviour
     {
         pathing = GetComponent<WaypointMover>();
         rigidBody = GetComponent<Rigidbody>();
+        enemyStun = GetComponent<EnemyStun>();
         animator = GetComponent<Animator>();
         animation = GetComponent<Animation>();
 
@@ -60,6 +62,10 @@ public class EnemyAI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Do not chase, patrol, search, or attack while stunned.
+        if (enemyStun != null && enemyStun.IsStunned)
+            return;
+
         LookForPlayer();
 
         switch (currentState)
