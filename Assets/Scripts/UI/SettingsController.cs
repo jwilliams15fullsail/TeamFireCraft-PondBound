@@ -35,7 +35,7 @@ public class settingsController : MonoBehaviour
 
     private void Start()
     {
-        mouseSensSlider.minValue = 1f;
+        mouseSensSlider.minValue = 5f;
         mouseSensSlider.maxValue = 100f;
         mouseSensSlider.wholeNumbers = true;
         mouseSensSlider.SetValueWithoutNotify(GetMouseSensitivity());
