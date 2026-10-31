@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-
 
 public class PauseMenuController : MonoBehaviour
 {
@@ -10,114 +8,127 @@ public class PauseMenuController : MonoBehaviour
     [SerializeField] private GameObject howToPlayPanel;
     [SerializeField] private GameObject mainMenuPanel;
 
-    [Header("Game settings")]
-    [SerializeField] private bool isOnlineGame;
-
     [Header("HUD")]
     [SerializeField] private GameObject hud;
-   private GameObject currentMenu;
 
     private bool isPaused;
-   
+
+    // GameSession.IsOffline is true for offline play.
+    private bool IsOnlineGame => !GameSession.IsOffline;
 
     private void Start()
     {
-        ShowPauseMenu(false);
-        Time.timeScale = 1f;
+        SetPaused(false);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (!Input.GetKeyDown(KeyCode.Escape))
+            return;
+
+        if ((settingsPanel != null && settingsPanel.activeSelf) ||
+            (howToPlayPanel != null && howToPlayPanel.activeSelf))
         {
-            if (settingsPanel.activeSelf || howToPlayPanel.activeSelf)
-                ShowPauseMenu(true); // Escape from a sub-screen returns to pause menu
-            else
-                TogglePause();
+            ShowPauseMenuPanel();
         }
-    }
-
-    public void BackToPauseMenu()
-{
-    ShowOnly(pausePanel);
-}
-
-    public void SwitchMenu(GameObject nextMenu)
-    {
-        currentMenu.SetActive(false);
-        nextMenu.SetActive(true);
-        currentMenu = nextMenu;
+        else
+        {
+            TogglePause();
+        }
     }
 
     public void TogglePause()
     {
-        ShowPauseMenu(!isPaused);
+        SetPaused(!isPaused);
     }
 
     public void Resume()
     {
-        ShowPauseMenu(false);
+        SetPaused(false);
     }
 
     public void OpenSettings()
     {
-        ShowOnly(settingsPanel);
+        ShowSubPanel(settingsPanel);
     }
 
     public void OpenHowToPlay()
     {
-        ShowOnly(howToPlayPanel);
+        ShowSubPanel(howToPlayPanel);
     }
 
+    public void BackToPauseMenu()
+    {
+        ShowPauseMenuPanel();
+    }
+
+    // Connect your Leave to Main Menu button to this method.
     public void OpenMainMenu()
     {
-        // Restore time before loading another scene.
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenuScene");
+        SetPaused(false);
+        GameSession.LeaveToMenu();
     }
 
+    // Connect your Quit button to this method.
     public void ExitGame()
     {
-        Time.timeScale = 1f;
-        Application.Quit();
-
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#endif
+        SetPaused(false);
+        GameSession.QuitGame();
     }
 
-    private void ShowPauseMenu(bool show)
+    private void SetPaused(bool paused)
     {
-        isPaused = show;
+        isPaused = paused;
 
-        if (pausePanel != null)
-            pausePanel.SetActive(show);
+        SetActive(pausePanel, paused);
+        SetActive(settingsPanel, false);
+        SetActive(howToPlayPanel, false);
+        SetActive(mainMenuPanel, false);
+        SetActive(hud, !paused);
 
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
+        // Offline gameplay pauses; online gameplay keeps running.
+        Time.timeScale = paused && !IsOnlineGame ? 0f : 1f;
 
-        if (howToPlayPanel != null)
-            howToPlayPanel.SetActive(false);
-
-        //Deactivates HUD when in Pause Menu
-        if (hud != null)
-            hud.SetActive(!show);
-
-        // Offline: freeze time. Online: leave the simulation running.
-        Time.timeScale = show && !isOnlineGame ? 0f : 1f;
-
-        Cursor.visible = show;
-        Cursor.lockState = show ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = paused;
+        Cursor.lockState = paused
+            ? CursorLockMode.None
+            : CursorLockMode.Locked;
     }
 
-    private void ShowOnly(GameObject panel)
+    private void ShowPauseMenuPanel()
     {
-        if (pausePanel != null) pausePanel.SetActive(false);
-        if (settingsPanel != null) settingsPanel.SetActive(false);
-        if (howToPlayPanel != null) howToPlayPanel.SetActive(false);
-        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
+        isPaused = true;
 
-        if (panel != null) panel.SetActive(true);
+        SetActive(pausePanel, true);
+        SetActive(settingsPanel, false);
+        SetActive(howToPlayPanel, false);
+        SetActive(mainMenuPanel, false);
+        SetActive(hud, false);
+
+        Time.timeScale = IsOnlineGame ? 1f : 0f;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
+    private void ShowSubPanel(GameObject panel)
+    {
+        isPaused = true;
+
+        SetActive(pausePanel, false);
+        SetActive(settingsPanel, false);
+        SetActive(howToPlayPanel, false);
+        SetActive(mainMenuPanel, false);
+        SetActive(panel, true);
+        SetActive(hud, false);
+
+        Time.timeScale = IsOnlineGame ? 1f : 0f;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    private static void SetActive(GameObject obj, bool active)
+    {
+        if (obj != null)
+            obj.SetActive(active);
+    }
 }
