@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections;
+using FishNet.Object;
 
 [RequireComponent(typeof(Rigidbody))]
-public class EnemyAI : MonoBehaviour
+public class EnemyAI : NetworkBehaviour
 {
     public enum AIState { patrolling, chasing, searching, returning }
 
@@ -47,6 +48,10 @@ public class EnemyAI : MonoBehaviour
     private bool hasTauntedThisChase = false; // Ensure spider only taunts once when it spots the player
     // -------------------------------
 
+    /////   NETWORKING   /////
+    // Track the last played animation name to prevent spamming network calls every frame
+    private string lastNetworkedClip = "";
+    // -----------------------------------------
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -69,6 +74,10 @@ public class EnemyAI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // NETWORK SAFETY: Only the Host/Server machine should process AI states and calculations
+        if (!IsServerStarted) return;
+        // -----------------------------------------
+
         // Do not chase, patrol, search, or attack while stunned.
         if (enemyStun != null && enemyStun.IsStunned)
             return;
