@@ -22,6 +22,17 @@ public class VictoryUI : MonoBehaviour
             Debug.LogWarning("GameManager not found! Victory UI could not register.");
         }
     }
+    
+private void Update()
+    {
+        // Keep the mouse free while the victory screen is up, so the button can be clicked.
+       // Every frame, because closing the pause menu captures the mouse again.
+       if (victoryPanel.activeSelf && !PauseMenu.IsOpen)
+       {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+       }
+    }
 
     public void ReturnToMainMenu()
     {

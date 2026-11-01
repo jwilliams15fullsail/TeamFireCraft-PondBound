@@ -163,7 +163,7 @@ public class PlayerHUD : MonoBehaviour
         if (!show)
             return;
         exitCounter.text = exit.SecondsLeft > 0f
-            ? $"Next level in {exit.SecondsLeft:0}..."
+             ? $"Leaving in {exit.SecondsLeft:0}..."
             : $"Frogs at the exit: {exit.PlayersInside} / {exit.PlayersNeeded}";
 
 
