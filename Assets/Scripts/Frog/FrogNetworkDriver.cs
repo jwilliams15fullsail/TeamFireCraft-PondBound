@@ -366,4 +366,8 @@ public class FrogNetworkDriver : NetworkBehaviour
 
     [ServerRpc]
     void BreakFreePressed() => FrogTongue.ReleaseEverythingHolding(NetworkObject);
+ 
+  // Public: the death screen calls it on your own frog when its countdown ends.
+    [ServerRpc]
+     public void RequestRespawn() => stats.Revive();
 }

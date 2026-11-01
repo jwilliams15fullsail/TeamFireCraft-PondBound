@@ -6,8 +6,8 @@ using UnityEngine;
 // every machine can read them; the HUD shows your own.
 // Hunger and hydration drain over time, hunger faster while climbing and on every jump.
 // Running out of water drains health; running low on food makes jumps lower instead.
-// Being well fed and watered slowly heals. At zero health the frog respawns with full
-// bars. Eating a fly adds its nutrition to hunger.
+// Being well fed and watered slowly heals. At zero health the frog dies, and comes back with
+// full bars when the death screen's countdown ends. Eating a fly adds its nutrition to hunger.
 [RequireComponent(typeof(FrogMotor))]
 public class FrogStats : NetworkBehaviour
 {
@@ -66,7 +66,7 @@ public class FrogStats : NetworkBehaviour
 
     void FixedUpdate()
     {
-        if (!IsServerInitialized || !IsSpawned)
+        if(!IsServerInitialized || !IsSpawned || motor.IsDead)
             return;
         FrogTuning t = Tuning;
         float dt = Time.fixedDeltaTime;
@@ -98,10 +98,10 @@ public class FrogStats : NetworkBehaviour
         else if (hunger > t.maxHunger * 0.5f && hydration > t.maxHydration * 0.5f)
             health = Mathf.Min(t.maxHealth, health + t.healthRegenPerSecond * dt);
 
-        if (health <= 0f)
-        {
-            motor.Respawn();
-            RefillAll();
+           if (health <= 0f)
+           {
+               health = 0f;
+            motor.Die(); // stays dead until the death screen's countdown ends (see Revive)
         }
         Publish();
     }
@@ -110,15 +110,15 @@ public class FrogStats : NetworkBehaviour
 
     public void Damage(float amount)
     {
-        if (!IsServerInitialized)
+        if (!IsServerInitialized || motor.IsDead)
             return;
-        health -= amount; // FixedUpdate respawns the frog if this reaches zero
+        health -= amount; // FixedUpdate kills the frog if this reaches zero
         Publish();
     }
 
     public void Restore(float healthAmount, float hungerAmount, float hydrationAmount)
     {
-        if (!IsServerInitialized)
+     if (!IsServerInitialized || motor.IsDead)
             return;
         FrogTuning t = Tuning;
         health = Mathf.Min(t.maxHealth, health + healthAmount);
@@ -138,7 +138,16 @@ public class FrogStats : NetworkBehaviour
         Publish();
     }
 
-    void OnEaten(FrogTongue eater, TongueTarget food)
+    // The death screen's countdown ended: back at the spawn point with full bars.
+    public void Revive()
+    {
+        if (!IsServerInitialized || !motor.IsDead)
+            return;
+        motor.Respawn();
+        RefillAll();
+   }
+
+void OnEaten(FrogTongue eater, TongueTarget food)
     {
         if (eater.gameObject == gameObject)
             Restore(0f, food.nutrition, 0f);

@@ -83,12 +83,19 @@ public class FrogTongue : NetworkBehaviour
 
     public void PressTongue(Vector3 origin, Vector3 dir)
     {
-        if (dir.sqrMagnitude < 0.5f)
-            return; // ignore garbage aim data
+            if (dir.sqrMagnitude < 0.5f || motor.IsDead)
+                return; // ignore garbage aim data, and a dead frog
         pressQueued = true;
         aimOrigin = origin;
         aimDirection = dir.normalized;
     }
+      // The frog died: whatever the tongue was doing, it comes back.
+   public void LetGo()
+   {
+        pressQueued = false;
+        if (state == TongueState.Extending || state == TongueState.Attached)
+           StartRetract();
+   }
 
     // Break free: drop every tongue currently holding this object.
     public static void ReleaseEverythingHolding(NetworkObject grabbed)
@@ -200,9 +207,13 @@ public class FrogTongue : NetworkBehaviour
     void Attach(TongueTarget newTarget, Vector3 point)
     {
         target = newTarget;
-        //added to attach to buttons -Tim
+        //added to attach to buttons -Jeff
         if (newTarget.TryGetComponent(out WallButton button))
+        {
             button.Activate();
+            StartRetract();
+            return;
+        }
         //added for food pile prefab -Tim
         if (newTarget.TryGetComponent(out FoodPile pile))
         {

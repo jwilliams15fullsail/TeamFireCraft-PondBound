@@ -50,7 +50,8 @@ public class FrogMotor : NetworkBehaviour
     public Rigidbody Body => rb;
     public float Radius => sphere.radius;
     public Vector3 GroundNormal { get; private set; } = Vector3.up;
-
+    // A dead frog is in Disabled mode: the host stops simulating it until Respawn.
+    public bool IsDead => Mode.Value == FrogMode.Disabled;
     // The host's clock (seconds), the same on every machine: FishNet's tick plus how far
     // into the next tick we are, so it moves smoothly every frame.
     public double NetworkTime => TimeManager.TicksToTime(TimeManager.GetPreciseTick(TickType.Tick));
@@ -61,6 +62,7 @@ public class FrogMotor : NetworkBehaviour
     FrogClimb climb;
     FrogStats stats;
     NetworkTransform networkTransform;
+    FrogTongue tongue;
 
     bool jumpHeld, jumpPressQueued, jumpReleaseQueued, stickQueued;
     float lastGroundedTime = -10f;
@@ -83,6 +85,7 @@ public class FrogMotor : NetworkBehaviour
         climb = GetComponent<FrogClimb>();
         stats = GetComponent<FrogStats>();
         networkTransform = GetComponent<NetworkTransform>();
+        tongue = GetComponent<FrogTongue>();
     }
 
     public override void OnStartServer()
@@ -231,13 +234,16 @@ public class FrogMotor : NetworkBehaviour
         float dt = Time.fixedDeltaTime;
         FrogInputState input = driver.CurrentInput;
 
-        if (rb.position.y < respawnHeight)
-        {
-            Respawn();
-            return;
-        }
-        if (Mode.Value == FrogMode.Disabled)
-            return;
+        if (IsDead)
+                 {
+                     SettleBody(dt);
+                    return;
+                }
+              if (rb.position.y < respawnHeight)
+                   {
+                       Respawn();
+                       return;
+                 }
 
         HandleStick(input);
         if (Mode.Value != FrogMode.Climbing)
@@ -577,6 +583,33 @@ public class FrogMotor : NetworkBehaviour
         Quaternion target = Quaternion.LookRotation(forward, up);
         rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, target, tuning.turnSpeed * dt));
     }
+      // Host only. Health ran out: stop simulating this frog and let go of everything. The body
+   // drops where it is and stays there until Respawn. Every machine sees the mode change and
+   // plays the death animation.
+   public void Die()
+   {
+       if (Mode.Value == FrogMode.Climbing)
+           climb.Detach();
+       EndHop();
+       IsCharging.Value = false;
+       followingArc = false;
+       Mode.Value = FrogMode.Disabled;
+       tongue.LetGo();
+   }
+
+    // Dead: no steering. The body falls and levels out, and once it's on something it brakes
+   // to a stop there (it's frictionless, so otherwise it would slide away).
+  void SettleBody(float dt)
+   {
+            bool onGround = ProbeGround(out RaycastHit hit);
+            FaceTowards(Vector3.zero, onGround ? hit.normal : Vector3.up, dt, Vector3.zero);
+           if (!onGround)
+                 return;
+          Vector3 supportVelocity = hit.rigidbody != null ? hit.rigidbody.GetPointVelocity(rb.position) : Vector3.zero;
+           Vector3 planar = Vector3.ProjectOnPlane(rb.linearVelocity - supportVelocity, hit.normal);
+            rb.AddForce(Vector3.ClampMagnitude(-planar, tuning.groundBraking * dt), ForceMode.VelocityChange);
+           rb.AddForce(-Vector3.ProjectOnPlane(Physics.gravity, hit.normal), ForceMode.Acceleration);
+       }
 
     public void Respawn()
     {
@@ -587,6 +620,7 @@ public class FrogMotor : NetworkBehaviour
         Mode.Value = FrogMode.Airborne;
         airSpeedLimit = 0f;
         followingArc = false;
+        jumpPressQueued = jumpReleaseQueued = stickQueued = false; // anything pressed while dead
         rb.linearVelocity = Vector3.zero;
         rb.position = spawnPosition;
         rb.rotation = Quaternion.identity;

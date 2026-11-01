@@ -105,7 +105,7 @@ public class FrogProceduralBody : MonoBehaviour
         squashSpeed += ((squashTarget - squashValue) * springStiffness - squashSpeed * springDamping) * dt;
         squashValue = Mathf.Clamp(squashValue + squashSpeed * dt, -0.6f, 0.6f);
 
-        float breath = Mathf.Sin(Time.time * breathRate * 2f * Mathf.PI) * breathAmount * (1f - hopAmount);
+        float breath = motor.IsDead ? 0f : Mathf.Sin(Time.time * breathRate * 2f * Mathf.PI) * breathAmount * (1f - hopAmount);
         airAmount = Mathf.Lerp(airAmount, mode == FrogMode.Airborne ? Mathf.Clamp01(velocity.magnitude / 8f) : 0f, 1f - Mathf.Exp(-12f * dt));
 
         float s = squashValue + breath;

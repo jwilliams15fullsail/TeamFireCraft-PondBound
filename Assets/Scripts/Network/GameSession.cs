@@ -127,16 +127,20 @@ public static class GameSession
         if (IsLeaving)
             return;
         IsLeaving = true;
+        Debug.Log("[Leave] 1: leaving");
 
         await LeaveSessionAsync();
+        Debug.Log("[Leave] 2: session left, stopping the network");
 
         NetworkManager manager = InstanceFinder.NetworkManager;
         if (manager != null)
         {
             StopNetwork(manager);
+            Debug.Log("[Leave] 3: network stopped, destroying the manager");
             UnityEngine.Object.Destroy(manager.gameObject);
         }
         UnitySceneManager.LoadScene(MenuScene);
+        Debug.Log("[Leave] 4: loading the menu");
         IsLeaving = false;
     }
 

@@ -8,6 +8,7 @@ using UnityEngine;
 // Every machine reads the timing from the shared network clock, so the smoke matches the
 // damage with no network messages. The host does the damage; the bars update for everyone
 // through FrogStats. Needs a trigger collider on the same GameObject; no NetworkObject.
+// A HazardPower on a parent object can switch it off.
 public class TimedVent : MonoBehaviour
 {
     [Header("Timing (seconds)")]
@@ -25,8 +26,10 @@ public class TimedVent : MonoBehaviour
     readonly Dictionary<FrogStats, int> inside = new(); // frog -> its colliders inside
     readonly List<FrogStats> gone = new();
     bool smoking;
+    HazardPower power; // optional: a parent that can switch this vent off
 
     static bool IsHost => InstanceFinder.IsServerStarted;
+    bool SwitchedOff => power != null && power.IsOff;
 
     // Seconds into the current cycle, the same on every machine.
     float CycleTime
@@ -41,6 +44,7 @@ public class TimedVent : MonoBehaviour
 
     void Start()
     {
+        power = GetComponentInParent<HazardPower>();
         // The smoke only plays when this script says so.
         if (smoke != null)
             smoke.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -48,7 +52,7 @@ public class TimedVent : MonoBehaviour
 
     void Update()
     {
-        bool shouldSmoke = CycleTime >= offTime;
+        bool shouldSmoke = !SwitchedOff && CycleTime >= offTime;
         if (smoke == null || shouldSmoke == smoking)
             return;
         smoking = shouldSmoke;
@@ -78,7 +82,7 @@ public class TimedVent : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!IsHost || inside.Count == 0 || CycleTime < offTime + warningTime)
+        if (SwitchedOff || !IsHost || inside.Count == 0 || CycleTime < offTime + warningTime)
             return;
         float amount = damagePerSecond * Time.fixedDeltaTime;
         foreach (FrogStats frog in inside.Keys)

@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
 
 // A door that slides between closed and open. The host decides: pressure plates and wall
-// buttons call SetOpen there. Open/closed is a SyncVar, so every player sees the
+// buttons call HoldOpen there. Open/closed is a SyncVar, so every player sees the
 // same door, including anyone who joins later. Each machine slides its own copy toward
 // that state, so no position has to be streamed.
 [RequireComponent(typeof(NetworkObject))]
@@ -11,8 +12,11 @@ public class DoorController : NetworkBehaviour
 {
     public Vector3 openOffset = new Vector3(0, -3, 0);
     public float openSpeed = 1.5f;
+    [Tooltip("How many plates or buttons must be on at the same time to open this door.")]
+    public int switchesNeeded = 1;
 
     readonly SyncVar<bool> isOpen = new();
+    readonly HashSet<Object> holders = new(); // host only: the plates and buttons that are on right now
 
     Vector3 closedPos;
     Vector3 openPos;
@@ -37,10 +41,15 @@ public class DoorController : NetworkBehaviour
 
     // Host only. Calls on other machines are ignored, so plates and buttons can't
     // disagree about the door: only the host's copy of them counts.
-    public void SetOpen(bool open)
+    public void HoldOpen(Object holder, bool hold)
     {
-        if (IsServerInitialized)
-            isOpen.Value = open;
+        if (!IsServerInitialized)
+            return;
+        if (hold)
+            holders.Add(holder);
+        else
+            holders.Remove(holder);
+        isOpen.Value = holders.Count >= switchesNeeded;
     }
 
     void FixedUpdate()

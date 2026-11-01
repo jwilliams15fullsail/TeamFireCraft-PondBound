@@ -318,7 +318,6 @@ GameObject:
   - component: {fileID: 4653001287088918300}
   - component: {fileID: 5962963085824486735}
   - component: {fileID: 1490099721687078629}
-  - component: {fileID: 6414703894641822777}
   m_Layer: 6
   m_Name: Frog
   m_TagString: Frog
@@ -712,22 +711,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   maxFlightTime: 2
---- !u!114 &6414703894641822777
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6960431495464794997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 070f0c4b51abef044b8e94e392a8177a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FrogElectricCharge
-  _componentIndexCache: 255
-  _addedNetworkObject: {fileID: 4653001287088918300}
-  _networkObjectCache: {fileID: 0}
-  defaultStunDuration: 2
 --- !u!1 &7591722043773449959
 GameObject:
   m_ObjectHideFlags: 0
