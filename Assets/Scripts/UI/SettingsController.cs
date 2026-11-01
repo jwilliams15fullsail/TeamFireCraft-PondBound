@@ -15,7 +15,6 @@ public class settingsController : MonoBehaviour
 
     [Header("UI Controls")]
     [SerializeField] private Slider mouseSensSlider;
-    [SerializeField] private Slider volumeSlider;
     [SerializeField] private Slider brightnessSlider;
     [SerializeField] private TMP_Dropdown resolutionDropD;
     [Tooltip("Optional: Fullscreen / Exclusive fullscreen / Windowed.")]
@@ -41,13 +40,6 @@ public class settingsController : MonoBehaviour
         mouseSensSlider.SetValueWithoutNotify(GetMouseSensitivity());
         mouseSensSlider.onValueChanged.AddListener(SetSensitivity);
 
-        volumeSlider.minValue = 0f;
-        volumeSlider.maxValue = 100f;
-        volumeSlider.SetValueWithoutNotify(
-            PlayerPrefs.GetFloat("Volume", 100f));
-        volumeSlider.onValueChanged.AddListener(SetVolume);
-        SetVolume(volumeSlider.value);
-
         brightnessSlider.minValue = 0f;
         brightnessSlider.maxValue = 100f;
         brightnessSlider.SetValueWithoutNotify(
@@ -69,12 +61,6 @@ public class settingsController : MonoBehaviour
     public void SetSensitivity(float mouseSensValue)
     {
         PlayerPrefs.SetFloat(MouseSensitivityKey, mouseSensValue);
-    }
-
-    public void SetVolume(float volumeValue)
-    {
-        AudioListener.volume = volumeValue / 100f;
-        PlayerPrefs.SetFloat("Volume", volumeValue);
     }
 
     public void SetBrightness(float brightnessValue)
