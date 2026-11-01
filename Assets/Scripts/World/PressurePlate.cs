@@ -6,10 +6,14 @@ using UnityEngine;
 // Anything with a Rigidbody counts by its mass; frogs only if Frogs Count is ticked.
 // Runs on the host, which simulates every box; the door then syncs to everyone.
 // Needs a trigger collider that reaches a little above the plate's top surface.
+// It can also hold a group of hazards off: fill in Hazards instead of, or as well as, Door.
 public class PressurePlate : MonoBehaviour
 {
     public DoorController door;
+    [Tooltip("Optional: lasers, vents or other hazards to keep off while the plate is pressed.")]
+    public HazardPower hazards;
     [Tooltip("Total mass (Rigidbody Mass) needed to hold the door open.")]
+
     public float minMass = 2f;
     [Tooltip("Let frogs standing on the plate add their own mass too.")]
     public bool frogsCount;
@@ -76,6 +80,8 @@ public class PressurePlate : MonoBehaviour
             return;
         pressed = nowPressed;
         if (door != null)
-            door.SetOpen(pressed);
+            door.HoldOpen(this, pressed);
+        if (hazards != null)
+            hazards.HoldOff(this, pressed);
     }
 }

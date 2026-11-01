@@ -200,9 +200,13 @@ public class FrogTongue : NetworkBehaviour
     void Attach(TongueTarget newTarget, Vector3 point)
     {
         target = newTarget;
-        //added to attach to buttons -Tim
+        //added to attach to buttons -Jeff
         if (newTarget.TryGetComponent(out WallButton button))
+        {
             button.Activate();
+            StartRetract();
+            return;
+        }
         //added for food pile prefab -Tim
         if (newTarget.TryGetComponent(out FoodPile pile))
         {
