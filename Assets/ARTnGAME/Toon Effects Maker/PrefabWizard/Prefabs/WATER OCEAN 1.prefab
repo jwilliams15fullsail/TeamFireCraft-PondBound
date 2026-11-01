@@ -1,0 +1,162 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 400000}
+  - component: {fileID: 11400000}
+  m_Layer: 0
+  m_Name: WATER OCEAN 1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &100002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 400002}
+  - component: {fileID: 3300000}
+  - component: {fileID: 2300000}
+  m_Layer: 0
+  m_Name: OCEAN TYPE 3 Plane HEAVY
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &400000
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_LocalRotation: {x: -0.3348901, y: -0.08535502, z: -0.030477008, w: 0.93788826}
+  m_LocalPosition: {x: 2720.1716, y: 327.15097, z: 3705.5493}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 400002}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &400002
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100002}
+  m_LocalRotation: {x: -0.25395826, y: -0.03694716, z: 0.03106585, w: -0.9660099}
+  m_LocalPosition: {x: -1734.5327, y: 1865.464, z: -3790.951}
+  m_LocalScale: {x: 45.14894, y: 45.14895, z: 45.148945}
+  m_Children: []
+  m_Father: {fileID: 400000}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &2300000
+MeshRenderer:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100002}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
+  m_Materials:
+  - {fileID: 2100000, guid: 03c60cba9bf42b4489cb3c58b7ee9066, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &3300000
+MeshFilter:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100002}
+  m_Mesh: {fileID: 4300000, guid: 3f8e174c112178147b20f70ab0def6bc, type: 2}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d715894d445e4343913ac81a82ed836, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  current_weather: 0
+  current_day_time: 0
+  delay: 1.5
+  emit_time: 1
+  speed: 1
+  Transfer_to: {fileID: 0}
+  Keep_init_color: 1
+  Dynamic: 1
+  OceanMaterial: {fileID: 2100000, guid: 03c60cba9bf42b4489cb3c58b7ee9066, type: 2}
+  WaveControl: {x: 0.62, y: 0, z: 0, w: -5.37}
+  TimeControl: {x: 3.4, y: -0.06, z: -0.38, w: 0.22}
+  CenterControl: {x: 181.8, y: 224, z: 41.1, w: -0.5}
+  ShapeControl1: {x: 54, y: -78, z: 1, w: 1}
+  ShapeControl2: {x: 112, y: -104, z: 2.6, w: 1}
+  Glow_color: {r: 0.46666667, g: 0.44313726, b: 0.8392157, a: 1}
+  Buldge_scale: 0.87
+  Buldge_shape: 1.32
+  Glow_intensity: 0.35
+  Buldge_scale2: 0.73
+  useGUI: 1
+  Extra_motion: 0
+  Box: {fileID: 0}
+  Experim_bouan: 0
+  Water_tile_transform: {fileID: 0}
+  Amp_adjust: 1
+  Freq_adjust: 1
+  Lerp_speed: 1
+  Afternoon: {r: 1, g: 0.827451, b: 0.70980394, a: 0.2627451}
+  Day: {r: 0.30980393, g: 0.38039216, b: 0.5882353, a: 0.83137256}
+  Morning: {r: 0.9882353, g: 0.99215686, b: 1, a: 0.53333336}
+  Night: {r: 0.15686275, g: 0.3137255, b: 0.47058824, a: 0.3137255}
+  Artistic: 0
+  Day_speed: 0.5
+  Extra_motion_GUI: 0
+  Weather_GUI_on: 0
+  Day_cycle_GUI_on: 0
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 100000}
+  m_IsPrefabParent: 1
