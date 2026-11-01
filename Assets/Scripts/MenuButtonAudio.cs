@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -14,6 +15,8 @@ public class MenuButtonAudio : MonoBehaviour,
     [Range(0f, 1f)]
     public float volume = 0.7f;
 
+    [SerializeField] private AudioMixerGroup sfxGroup;
+
     private AudioSource audioSource;
 
     private void Awake()
@@ -26,6 +29,7 @@ public class MenuButtonAudio : MonoBehaviour,
         audioSource.playOnAwake = false;
         audioSource.loop = false;
         audioSource.spatialBlend = 0f;
+        audioSource.outputAudioMixerGroup = sfxGroup;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -36,15 +40,7 @@ public class MenuButtonAudio : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("BUTTON CLICK DETECTED!");
-
         if (clickSound != null)
-        {
-            AudioSource.PlayClipAtPoint(
-                clickSound,
-                Vector3.zero,
-                volume
-            );
-        }
+            audioSource.PlayOneShot(clickSound, volume);
     }
 }
