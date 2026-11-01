@@ -129,7 +129,7 @@ public class PlayerHUD : MonoBehaviour
 
 
     // Your own frog (the one you own), once PlayerSpawner has spawned it.
-    static FrogStats FindLocalFrogStats()
+    public static FrogStats FindLocalFrogStats()
     {
         foreach (FrogStats frog in FindObjectsByType<FrogStats>())
         {
