@@ -78,12 +78,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11100000, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       propertyPath: m_Animations.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 11100000, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       propertyPath: 'm_Animations.Array.data[0]'
       value: 
       objectReference: {fileID: 7400010, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
+    - target: {fileID: 11100000, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
+      propertyPath: 'm_Animations.Array.data[5]'
+      value: 
+      objectReference: {fileID: 7400014, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -100,6 +104,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5261652211245686176}
+    - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2213638344316116127}
+    - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
     - targetCorrespondingSourceObject: {fileID: 100138, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2290723857535773271}
@@ -397,9 +407,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25ea7cfb79a19bb4cb56b20984d53ef8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  spiderDamage: 10
   currentState: 0
   viewRadius: 10
-  viewAngle: 65
+  viewAngle: 90
   targetMask:
     serializedVersion: 2
     m_Bits: 64
@@ -407,12 +421,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   searchDuration: 8
-  stopDistance: 2
-  patrolSpeed: 2
-  chaseSpeed: 3.2
-  returnSpeed: 2.5
+  stopDistance: 0.7
+  patrolSpeed: 2.8
+  chaseSpeed: 4.3
+  returnSpeed: 2.9
   rotationSpeed: 5
-  pauseTime: 1
+  pauseTime: 2
 --- !u!114 &7382786652424249559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,7 +442,7 @@ MonoBehaviour:
   waypoint: {fileID: 0}
   isBoomerang: 0
   distanceThreshold: 0.5
-  moveSpeed: 2
+  moveSpeed: 2.8
   pauseTime: 2
   rotationSpeed: 5
   isWaiting: 0
@@ -480,3 +494,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.0999999, y: 0.55, z: 1.25}
   m_Center: {x: 0, y: 0.275, z: -0.2249999}
+--- !u!114 &2213638344316116127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5457529088477483022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37e128652a4997743bdda5104e8b0ce1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStun
+  defaultStunDuration: 2

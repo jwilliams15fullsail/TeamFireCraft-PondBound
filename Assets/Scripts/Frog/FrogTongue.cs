@@ -40,9 +40,9 @@ public class FrogTongue : NetworkBehaviour
     static readonly List<FrogTongue> spawned = new();
 
     FrogMotor motor;
-    
     FrogNetworkDriver driver;
     FrogClimb climb;
+    FrogElectricCharge electricCharge;
     Rigidbody rb;
     readonly RaycastHit[] hits = new RaycastHit[16];
 
@@ -64,6 +64,7 @@ public class FrogTongue : NetworkBehaviour
         driver = GetComponent<FrogNetworkDriver>();
         climb = GetComponent<FrogClimb>();
         rb = GetComponent<Rigidbody>();
+        electricCharge = GetComponent<FrogElectricCharge>();
     }
 
     public override void OnStartServer()
@@ -82,12 +83,19 @@ public class FrogTongue : NetworkBehaviour
 
     public void PressTongue(Vector3 origin, Vector3 dir)
     {
-        if (dir.sqrMagnitude < 0.5f)
-            return; // ignore garbage aim data
+            if (dir.sqrMagnitude < 0.5f || motor.IsDead)
+                return; // ignore garbage aim data, and a dead frog
         pressQueued = true;
         aimOrigin = origin;
         aimDirection = dir.normalized;
     }
+      // The frog died: whatever the tongue was doing, it comes back.
+   public void LetGo()
+   {
+        pressQueued = false;
+        if (state == TongueState.Extending || state == TongueState.Attached)
+           StartRetract();
+   }
 
     // Break free: drop every tongue currently holding this object.
     public static void ReleaseEverythingHolding(NetworkObject grabbed)
@@ -158,13 +166,31 @@ public class FrogTongue : NetworkBehaviour
         SetState(TongueState.Extending);
     }
 
+
     void Extend(float dt)
     {
         // Swept test from the old tip to the new tip, so a fast tongue can't skip past a fly.
         float step = Tuning.tongueExtendSpeed * dt;
         Vector3 from = mouth.position + direction * tipDistance;
+
         if (CastIgnoringSelf(from, direction, Tuning.tongueRadius, step, out RaycastHit hit))
         {
+            // Check whether the tongue hit an enemy.
+            EnemyStun enemy = hit.collider.GetComponentInParent<EnemyStun>();
+
+            if (enemy != null && electricCharge != null)
+            {
+                // Only consume electricity when an enemy is successfully hit.
+                if (electricCharge.TryConsumeCharge(out float stunDuration))
+                {
+                    enemy.ApplyStun(stunDuration);
+                    Debug.Log($"Electrified tongue stunned {enemy.name}!");
+
+                    StartRetract();
+                    return;
+                }
+            }
+
             TongueTarget hitTarget = hit.collider.GetComponentInParent<TongueTarget>();
             if (hitTarget != null && hitTarget.NetObject.IsSpawned && !IsHeldByAnyone(hitTarget))
                 Attach(hitTarget, hit.distance > 0f ? hit.point : from);
@@ -181,15 +207,23 @@ public class FrogTongue : NetworkBehaviour
     void Attach(TongueTarget newTarget, Vector3 point)
     {
         target = newTarget;
-        //added to attach to buttons -Tim
+        //added to attach to buttons -Jeff
         if (newTarget.TryGetComponent(out WallButton button))
+        {
             button.Activate();
+            StartRetract();
+            return;
+        }
         //added for food pile prefab -Tim
         if (newTarget.TryGetComponent(out FoodPile pile))
         {
             pile.OnTongueHit(this, point);
             return;
         }
+        // Stop a firefly wandering while the tongue is holding it.
+        if (target.TryGetComponent(out FireflyWander firefly))
+            firefly.SetCaught(true);
+
         localAnchor = target.transform.InverseTransformPoint(point);
         restLength = Vector3.Distance(mouth.position, point); // no sudden yank on contact
         tipDistance = restLength;
@@ -205,7 +239,7 @@ public class FrogTongue : NetworkBehaviour
 
     void Hold(float dt)
     {
-       
+
         if (target == null || !target.NetObject.IsSpawned)
         {
             StartRetract(); // target was eaten, destroyed, or its player left
@@ -290,8 +324,18 @@ public class FrogTongue : NetworkBehaviour
     {
         if (distance <= Tuning.eatDistance)
         {
+            // Check before consuming, because Consume despawns the food.
+            bool ateElectricFirefly =
+                target != null && target.TryGetComponent(out ElectricFirefly electricFirefly);
+
             target.Consume(this); // the host eats it exactly once
-            StartRetract();
+
+            // Preserve a newly earned charge when eating an Electric Firefly.
+            if (ateElectricFirefly)
+                StartRetract(false);
+            else
+                StartRetract();
+
             return;
         }
 
@@ -299,11 +343,24 @@ public class FrogTongue : NetworkBehaviour
         Rigidbody food = target.Body;
         if (food != null && !food.isKinematic)
             food.linearVelocity = (mouth.position - anchor).normalized * Tuning.foodReelSpeed + rb.linearVelocity;
+
         PushSync(1f);
     }
 
-    void StartRetract()
+    void StartRetract(bool consumeElectricCharge = true)
     {
+        // Let a released firefly resume wandering, if it still exists.
+        if (target != null && target.TryGetComponent(out FireflyWander firefly))
+            firefly.SetCaught(false);
+
+        // An electrified tongue only gets one attempt.
+        // Preserve the charge immediately after eating an Electric Firefly.
+        if (consumeElectricCharge && electricCharge != null && electricCharge.HasCharge.Value)
+        {
+            electricCharge.TryConsumeCharge(out _);
+            Debug.Log("Electric tongue charge lost after retracting!");
+        }
+
         target = null;
         SetState(TongueState.Retracting);
     }
@@ -322,7 +379,7 @@ public class FrogTongue : NetworkBehaviour
         {
             State = state,
             Direction = direction,
-            
+
             LocalAnchor = localAnchor,
             RestLength = Mathf.Round(restLength * 50f) / 50f, // rounding = fewer network updates
             Tension = Mathf.Round(tension01 * 20f) / 20f,

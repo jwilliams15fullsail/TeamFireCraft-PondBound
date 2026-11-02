@@ -67,9 +67,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 859a4434adf601549821b6cdd445fa77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelExit
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 4159745450071808972}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 4159745450071808972}
   nextLevel:
     sceneAsset: {fileID: 102900000, guid: 6c5fa4eede05f104b8690d61d13b1682, type: 3}
     sceneName: FrogTestScene
@@ -106,22 +106,23 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 65535
+  <PrefabId>k__BackingField: 2
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 2731853310982828911
   SceneId: 0
   SerializedTransformProperties:
-    Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    Scale: {x: 0, y: 0, z: 0}
-    IsValid: 0
+    Position: {x: 0.585, y: -0.25972003, z: 1.569}
+    Rotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071067}
+    Scale: {x: 1.5000007, y: 1, z: 1.03}
+    IsValid: 1
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
   WasActiveDuringEdit_Set1: 1
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours: []
+  NetworkBehaviours:
+  - {fileID: 5525852677973322787}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -132,4 +133,4 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: 0
+  _initializedTimestamp: -8584081875959590242

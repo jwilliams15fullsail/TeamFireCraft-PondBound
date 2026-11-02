@@ -61,6 +61,7 @@ public class FrogAnimatorDriver : MonoBehaviour
     static readonly int JumpPhaseId = Animator.StringToHash("JumpPhase");
     static readonly int TonguePhaseId = Animator.StringToHash("TonguePhase");
     static readonly int TongueAttachedId = Animator.StringToHash("TongueAttached");
+    static readonly int DeadId = Animator.StringToHash("Dead");
 
     enum JumpStep { None, Charging, Takeoff, Air, Landing }
 
@@ -140,6 +141,13 @@ public class FrogAnimatorDriver : MonoBehaviour
 
         FrogMode mode = motor.Mode.Value;
         bool supported = mode == FrogMode.Grounded || mode == FrogMode.Climbing;
+
+     // Dead: the Die state takes over from any pose. Forget the jump it was in, so LateUpdate
+       // stops cancelling the jump clip's lift.
+      animator.SetBool(DeadId, motor.IsDead);
+           if (motor.IsDead)
+               jumpStep = JumpStep.None;
+     
 
         UpdateLocomotion(mode, supported, dt);
         UpdateJump(mode, supported, dt);

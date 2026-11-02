@@ -1,37 +1,40 @@
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngineInternal;
+using System.Collections;
+using FishNet.Object;
 
 [RequireComponent(typeof(Rigidbody))]
-public class EnemyAI : MonoBehaviour
+public class EnemyAI : NetworkBehaviour
 {
     public enum AIState { patrolling, chasing, searching, returning }
+
+    [SerializeField] float spiderDamage = 10f;
 
     [Header("State Machine")]
     [SerializeField] AIState currentState = AIState.patrolling;
 
     [Header("FOV Settings")]
-    [SerializeField] float viewRadius = 10f;
+    [SerializeField] float viewRadius = 13f;
     [SerializeField] float viewAngle = 90f;
     [SerializeField] LayerMask targetMask;      // What the AI targets/responds to
     [SerializeField] LayerMask obstacleMask;    // Set to environment/obstacle layer
 
     [Header("Search Settings")]
     [SerializeField] float searchDuration = 8f; // How long the AI searches
-    [SerializeField] float stopDistance = 2;    // How far away from the target it stops moving
+    [SerializeField] float stopDistance = 0.7f;    // How far away from the target it stops moving
     private Vector3 lastPlayerPosition;
     private float searchTimer;
 
     [Header("AI Movement")]
-    [SerializeField] float patrolSpeed = 2f;
-    [SerializeField] float chaseSpeed = 3.2f;
-    [SerializeField] float returnSpeed = 2.5f;
+    [SerializeField] float patrolSpeed = 2.8f;
+    [SerializeField] float chaseSpeed = 4.5f;
+    [SerializeField] float returnSpeed = 2.9f;
     [SerializeField] float rotationSpeed = 5f;
-    [SerializeField] float pauseTime = 1f;
+    [SerializeField] float pauseTime = 2f;
 
     private Transform player;
     private WaypointMover pathing;
     private Rigidbody rigidBody;
+    private EnemyStun enemyStun;
 
     /////   ANIMATION INTEGRATION   /////
     private Animator animator;
@@ -40,16 +43,27 @@ public class EnemyAI : MonoBehaviour
     private static readonly int attackHash = Animator.StringToHash("attack");
     private static readonly int attackIndexHash = Animator.StringToHash("attackIndex");
     private bool isAttacking = false;
+    private float stateLockTimer = 0f;  // Stops state flickering for animations
+    private bool isTaunting = false;
+    private bool hasTauntedThisChase = false; // Ensure spider only taunts once when it spots the player
     // -------------------------------
 
+    /////   NETWORKING   /////
+    // Track the last played animation name to prevent spamming network calls every frame
+    private string lastNetworkedClip = "";
+    // -----------------------------------------
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         pathing = GetComponent<WaypointMover>();
         rigidBody = GetComponent<Rigidbody>();
+        enemyStun = GetComponent<EnemyStun>();
         animator = GetComponent<Animator>();
         animation = GetComponent<Animation>();
+
+        isTaunting = false;
+        hasTauntedThisChase = false;
 
         // !!CRUCIAL FOR RIGIDBODY!! Prevents falling over from physics
         rigidBody.freezeRotation = true;
@@ -60,6 +74,15 @@ public class EnemyAI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // NETWORK SAFETY: Only the Host/Server machine should process AI states and calculations
+        if (!IsServerStarted) return;
+        // -----------------------------------------
+
+        // Do not chase, patrol, search, or attack while stunned.
+        if (enemyStun != null && enemyStun.IsStunned)
+            return;
+        if (stateLockTimer > 0f) { stateLockTimer -= Time.deltaTime; }
+
         LookForPlayer();
 
         switch (currentState)
@@ -90,14 +113,19 @@ public class EnemyAI : MonoBehaviour
             // First to enter enemy FOV is the target
             Transform target = targetsInRadius[0].transform;
             Vector3 directionToTarget = (target.position - transform.position).normalized;
+            float distanceToTarget = Vector3.Distance(transform.position, target.position);
+
+            // STICKY TARGETING: if we are already chasing, don't lose player immediately upon exiting FOV
+            bool isCloseEnoughToTrack = (currentState == AIState.chasing && distanceToTarget <= stopDistance + 3f);
+            bool isInFOVCone = Vector3.Angle(transform.forward, directionToTarget) < viewAngle / 2;
 
             // Check if player is within our FOV
-            if (Vector3.Angle(transform.forward, directionToTarget) < viewAngle/2)
+            if (isInFOVCone || isCloseEnoughToTrack)
             {
-                float distanceToTarget = Vector3.Distance(transform.position, target.position);
-
+                // Fix Raycast collission with own body
+                Vector3 rayOrigin = transform.position + (directionToTarget * 1f);
                 // Check for obstacles with Raycast
-                if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstacleMask))
+                if (!Physics.Raycast(rayOrigin, directionToTarget, distanceToTarget, obstacleMask))
                 {
                     player = target;        // Continuously update players last known position
                     lastPlayerPosition = player.position;
@@ -112,11 +140,14 @@ public class EnemyAI : MonoBehaviour
             }
         }
         // If the player was being chased and was lost, start search
-        if (currentState == AIState.chasing)
+        if (currentState == AIState.chasing && stateLockTimer <= 0)
         {
             player = null;
             searchTimer = searchDuration;   // Set the countdown timer
             currentState = AIState.searching;
+            stateLockTimer = 0.5f;          // Prevent immediately switching back to chase state
+
+            hasTauntedThisChase = false;    // Player escaped FOV, can taunt again if it finds the player
         }
     }
 
@@ -139,29 +170,54 @@ public class EnemyAI : MonoBehaviour
     {
         if (player == null) { return; }
 
+        // Trigger taunt coroutine before chase starts
+        if (!hasTauntedThisChase && !isTaunting)
+        {
+            StartCoroutine(PerformTaunt());
+            return;
+        }
+        if (isTaunting)
+        {
+            Vector3 lookDirection = (player.position - transform.position).normalized;
+            lookDirection.y = 0;
+            if (lookDirection != Vector3.zero)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), rotationSpeed * Time.deltaTime);
+            }
+            return; // Skip the rest of the chase movement code below until taunt completes
+        }
+        // --------------------------------------------
+
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // If player in attack range, stop chasing animation, perform attack animations
-        if (distanceToPlayer <= stopDistance + 0.3f) 
+        if (distanceToPlayer <= stopDistance + 0.5f)
         {
             if (animator != null) { animator.SetFloat(speedHash, 0f); }
-            else if (animation != null) { animation.CrossFade("idle"); } // Legacy spider animation
+            else if (animation != null && !animation.IsPlaying("attack1") && !animation.IsPlaying("attack2") && !animation.IsPlaying("idle"))
+            { animation.CrossFade("idle", 0.2f); } // Legacy spider animation
 
             // Trigger random attack animation once
             if (!isAttacking)
             {
                 isAttacking = true;
-                if (animator != null) 
+                if (animator != null)
                 {
                     // Choose random attack between 0 and 1
                     int randomAttack = Random.Range(0, 2);
                     animator.SetInteger(attackIndexHash, randomAttack);
-                    animator.SetTrigger(attackHash); 
+                    animator.SetTrigger(attackHash);
                 }
                 else if (animation != null)     // Legacy spider animation
                 {
                     string attackClip = (Random.Range(0, 2) == 0) ? "attack1" : "attack2";
                     animation.CrossFade(attackClip, 0.1f);
+                }
+
+                FrogStats stats = player.GetComponent<FrogStats>();
+                if (stats != null)
+                {
+                    stats.Damage(spiderDamage);
                 }
                 Invoke(nameof(ResetAttackCooldown), 1.5f);
             }
@@ -174,16 +230,19 @@ public class EnemyAI : MonoBehaviour
             }
         }
         else
-        {
-            MoveTowards(player.position, chaseSpeed, stopDistance);
-        }
+            if (!isAttacking)
+            {
+                {
+                    MoveTowards(player.position, chaseSpeed, stopDistance);
+                }
+            }
     }
 
     void PerformSearch()
     {
         // Calculate distance ignoring height (avoid locked state from jittering physics)
         Vector3 flatSelf = new Vector3(transform.position.x, 0, transform.position.z);
-        Vector3 flatTarget = new Vector3(transform.position.x, 0, transform.position.z);
+        Vector3 flatTarget = new Vector3(lastPlayerPosition.x, 0, lastPlayerPosition.z);
 
         // Lost sight of player, move to players last known position
         if (Vector3.Distance(flatSelf, flatTarget) > 0.5f)
@@ -215,7 +274,7 @@ public class EnemyAI : MonoBehaviour
         MoveTowards(targetWaypointPosition, returnSpeed, 0f);
 
         Vector3 flatSelf = new Vector3(transform.position.x, 0, transform.position.z);
-        Vector3 flatTarget = new Vector3(transform.position.x, 0, transform.position.z);
+        Vector3 flatTarget = new Vector3(targetWaypointPosition.x, 0, targetWaypointPosition.z);
 
         if (Vector3.Distance(flatSelf, flatTarget) < 0.4f)
         {
@@ -260,6 +319,20 @@ public class EnemyAI : MonoBehaviour
             if (animator != null) { animator.SetFloat(speedHash, 0f); }
             else if (animation != null) { animation.CrossFade("idle"); } // Legacy spider animation
         }
+    }
+
+    IEnumerator PerformTaunt()
+    {
+        isTaunting = true;
+        hasTauntedThisChase = true;
+
+        if (animation != null && !animation.IsPlaying("taunt"))
+        {
+            animation.CrossFade("taunt", .15f);
+        }
+        yield return new WaitForSeconds(1.15f);
+
+        isTaunting = false;
     }
 
     void ResetAttackCooldown()

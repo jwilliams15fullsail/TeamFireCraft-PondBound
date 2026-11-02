@@ -6,14 +6,15 @@ using TMPro;
 using UnityEngine;
 
 // Level exit. When every player in the session is standing inside this trigger, a short
-// countdown starts and the host loads the next level for everyone. Someone stepping out
-// (or a new player joining) cancels the countdown. Only the host decides; every player
-// sees the same "frogs here" count and countdown on the label.
+// countdown starts. Then the host loads the next level for everyone or, with no next level
+// picked, every player gets the victory screen. Someone stepping out (or a new player joining)
+// cancels the countdown. Only the host decides; every player sees the same "frogs here" count
+// and countdown on the label.
 // Needs a NetworkObject and a trigger collider on the same GameObject.
 [RequireComponent(typeof(NetworkObject))]
 public class LevelExit : NetworkBehaviour
 {
-    [Tooltip("The level everyone moves to. It needs a PlayerSpawner and must be in the Build Profiles scene list.")]
+    [Tooltip("The level everyone moves to. It needs a PlayerSpawner and must be in the Build Profiles scene list. Leave it empty on the last level, and everyone gets the victory screen instead.")]
     [SerializeField] SceneField nextLevel;
     [SerializeField] float countdown = 3f;
     [Tooltip("Optional: a TextMeshPro (3D) text above the exit.")]
@@ -23,6 +24,7 @@ public class LevelExit : NetworkBehaviour
     readonly SyncVar<int> playersInside = new();
     readonly SyncVar<int> playersNeeded = new();
     readonly SyncVar<float> secondsLeft = new(-1f);
+    readonly SyncVar<bool> won = new();
 
     // Read by the HUD on every machine.
     public int PlayersInside => playersInside.Value;
@@ -71,6 +73,9 @@ public class LevelExit : NetworkBehaviour
         if (IsServerInitialized && !loading)
             CheckPlayers();
         ShowLabel();
+        // Every machine shows its own victory screen. WinGame ignores repeat calls.
+         if (won.Value && GameManager.instance != null)
+          GameManager.instance.WinGame();
     }
 
     void CheckPlayers()
@@ -89,7 +94,7 @@ public class LevelExit : NetworkBehaviour
         {
             timer = timer < 0f ? countdown : timer - Time.deltaTime;
             if (timer <= 0f)
-                LoadNextLevel();
+                FinishLevel();
         }
         else
         {
@@ -102,25 +107,23 @@ public class LevelExit : NetworkBehaviour
         secondsLeft.Value = timer < 0f ? -1f : Mathf.Ceil(timer);
     }
 
-    void LoadNextLevel()
+     void FinishLevel()
     {
-        loading = true; // once only, even if it fails (no error spam every frame)
+        loading = true; // once only
         if (nextLevel == null || !nextLevel.IsSet)
-        {
-            Debug.LogError("LevelExit: no Next Level picked.", this);
-            return;
-        }
-        GameSession.LoadLevel(nextLevel.SceneName);
+            won.Value = true; // the last level: nowhere to go, so every player gets the victory screen
+        else
+            GameSession.LoadLevel(nextLevel.SceneName);
     }
 
-    void ShowLabel()
+void ShowLabel()
     {
         if (label == null)
             return;
         if (!IsSpawned)
             label.text = "";
         else if (secondsLeft.Value > 0f)
-            label.text = $"Next level in {secondsLeft.Value:0}...";
+            label.text = $"Leaving in {secondsLeft.Value:0}...";
         else
             label.text = $"Frogs here: {playersInside.Value} / {playersNeeded.Value}";
 
