@@ -68,6 +68,7 @@ public class FrogMotor : NetworkBehaviour
     float lastGroundedTime = -10f;
     float ignoreGroundUntil;
     Rigidbody support;
+    PetriDishSlime currentSlime;
     Vector3 spawnPosition;
     bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
     float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
@@ -311,12 +312,22 @@ public class FrogMotor : NetworkBehaviour
     void UpdateGroundState()
     {
         bool hitGround = ProbeGround(out RaycastHit hit);
+
         if (hitGround)
         {
             lastGroundedTime = Time.time;
             GroundNormal = hit.normal;
             support = hit.rigidbody;
+
+            // Check whether the ground beneath this frog is slime.
+            currentSlime = hit.collider.GetComponentInParent<PetriDishSlime>();
         }
+        else
+        {
+            // Clear the slime effect when the frog is no longer touching the ground.
+            currentSlime = null;
+        }
+
 
         if (Mode.Value == FrogMode.Airborne && hitGround)
         {
@@ -447,11 +458,26 @@ public class FrogMotor : NetworkBehaviour
                 EndHop(); // switched back to running mid-hop
                 target = RunVelocity(wish, up);
             }
+
             // Speeding up uses Ground Acceleration, slowing down or stopping uses Ground Braking.
             float acceleration = hopping ? tuning.hopAcceleration
                 : target.sqrMagnitude > planar.sqrMagnitude ? tuning.groundAcceleration : tuning.groundBraking;
+
+            // Slime reduces traction, making it harder to accelerate, stop, and change direction.
+            if (currentSlime != null)
+            {
+                bool speedingUp = target.sqrMagnitude > planar.sqrMagnitude;
+
+                float multiplier = speedingUp
+                    ? currentSlime.accelerationMultiplier
+                    : currentSlime.brakingMultiplier;
+
+                acceleration *= multiplier;
+            }
+
             Vector3 change = Vector3.ClampMagnitude(target - planar, acceleration * dt);
             rb.AddForce(change, ForceMode.VelocityChange);
+
 
             // The body is frictionless, so cancel gravity's slide when standing still on a slope.
             if (target.sqrMagnitude < 0.0001f)
