@@ -4,10 +4,10 @@ using FishNet.Object;
 
 public class CheckpointManager : NetworkBehaviour
 {
-    // A static event that passes the specific checkpoint that was just activated
-    public static event Action<CheckpointManager> OnCheckpointActivated;
+    // Pass BOTH the checkpoint AND the GameObject of the specific player who touched it
+    public static event Action<CheckpointManager, GameObject> OnCheckpointActivated;
 
-    private bool isActivated = false;
+    // private bool isActivated = false;
     private Color originalColor;
     private Renderer flagRenderer;
 
@@ -25,36 +25,61 @@ public class CheckpointManager : NetworkBehaviour
         // Only run checkpoint logic on the Server/Host to prevent cheating/desync
         if (!IsServerStarted) return;
 
-        if (other.CompareTag("Frog") && !isActivated)
+        // Verify the object has a NetworkObject attached
+        NetworkObject playerNetworkObject = other.GetComponentInParent<NetworkObject>();
+        if (playerNetworkObject != null)
         {
-            isActivated = true;
+            // Fire the static event passing along WHICH player touched it
+            OnCheckpointActivated?.Invoke(this, playerNetworkObject.gameObject);
 
-            // Change color on the server and tell all clients to do the same
-            ObserversSetCheckpointState(true);
-
-            // Fire the event. The ?. ensures it only runs if something is listening
-            OnCheckpointActivated?.Invoke(this);
+            // Uniquely turn the flag green ONLY on the screen of the player who touched it
+            TargetSetCheckpointVisual(playerNetworkObject.Owner, true);
         }
+
+        //if (other.CompareTag("Frog") && !isActivated)
+        //{
+        //    isActivated = true;
+
+        //    // Change color on the server and tell all clients to do the same
+        //    ObserversSetCheckpointState(true);
+
+        //    // Fire the event. The ?. ensures it only runs if something is listening
+        //    OnCheckpointActivated?.Invoke(this);
+        //}
     }
 
-    public void DeactivateCheckpoint()
+    //public void DeactivateCheckpoint()
+    //{
+    //    // Ensure only the server can dictate deactivation state
+    //    if (!IsServerStarted) return;
+
+    //    isActivated = false;
+    //    if (flagRenderer != null)
+    //    {
+    //        flagRenderer.material.color = originalColor;
+    //    }
+    //}
+
+    public void DeactivateForPlayer(GameObject player)
     {
-        // Ensure only the server can dictate deactivation state
         if (!IsServerStarted) return;
 
-        isActivated = false;
-        if (flagRenderer != null)
+        NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
+        if (playerNetworkObject != null)
         {
-            flagRenderer.material.color = originalColor;
+            // Reset the flag color back to original ONLY for this player
+            TargetSetCheckpointVisual(playerNetworkObject.Owner, false);
         }
     }
 
-    // This RPC ensures the visual color changes happen perfectly across all players screens
-    [ObserversRpc]
-    private void ObserversSetCheckpointState(bool activated)
+    // TargetRpc ensures this logic runs ONLY on the computer of the player who owns this connection
+    [TargetRpc]
+    private void TargetSetCheckpointVisual(FishNet.Connection.NetworkConnection connection, bool activated)
     {
+        Renderer flagRenderer = GetComponent<Renderer>();
         if (flagRenderer == null) return;
 
+        // Custom local color settings for individual feedback
         if (activated)
         {
             flagRenderer.material.color = Color.green;
@@ -64,4 +89,20 @@ public class CheckpointManager : NetworkBehaviour
             flagRenderer.material.color = originalColor;
         }
     }
+
+    //// This RPC ensures the visual color changes happen perfectly across all players screens
+    //[ObserversRpc]
+    //private void ObserversSetCheckpointState(bool activated)
+    //{
+    //    if (flagRenderer == null) return;
+
+    //    if (activated)
+    //    {
+    //        flagRenderer.material.color = Color.green;
+    //    }
+    //    else
+    //    {
+    //        flagRenderer.material.color = originalColor;
+    //    }
+    //}
 }
