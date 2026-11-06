@@ -34,12 +34,14 @@ public class FrogNetworkDriver : NetworkBehaviour
     // the landing marker you place while charging.
     public Vector3 LocalJumpTarget { get; private set; }
 
-    // Owner only: the landing marker placed with the mouse, a spot on a surface. It stays
-    // exactly where you put it while the charge swings; the arc shows whether this charge
-    // reaches it. HasMarker is false when there is none (straight up, or not aiming).
+    // Owner only: the landing marker you aim with the crosshair, a spot on a surface. It stays
+    // where you aim while the charge swings; the arc shows whether this charge reaches it.
+    // HasMarker is false when there is none (straight up, or not aiming). MarkerOnWall: it's on
+    // a wall or a side too steep to stand on, so the frog will land there and cling to it.
     public bool HasMarker { get; private set; }
     public Vector3 MarkerPoint { get; private set; }
     public Vector3 MarkerNormal { get; private set; }
+    public bool MarkerOnWall { get; private set; }
 
     // Owner only: the launch the next jump will have. The preview draws exactly this arc,
     // and it is what gets sent to the host on release.
@@ -48,8 +50,9 @@ public class FrogNetworkDriver : NetworkBehaviour
         get
         {
             float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
-            // On a wall the frog lies flat against it, so its up is the wall's normal.
-            Vector3 wall = motor.Mode.Value == FrogMode.Climbing ? transform.up : Vector3.zero;
+            // On a wall the frog lies flat against it, so its up is the wall's normal. A jump
+            // aimed at a marker flies exactly to it, so it gets no extra push off the wall.
+            Vector3 wall = motor.Mode.Value == FrogMode.Climbing && !HasMarker ? transform.up : Vector3.zero;
             return motor.JumpVelocity(LocalCharge, LocalJumpTarget, heightScale, wall);
         }
     }
@@ -64,9 +67,7 @@ public class FrogNetworkDriver : NetworkBehaviour
     uint lastSentTick;
     readonly RaycastHit[] aimHits = new RaycastHit[8];
     readonly Collider[] aimOverlaps = new Collider[8];
-    Vector3 markerOffset; // flat offset from the frog to the landing marker (metres)
-    bool wasAimingMarker;
-    float lastAimYaw;     // the camera's AimYaw last frame, to turn the marker with it
+    
 
     void Awake()
     {
@@ -174,57 +175,22 @@ public class FrogNetworkDriver : NetworkBehaviour
             BreakFreePressed();
     }
 
-    // Where the next jump should come down. Mouse aiming, while charging: a landing marker
-    // that the mouse moves freely, as seen from the camera (left / right sideways, up / down
-    // further or closer), up to Max Jump Distance from the frog. It sits on the highest thing
-    // there a jump can reach (a platform, the floor below...), and slides along anything too
-    // high, like a wall. It starts where the crosshair pointed when the charge began (or the
-    // nearest spot short of it a jump can reach). The jump always comes down on it.
-    // Without mouse aiming: the way the frog faces (on a wall, the way the stick points),
-    // as far as the charge reaches, or straight up with no direction held.
+    // Where the next jump should come down. Mouse aiming, while charging: wherever the crosshair
+    // points (AimAtCrosshair). Without mouse aiming: the way the frog faces (on a wall, the way
+    // the stick points), as far as the charge reaches, or straight up with no direction held.
     void UpdateJumpTarget(float viewYaw, bool supported)
     {
         FrogTuning tuning = motor.Tuning;
         if (tuning.aimJumpsWithMouse && frogCamera != null)
         {
-            bool aiming = LocalJumpHeld && supported;
-            frogCamera.AimingMarker = aiming;
-            if (aiming && !wasAimingMarker)
-            {
-                Vector3 pointed = CrosshairTarget();
-                Vector3 start = Vector3.ClampMagnitude(new Vector3(pointed.x, 0f, pointed.z), tuning.maxJumpDistance);
-                markerOffset = Vector3.zero;
-                for (int i = 10; i >= 0; i--)
-                    if (MoveMarker(start * (i / 10f)))
-                        break;
-                lastAimYaw = frogCamera.AimYaw;
-            }
-            wasAimingMarker = aiming;
-            if (aiming)
-            {
-                // The camera orbited while aiming (Third Person Follow): swing the marker round
-                // the frog by the same angle, so it stays where it was on screen.
-                float turned = Mathf.DeltaAngle(lastAimYaw, frogCamera.AimYaw);
-                lastAimYaw = frogCamera.AimYaw;
-                if (Mathf.Abs(turned) > 0.001f)
-                    MoveMarker(Quaternion.Euler(0f, turned, 0f) * markerOffset - markerOffset);
-
-                // Sideways / forward as seen from the camera.
-                // Blocked: try just the east / west part of the move, then just north / south,
-                // so it slides along walls instead of sticking to them.
-                Vector2 look = frogCamera.TakeJumpAimLook();
-                Vector3 move = Quaternion.Euler(0f, frogCamera.AimYaw, 0f) * new Vector3(look.x, 0f, look.y) * tuning.jumpAimPerDegree;
-                if (!MoveMarker(move) && !MoveMarker(new Vector3(move.x, 0f, 0f)))
-                    MoveMarker(new Vector3(0f, 0f, move.z));
-            }
+            if (LocalJumpHeld && supported)
+                AimAtCrosshair();
             else
-            {
-                HasMarker = false;
-            }
+                HasMarker = MarkerOnWall = false;
             return;
         }
 
-        HasMarker = false;
+        HasMarker = MarkerOnWall = false;
         if (LocalMove.sqrMagnitude <= 0.04f)
         {
             LocalJumpTarget = Vector3.zero;
@@ -238,16 +204,46 @@ public class FrogNetworkDriver : NetworkBehaviour
         LocalJumpTarget = Vector3.ProjectOnPlane(direction, Vector3.up).normalized * reach;
     }
 
-    // Moves the landing marker by step, if a jump can come down there. False (and it stays
-    // put) when that spot is inside something too high to land on.
-    bool MoveMarker(Vector3 step)
+    // The landing marker goes on whatever surface the crosshair points at (a floor, a box top, a
+    // slope, a wall), if a jump can reach it. A wall, or a side too steep to stand on, is
+    // somewhere to cling: the frog lands on it and sticks there (MarkerOnWall). Out of reach (too
+    // far, too high, a ceiling, the sky): as far as a jump goes toward it, set down on whatever
+    // is there, stepping back toward the frog until it fits.
+    void AimAtCrosshair()
     {
-        Vector3 next = Vector3.ClampMagnitude(markerOffset + step, motor.Tuning.maxJumpDistance);
-        if (!MarkerTarget(next, out Vector3 target))
-            return false;
-        markerOffset = next;
-        LocalJumpTarget = target;
-        return true;
+        FrogTuning tuning = motor.Tuning;
+        Ray aim = frogCamera.AimRay;
+        Vector3 aimed = aim.origin + aim.direction * tuning.maxJumpDistance; // the sky: just that way
+        if (Cast(aim, MaxAimDistance, out RaycastHit hit))
+        {
+            aimed = hit.point;
+            float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
+            float highest = tuning.maxJumpHeight * heightScale - tuning.jumpClearance; // highest landing a jump can clear
+            Vector3 target = hit.point + hit.normal * motor.Radius - transform.position; // the frog's centre, touching the spot
+            bool floor = Vector3.Angle(hit.normal, Vector3.up) <= tuning.maxSlopeAngle;
+            bool wall = !floor && Vector3.Dot(hit.normal, Vector3.up) >= tuning.minWallUpDot;
+            bool inReach = new Vector2(target.x, target.z).magnitude <= tuning.maxJumpDistance && target.y <= highest;
+            if ((floor || wall) && inReach)
+            {
+                HasMarker = true;
+                MarkerOnWall = wall;
+                MarkerPoint = hit.point;
+                MarkerNormal = hit.normal;
+                LocalJumpTarget = target;
+                return;
+            }
+        }
+
+        MarkerOnWall = false;
+        Vector3 toward = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(aimed - transform.position, Vector3.up), tuning.maxJumpDistance);
+        for (int i = 10; i >= 0; i--)
+        {
+            if (MarkerTarget(toward * (i / 10f), out Vector3 dropped))
+            {
+                LocalJumpTarget = dropped;
+                return;
+            }
+        }
     }
 
     // The landing marker `offset` (flat, metres) from the frog, set down on the highest
@@ -288,15 +284,6 @@ public class FrogNetworkDriver : NetworkBehaviour
         return true;
     }
 
-    // The spot under the crosshair, as where the frog's centre should come down (one body
-    // radius off the surface, so the frog touches exactly that spot), relative to the frog.
-    // Zero (straight up) when the crosshair points at the sky.
-    Vector3 CrosshairTarget()
-    {
-        return Cast(frogCamera.AimRay, MaxAimDistance, out RaycastHit hit)
-            ? hit.point + hit.normal * motor.Radius - transform.position
-            : Vector3.zero;
-    }
 
     // Nearest hit along a ray, ignoring this frog's own collider.
     bool Cast(Ray ray, float distance, out RaycastHit best)
@@ -351,7 +338,9 @@ public class FrogNetworkDriver : NetworkBehaviour
     void ReleaseJumpLocally()
     {
         LocalJumpHeld = false;
-        JumpReleased(LocalJumpVelocity);
+        // Aimed at a wall: tell the host which wall, and where the frog's centre comes to rest on it.
+        bool toWall = HasMarker && MarkerOnWall;
+        JumpReleased(LocalJumpVelocity, toWall ? MarkerNormal : Vector3.zero, transform.position + LocalJumpTarget);
     }
 
     // ---- Owner -> host commands. The host only queues them; FrogMotor and
@@ -365,7 +354,7 @@ public class FrogNetworkDriver : NetworkBehaviour
     void JumpPressed() => motor.PressJump();
 
     [ServerRpc]
-    void JumpReleased(Vector3 velocity) => motor.ReleaseJump(velocity);
+    void JumpReleased(Vector3 velocity, Vector3 wallNormal, Vector3 wallTarget) => motor.ReleaseJump(velocity, wallNormal, wallTarget);
 
     [ServerRpc]
     void TonguePressed(Vector3 aimOrigin, Vector3 aimDirection) => tongue.PressTongue(aimOrigin, aimDirection);

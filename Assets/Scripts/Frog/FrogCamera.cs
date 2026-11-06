@@ -60,8 +60,7 @@ public class FrogCamera : MonoBehaviour
     [SerializeField] Vector2 pitchLimits = new Vector2(-30f, 70f);
     [Tooltip("How far the camera looks down when your frog spawns (degrees).")]
     [SerializeField] float startPitch = 15f;
-    [Tooltip("While charging a jump the camera tilts down to at least this (degrees), toward a top-down view, so you can see where you'll land.")]
-    [SerializeField, Range(0f, 89f)] float aimPitch = 45f;
+  
     [Tooltip("While you place the landing marker the camera slides toward it (by Aim Look At Marker), but never more than this (m), so the frog stays on screen.")]
     [SerializeField] float aimMaxSlide = 1.5f;
     [Tooltip("While charging, left / right orbits the camera and swings the landing marker round the frog with it. Off: the camera holds still and left / right slides the marker sideways.")]
@@ -157,7 +156,7 @@ public class FrogCamera : MonoBehaviour
         frogDriver = target.GetComponent<FrogNetworkDriver>();
         frogPreview = target.GetComponent<JumpPreview>();
         frogMotor = target.GetComponent<FrogMotor>();
-        frogRenderers = target.GetComponentsInChildren<Renderer>(true);
+        frogRenderers = System.Array.FindAll(target.GetComponentsInChildren<Renderer>(true), r => frogPreview == null || !frogPreview.IsPreviewRenderer(r)); // the jump arc and marker stay visible
         frogShadowModes = new ShadowCastingMode[frogRenderers.Length];
         for (int i = 0; i < frogRenderers.Length; i++)
             frogShadowModes[i] = frogRenderers[i].shadowCastingMode;
@@ -389,10 +388,7 @@ public class FrogCamera : MonoBehaviour
     Quaternion FollowRotation()
     {
         if (thirdPerson != null)
-        {
-            float aim = Mathf.SmoothStep(0f, 1f, zoomBlend); // tilt down toward Aim Pitch while charging a jump
-            return Quaternion.Euler(Mathf.Lerp(lookPitch, Mathf.Max(lookPitch, aimPitch), aim), lookYaw, 0f);
-        }
+            return Quaternion.Euler(lookPitch, lookYaw, 0f);
         Vector3 heading = Vector3.ProjectOnPlane(target.forward, Vector3.up);
         return heading.sqrMagnitude > 0.01f ? Quaternion.LookRotation(heading) : followPoint.rotation; // keep the last heading while it faces straight up or down a wall
     }
