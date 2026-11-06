@@ -48,6 +48,8 @@ public class FrogNetworkDriver : NetworkBehaviour
         get
         {
             float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
+            heightScale *= motor.LocalSlimeJumpMultiplier;
+
             // On a wall the frog lies flat against it, so its up is the wall's normal.
             Vector3 wall = motor.Mode.Value == FrogMode.Climbing ? transform.up : Vector3.zero;
             return motor.JumpVelocity(LocalCharge, LocalJumpTarget, heightScale, wall);
@@ -225,6 +227,8 @@ public class FrogNetworkDriver : NetworkBehaviour
             ? Quaternion.Euler(0f, viewYaw, 0f) * new Vector3(LocalMove.x, 0f, LocalMove.y)
             : transform.forward;
         float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
+        heightScale *= motor.LocalSlimeJumpMultiplier;
+
         float reach = motor.GroundJumpReach(LocalCharge, heightScale).y; // as far as this charge goes
         LocalJumpTarget = Vector3.ProjectOnPlane(direction, Vector3.up).normalized * reach;
     }
@@ -260,7 +264,12 @@ public class FrogNetworkDriver : NetworkBehaviour
         // The highest the frog's centre can get and still clear an edge: its highest jump
         // less Jump Clearance, or lower under a ceiling.
         float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
-        float reach = Mathf.Max(0.05f, motor.Tuning.maxJumpHeight * heightScale - motor.Tuning.jumpClearance);
+        heightScale *= motor.LocalSlimeJumpMultiplier;
+
+        float reach = Mathf.Max(
+            0.05f,
+            motor.Tuning.maxJumpHeight * heightScale - motor.Tuning.jumpClearance
+        );
         if (SphereCast(new Ray(transform.position, Vector3.up), radius, reach, out RaycastHit ceiling))
             reach = ceiling.distance;
         Vector3 top = transform.position + offset + Vector3.up * reach;
