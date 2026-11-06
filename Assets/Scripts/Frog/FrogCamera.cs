@@ -60,11 +60,11 @@ public class FrogCamera : MonoBehaviour
     [SerializeField] Vector2 pitchLimits = new Vector2(-30f, 70f);
     [Tooltip("How far the camera looks down when your frog spawns (degrees).")]
     [SerializeField] float startPitch = 15f;
-  
+    [Tooltip("While aiming a jump the camera tilts down to at least this (degrees), a view from above that follows the landing marker.")]
+    [SerializeField, Range(0f, 89f)] float aimPitch = 45f;
     [Tooltip("While you place the landing marker the camera slides toward it (by Aim Look At Marker), but never more than this (m), so the frog stays on screen.")]
     [SerializeField] float aimMaxSlide = 1.5f;
-    [Tooltip("While charging, left / right orbits the camera and swings the landing marker round the frog with it. Off: the camera holds still and left / right slides the marker sideways.")]
-    [SerializeField] bool orbitWhileAiming = true;
+   
 
     public float Yaw => transform.eulerAngles.y;
 
@@ -76,26 +76,35 @@ public class FrogCamera : MonoBehaviour
     // on screen.
     public bool AimingJump { get; set; }
 
-    // Set by our frog while it places a landing marker: the camera holds its place and looks
-    // at the marker, and mouse / stick look moves the marker (TakeJumpAimLook) instead.
+    // Set by our frog while it aims a jump with the landing marker: the camera goes overhead
+    // and follows the marker, and mouse / stick look steers the aim (JumpAimRay) instead of the
+    // camera. The aim starts where the crosshair points.
     public bool AimingMarker
     {
         get => aimingMarker;
         set
         {
-            if (!value)
-                jumpAimLook = Vector2.zero;
+            if (value && !aimingMarker)
+            {
+                Vector3 forward = transform.forward;
+                jumpAimYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+                jumpAimPitch = -Mathf.Asin(Mathf.Clamp(forward.y, -1f, 1f)) * Mathf.Rad2Deg;
+            }
             aimingMarker = value;
         }
     }
 
-    // Look gathered while AimingMarker is on (degrees, Settings sensitivity included).
-    // The frog takes it every frame.
-    public Vector2 TakeJumpAimLook()
+    // Aiming a jump: the ray the landing marker sits on. It starts at the frog's head (where the
+    // crosshair line passes over the frog) and points where the mouse steered it, so the camera
+    // can float overhead to follow the marker without moving the aim.
+    public Ray JumpAimRay
     {
-        Vector2 look = jumpAimLook;
-        jumpAimLook = Vector2.zero;
-        return look;
+        get
+        {
+            float head = thirdPerson != null ? shoulderOffset.y : composerOffset.y;
+            Vector3 from = target != null ? target.position + Vector3.up * head : transform.position;
+            return new Ray(from, Quaternion.Euler(jumpAimPitch, jumpAimYaw, 0f) * Vector3.forward);
+        }
     }
 
     // The crosshair ray. It starts level with the frog rather than at the lens, so
@@ -136,7 +145,7 @@ public class FrogCamera : MonoBehaviour
     Vector3 shoulderOffset;      // Third Person Follow's Shoulder Offset, as set in the Inspector
     float aimRoom = 1f, aimRoomVelocity; // how much room the camera has behind its pivot (1 = all of it), smoothed
     bool aimingMarker;
-    Vector2 jumpAimLook;
+    float jumpAimYaw, jumpAimPitch; // where the jump is aimed while AimingMarker (degrees, pitch + = down)
     float zoomBlend, markerBlend; // 0 = normal, 1 = fully into aiming
     Vector3 markerFocus, markerFocusVelocity; // where the camera looks while (and just after) aiming
     Vector3 lastTargetPosition;
@@ -254,16 +263,14 @@ public class FrogCamera : MonoBehaviour
             bool fromStick = lookAction.activeControl != null && lookAction.activeControl.device is Gamepad;
             look *= (fromStick ? stickSensitivity * dt : mouseSensitivity) * sensitivityScale;
 
-            if (AimingMarker && thirdPerson != null && orbitWhileAiming)
+            if (AimingMarker)
             {
-                // Third Person Follow: left / right orbits the camera, and the frog swings the
-                // landing marker round with it; up / down moves the marker nearer or further.
-                lookYaw = Mathf.Repeat(lookYaw + look.x, 360f);
-                jumpAimLook.y += look.y;
-            }
-            else if (AimingMarker)
-            {
-                jumpAimLook += look; // the frog moves its landing marker with it; the camera holds its place
+                // Aiming a jump: the mouse steers the aim (where the landing marker goes), not the
+                // camera. Third Person Follow turns with it, so the marker stays ahead of you.
+                jumpAimYaw = Mathf.Repeat(jumpAimYaw + look.x, 360f);
+                jumpAimPitch = Mathf.Clamp(jumpAimPitch + (invertY ? look.y : -look.y), -80f, 89f);
+                if (thirdPerson != null)
+                    lookYaw = jumpAimYaw;
             }
             else if (thirdPerson != null)
             {
@@ -388,7 +395,11 @@ public class FrogCamera : MonoBehaviour
     Quaternion FollowRotation()
     {
         if (thirdPerson != null)
-            return Quaternion.Euler(lookPitch, lookYaw, 0f);
+        {
+            // Aiming a jump: tilt down toward Aim Pitch, a view from above that follows the marker.
+            float overhead = Mathf.SmoothStep(0f, 1f, zoomBlend);
+            return Quaternion.Euler(Mathf.Lerp(lookPitch, Mathf.Max(lookPitch, aimPitch), overhead), lookYaw, 0f);
+        }
         Vector3 heading = Vector3.ProjectOnPlane(target.forward, Vector3.up);
         return heading.sqrMagnitude > 0.01f ? Quaternion.LookRotation(heading) : followPoint.rotation; // keep the last heading while it faces straight up or down a wall
     }
@@ -478,7 +489,7 @@ public class FrogCamera : MonoBehaviour
 
     void OnGUI()
     {
-        if (target != null && Cursor.lockState == CursorLockMode.Locked)
+        if (target != null && Cursor.lockState == CursorLockMode.Locked && !AimingMarker) // the landing marker is the cursor while aiming
             GUI.Label(new Rect(Screen.width * 0.5f - 4f, Screen.height * 0.5f - 10f, 20f, 20f), "+");
     }
 

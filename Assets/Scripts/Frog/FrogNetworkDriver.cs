@@ -3,6 +3,7 @@ using FishNet.Object.Synchronizing;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+
 // Collects the local player's input and hands it to the host.
 // Only the host simulates frogs. Every other machine only displays them.
 public class FrogNetworkDriver : NetworkBehaviour
@@ -184,8 +185,10 @@ public class FrogNetworkDriver : NetworkBehaviour
         FrogTuning tuning = motor.Tuning;
         if (tuning.aimJumpsWithMouse && frogCamera != null)
         {
-            if (LocalJumpHeld && supported)
-                AimAtCrosshair();
+            bool aiming = LocalJumpHeld && supported;
+            frogCamera.AimingMarker = aiming; // the camera goes overhead and follows the marker
+            if (aiming)
+                AimLandingMarker();
             else
                 HasMarker = MarkerOnWall = false;
             return;
@@ -204,19 +207,20 @@ public class FrogNetworkDriver : NetworkBehaviour
         heightScale *= motor.LocalSlimeJumpMultiplier;
 
         float reach = motor.GroundJumpReach(LocalCharge, heightScale).y; // as far as this charge goes
-        LocalJumpTarget = Vector3.ProjectOnPlane(direction, Vector3.up).normalized * reach;
+LocalJumpTarget = Vector3.ProjectOnPlane(direction, Vector3.up).normalized * reach;
     }
 
-    // The landing marker goes on whatever surface the crosshair points at (a floor, a box top, a
-    // slope, a wall), if a jump can reach it. A wall, or a side too steep to stand on, is
-    // somewhere to cling: the frog lands on it and sticks there (MarkerOnWall). Out of reach (too
-    // far, too high, a ceiling, the sky): as far as a jump goes toward it, set down on whatever
-    // is there, stepping back toward the frog until it fits.
-    void AimAtCrosshair()
-    {
-        FrogTuning tuning = motor.Tuning;
-        Ray aim = frogCamera.AimRay;
-        Vector3 aimed = aim.origin + aim.direction * tuning.maxJumpDistance; // the sky: just that way
+    // The landing marker goes on whatever surface the jump aim points at (a floor, a box top, a
+    // slope, a wall), if a jump can reach it. The aim starts where the crosshair pointed when the
+    // charge began, then the mouse steers it while the camera floats overhead (FrogCamera.JumpAimRay).
+    // A wall, or a side too steep to stand on, is somewhere to cling: the frog lands on it and
+    // sticks there (MarkerOnWall). Out of reach (too far, too high, a ceiling, the sky): as far as
+    // a jump goes toward it, set down on whatever is there, stepping back toward the frog until it fits.
+    void AimLandingMarker()
+{
+    FrogTuning tuning = motor.Tuning;
+    Ray aim = frogCamera.JumpAimRay;
+    Vector3 aimed = aim.origin + aim.direction * tuning.maxJumpDistance; // the sky: just that way
         if (Cast(aim, MaxAimDistance, out RaycastHit hit))
         {
             aimed = hit.point;
