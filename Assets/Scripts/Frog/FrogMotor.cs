@@ -47,6 +47,32 @@ public class FrogMotor : NetworkBehaviour
     public readonly SyncVar<HopSync> Hop = new(new SyncTypeSettings(0.001f));
 
     public FrogTuning Tuning => tuning;
+    
+    public float SlimeJumpMultiplier =>
+    Mode.Value == FrogMode.Grounded && currentSlime != null
+        ? currentSlime.jumpMultiplier
+        : 1f;
+
+    public float LocalSlimeJumpMultiplier
+    {
+        get
+        {
+            if (Mode.Value != FrogMode.Grounded)
+                return 1f;
+
+            if (ProbeGround(out RaycastHit hit))
+            {
+                PetriDishSlime slime =
+                    hit.collider.GetComponentInParent<PetriDishSlime>();
+
+                if (slime != null)
+                    return slime.jumpMultiplier;
+            }
+
+            return 1f;
+        }
+    }
+
     public Rigidbody Body => rb;
     public float Radius => sphere.radius;
     public Vector3 GroundNormal { get; private set; } = Vector3.up;
