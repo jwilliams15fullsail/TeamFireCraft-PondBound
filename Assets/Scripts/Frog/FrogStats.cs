@@ -101,6 +101,7 @@ public class FrogStats : NetworkBehaviour
            if (health <= 0f)
            {
                health = 0f;
+            TestObserver.instance.isPlayerDead = true;      // Added for respawn countdown timer
             motor.Die(); // stays dead until the death screen's countdown ends (see Revive)
         }
         Publish();

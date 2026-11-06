@@ -51,6 +51,17 @@ public class DeathScreen : MonoBehaviour
 
         bool dead = stats != null && stats.IsSpawned && motor.IsDead;
         deadTime = dead ? deadTime + Time.deltaTime : 0f;
+
+        // --- ADDED TO BLOCK DEATH SCREEN UNTIL PLAYER WISHES TO RESPAWN ---
+        if (TestObserver.instance != null && TestObserver.instance.isPlayerDead && !TestObserver.instance.canRespawn)
+        {
+            panel.gameObject.SetActive(false);
+            deadTime = 0f; // Reset its internal timers so it doesn't build up time
+            respawnRequested = false;
+            return;
+        }
+        // ------------------------------------------------------------------
+
         bool show = dead && deadTime >= showDelay;
 
         if (panel.gameObject.activeSelf != show)
@@ -68,7 +79,7 @@ public class DeathScreen : MonoBehaviour
         float shownFor = deadTime - showDelay;
         panel.alpha = Mathf.Clamp01(shownFor / fadeTime);
         number.sprite = digits[Mathf.Max(0, countFrom - (int)shownFor)];
-        if (shownFor >= countFrom + 1 && !respawnRequested)
+        if (shownFor >= countFrom + 1 && !respawnRequested && TestObserver.instance.canRespawn)
         {
             respawnRequested = true;
             driver.RequestRespawn(); // the panel closes when the frog is alive again

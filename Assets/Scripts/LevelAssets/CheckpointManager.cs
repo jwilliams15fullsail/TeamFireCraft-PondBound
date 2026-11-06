@@ -23,7 +23,7 @@ public class CheckpointManager : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // Only run checkpoint logic on the Server/Host to prevent cheating/desync
-        if (!IsServerStarted) return;
+        if (!IsServerInitialized) return;
 
         // Verify the object has a NetworkObject attached
         NetworkObject playerNetworkObject = other.GetComponentInParent<NetworkObject>();
@@ -51,7 +51,7 @@ public class CheckpointManager : NetworkBehaviour
     //public void DeactivateCheckpoint()
     //{
     //    // Ensure only the server can dictate deactivation state
-    //    if (!IsServerStarted) return;
+    //    if (!IsServerInitialized) return;
 
     //    isActivated = false;
     //    if (flagRenderer != null)
@@ -62,7 +62,7 @@ public class CheckpointManager : NetworkBehaviour
 
     public void DeactivateForPlayer(GameObject player)
     {
-        if (!IsServerStarted) return;
+        if (!IsServerInitialized) return;
 
         NetworkObject playerNetworkObject = player.GetComponent<NetworkObject>();
         if (playerNetworkObject != null)
