@@ -8,9 +8,15 @@ public class PetriDishSlime : MonoBehaviour
 
     [Tooltip("Multiplier for ground acceleration. Lower means slower acceleration.")]
     [Range(0.05f, 1f)]
-    public float accelerationMultiplier = 0.35f;
+    public float accelerationMultiplier = 0.05f;
 
-    [Tooltip("Multiplier for ground braking. Lower means more sliding.")]
-    [Range(0.01f, 1f)]
-    public float brakingMultiplier = 0.08f;
+    [Tooltip("Multiplier for ground braking. Higher values make the frog stop faster.")]
+    [Range(1f, 10f)]
+    public float brakingMultiplier = 10f;
+
+    [Header("Slime Jumping")]
+
+    [Tooltip("Multiplier for jump height and reach while standing on slime. Lower values make jumping harder.")]
+    [Range(0.1f, 1f)]
+    public float jumpMultiplier = 0.5f;
 }
