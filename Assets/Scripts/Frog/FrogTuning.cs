@@ -113,10 +113,9 @@ public class FrogTuning : ScriptableObject
     public float minJumpDistance = 0.5f;
     [Tooltip("Without mouse aiming: how far (m) a jump reaches with a full charge. With mouse aiming: how far from the frog the landing marker can go.")]
     public float maxJumpDistance = 2.5f;
-    [Tooltip("On: while charging, the mouse moves a landing marker freely (left / right sideways, up / down further or closer) and the camera looks at it. The jump always comes down on the marker; the charge only sets how high the arc goes. Off: jumps go the way the frog faces, as far as the charge allows.")]
+    [Tooltip("On: while charging, the landing marker goes wherever the crosshair points (a floor, a box top, a slope, a wall), as far as a jump can reach. The jump always comes down on the marker, and clings to it on a wall; the charge only sets how high the arc goes. Off: jumps go the way the frog faces, as far as the charge allows.")]
     public bool aimJumpsWithMouse = true;
-    [Tooltip("How far (m) the landing marker moves per degree of mouse movement.")]
-    public float jumpAimPerDegree = 0.05f;
+   
     [Tooltip("A jump always peaks at least this high (m) above where it lands, so it clears the edge of a higher landing spot.")]
     public float jumpClearance = 0.25f;
     [Tooltip("Charged jumps fly exactly along the previewed arc: no steering in the air. Off: WASD can steer and slow a jump.")]
