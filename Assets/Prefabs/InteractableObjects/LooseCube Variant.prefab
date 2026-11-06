@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4624395180905740361}
   - component: {fileID: 8002835771049181895}
   - component: {fileID: 585039685925811012}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -232,6 +232,10 @@ PrefabInstance:
     - target: {fileID: 451817733080526715, guid: c56eb0ea47930094995618ac1f5c17f6, type: 3}
       propertyPath: m_Name
       value: LooseCube Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 451817733080526715, guid: c56eb0ea47930094995618ac1f5c17f6, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3715021374008166870, guid: c56eb0ea47930094995618ac1f5c17f6, type: 3}
       propertyPath: SceneId

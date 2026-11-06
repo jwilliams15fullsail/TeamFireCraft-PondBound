@@ -66,6 +66,7 @@ public class FrogNetworkDriver : NetworkBehaviour
     readonly Collider[] aimOverlaps = new Collider[8];
     Vector3 markerOffset; // flat offset from the frog to the landing marker (metres)
     bool wasAimingMarker;
+    float lastAimYaw;     // the camera's AimYaw last frame, to turn the marker with it
 
     void Awake()
     {
@@ -196,11 +197,19 @@ public class FrogNetworkDriver : NetworkBehaviour
                 for (int i = 10; i >= 0; i--)
                     if (MoveMarker(start * (i / 10f)))
                         break;
+                lastAimYaw = frogCamera.AimYaw;
             }
             wasAimingMarker = aiming;
             if (aiming)
             {
-                // Sideways / forward as seen from the camera, which holds still while aiming.
+                // The camera orbited while aiming (Third Person Follow): swing the marker round
+                // the frog by the same angle, so it stays where it was on screen.
+                float turned = Mathf.DeltaAngle(lastAimYaw, frogCamera.AimYaw);
+                lastAimYaw = frogCamera.AimYaw;
+                if (Mathf.Abs(turned) > 0.001f)
+                    MoveMarker(Quaternion.Euler(0f, turned, 0f) * markerOffset - markerOffset);
+
+                // Sideways / forward as seen from the camera.
                 // Blocked: try just the east / west part of the move, then just north / south,
                 // so it slides along walls instead of sticking to them.
                 Vector2 look = frogCamera.TakeJumpAimLook();
