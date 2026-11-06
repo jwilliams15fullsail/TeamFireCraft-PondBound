@@ -100,6 +100,9 @@ public class FrogMotor : NetworkBehaviour
     float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
     Vector3 releaseVelocity; // the launch the owner worked out when letting go of jump
     bool followingArc;      // a charged jump in flight: no air steering, so it follows its preview
+    Vector3 releaseWallNormal; // the jump being let go of was aimed at this wall (zero: it wasn't)
+    Vector3 aimedWallNormal;   // a jump aimed at a wall is in flight: cling to that wall on arrival
+    Vector3 releaseWallTarget, aimedWallTarget; // where the frog's centre comes to rest on that wall
 
     bool hopping;                           // host only: the hop being simulated
     float hopPhase, hopDuration, hopStride;
@@ -240,14 +243,17 @@ public class FrogMotor : NetworkBehaviour
         jumpPressQueued = true;
     }
 
-    // target: where the player put the landing marker (world x/z offset from the frog, metres).
     // velocity: the launch the owner worked out from what its preview showed (its charge,
-    // crosshair and wall), so the frog flies exactly the arc that player saw.
-    public void ReleaseJump(Vector3 velocity)
+    // crosshair and wall), so the frog flies exactly the arc that player saw. wallNormal: the
+    // landing marker was on this wall (zero when it wasn't), so the frog clings to it on arrival,
+    // with its centre at wallTarget.
+    public void ReleaseJump(Vector3 velocity, Vector3 wallNormal, Vector3 wallTarget)
     {
         jumpHeld = false;
         jumpReleaseQueued = true;
         releaseVelocity = Vector3.ClampMagnitude(velocity, MaxJumpSpeed());
+        releaseWallNormal = wallNormal.sqrMagnitude > 0.5f ? wallNormal.normalized : Vector3.zero;
+        releaseWallTarget = wallTarget;
     }
     public void PressStick() => stickQueued = true;
 
@@ -313,9 +319,13 @@ public class FrogMotor : NetworkBehaviour
     {
         if (Mode.Value == FrogMode.Grounded)
             autoClimbBlocked = false;
-        if (!tuning.autoClimb || autoClimbBlocked || Mode.Value != FrogMode.Airborne)
+        if (Mode.Value != FrogMode.Airborne)
+            aimedWallNormal = Vector3.zero; // landed, clinging or dead: the aimed jump is over
+        if (autoClimbBlocked || Mode.Value != FrogMode.Airborne)
             return;
-        if (climb.TryAutoAttach(input))
+        // A jump aimed at a wall clings to it even with Auto Climb off.
+        bool aimed = aimedWallNormal.sqrMagnitude > 0.5f;
+        if ((tuning.autoClimb || aimed) && climb.TryAutoAttach(input, aimedWallNormal, aimedWallTarget))
             StartClimbing();
     }
 
@@ -451,6 +461,8 @@ public class FrogMotor : NetworkBehaviour
 
         airSpeedLimit = FlatSpeed();
         followingArc = tuning.followJumpArc;
+        aimedWallNormal = releaseWallNormal;
+        aimedWallTarget = releaseWallTarget;
         Mode.Value = FrogMode.Airborne;
         ignoreGroundUntil = Time.time + 0.15f;
         support = null;
@@ -672,6 +684,7 @@ public class FrogMotor : NetworkBehaviour
         Mode.Value = FrogMode.Airborne;
         airSpeedLimit = 0f;
         followingArc = false;
+        aimedWallNormal = Vector3.zero;
         jumpPressQueued = jumpReleaseQueued = stickQueued = false; // anything pressed while dead
         rb.linearVelocity = Vector3.zero;
         rb.position = spawnPosition;
