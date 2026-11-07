@@ -9,36 +9,57 @@ public class ObjectiveMarkers : MonoBehaviour
     public TMP_Text meter;
     public Vector3 offset;
 
+    [Tooltip("Subtract this amount from the camera-to-objective distance.")]
+    public float distanceAdjustment = 3f;
+
+    Camera mainCamera;
+
+    void Awake()
+    {
+        mainCamera = Camera.main;
+    }
+
     void Update()
     {
         Transform targetObject = sequence != null ? sequence.CurrentTarget : null;
 
         if (targetObject == null)
         {
-            markerImage.gameObject.SetActive(false);
+            if (markerImage != null)
+                markerImage.gameObject.SetActive(false);
+
             if (meter != null)
                 meter.text = "";
+
             return;
         }
 
-        markerImage.gameObject.SetActive(true);
+        if (markerImage != null)
+            markerImage.gameObject.SetActive(true);
 
-        float minX = markerImage.GetPixelAdjustedRect().width / 2;
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null)
+                return;
+        }
+
+        float minX = markerImage.GetPixelAdjustedRect().width / 2f;
         float maxX = Screen.width - minX;
-        float minY = markerImage.GetPixelAdjustedRect().height / 2;
+        float minY = markerImage.GetPixelAdjustedRect().height / 2f;
         float maxY = Screen.height - minY;
 
-        Vector3 screenPosition =
-            Camera.main.WorldToScreenPoint(targetObject.position + offset);
+        Vector3 targetPosition = targetObject.position + offset;
+        Vector3 screenPosition = mainCamera.WorldToScreenPoint(targetPosition);
 
         if (Vector3.Dot(
-                targetObject.position - transform.position,
-                transform.forward) < 0)
+                targetPosition - mainCamera.transform.position,
+                mainCamera.transform.forward) < 0)
         {
-            if (screenPosition.x < Screen.width / 2)
-                screenPosition.x = maxX;
-            else
-                screenPosition.x = minX;
+            // Target is behind the camera.
+            screenPosition.x = screenPosition.x < Screen.width / 2f
+                ? maxX
+                : minX;
         }
 
         screenPosition.x = Mathf.Clamp(screenPosition.x, minX, maxX);
@@ -48,9 +69,14 @@ public class ObjectiveMarkers : MonoBehaviour
 
         if (meter != null)
         {
-            int distance = (int)Vector3.Distance(
-                targetObject.position, transform.position);
-            meter.text = distance + "m";
+            float actualDistance = Vector3.Distance(
+                targetPosition, mainCamera.transform.position);
+
+            int displayedDistance = Mathf.Max(
+                0,
+                Mathf.RoundToInt(actualDistance - distanceAdjustment));
+
+            meter.text = displayedDistance + "m";
         }
     }
 }

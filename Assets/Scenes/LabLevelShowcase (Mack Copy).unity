@@ -966,7 +966,8 @@ MonoBehaviour:
   markerImage: {fileID: 2101620348}
   sequence: {fileID: 1453650690}
   meter: {fileID: 1348392975}
-  offset: {x: 0, y: 0, z: 0}
+  offset: {x: 0, y: 0.5, z: 0}
+  distanceAdjustment: 3
 --- !u!1001 &48203112
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14615,6 +14616,10 @@ PrefabInstance:
       propertyPath: pressOnce
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3118465869620575116, guid: 5001b201b2d89e54db97f86f5b8d8ea0, type: 3}
+      propertyPath: completesObjective
+      value: 
+      objectReference: {fileID: 1453650690}
     - target: {fileID: 6056884631637818758, guid: 5001b201b2d89e54db97f86f5b8d8ea0, type: 3}
       propertyPath: SceneId
       value: 1807711474
@@ -18332,6 +18337,10 @@ PrefabInstance:
       propertyPath: pressOnce
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3118465869620575116, guid: 5001b201b2d89e54db97f86f5b8d8ea0, type: 3}
+      propertyPath: completesObjective
+      value: 
+      objectReference: {fileID: 1453650690}
     - target: {fileID: 6056884631637818758, guid: 5001b201b2d89e54db97f86f5b8d8ea0, type: 3}
       propertyPath: SceneId
       value: 725032810
@@ -21480,7 +21489,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 66.1}
+  m_AnchoredPosition: {x: 0, y: 54}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1348392975
@@ -34003,7 +34012,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2101620348
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34049,7 +34058,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2101620347}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -34060,7 +34069,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 80, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &2104478260
 PrefabInstance:
@@ -35196,6 +35205,10 @@ PrefabInstance:
       propertyPath: lockedMaterial
       value: 
       objectReference: {fileID: 2100000, guid: 2a71e17c487def34fbe0c501eb326eec, type: 2}
+    - target: {fileID: 3118465869620575116, guid: 5001b201b2d89e54db97f86f5b8d8ea0, type: 3}
+      propertyPath: completesObjective
+      value: 
+      objectReference: {fileID: 1453650690}
     - target: {fileID: 3863237212765365910, guid: 5001b201b2d89e54db97f86f5b8d8ea0, type: 3}
       propertyPath: m_LODs.Array.data[0].renderers.Array.data[1].renderer
       value: 
