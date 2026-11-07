@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Multiplayer;
 using UnityEngine;
+using UnityEngine.UI;
 
 // The main menu's play buttons: Offline, plus the Multiplayer panel's Quick Match, Host,
 // Join by code and the Browse list. Button OnClick events call the public methods.
@@ -11,6 +12,8 @@ public class PlayMenu : MonoBehaviour
 {
     [Tooltip("The level to load: drag its scene file here. It must be in the Build Profiles scene list and must not contain its own NetworkManager.")]
     [SerializeField] SceneField gameScene;
+    [Tooltip("Optional: the Continue button, so it's greyed out while there's no saved game.")]
+    [SerializeField] Button continueButton;
 
     [Header("Multiplayer panel")]
     [SerializeField] CanvasGroup multiplayerPanel;  // greyed out while a request is running
@@ -30,6 +33,8 @@ public class PlayMenu : MonoBehaviour
 
         SetStatus(GameSession.LastMessage ?? "");
         GameSession.LastMessage = null;
+        if (continueButton != null)
+            continueButton.interactable = SaveSystem.HasSave; // greyed out until there's a save
     }
 
     public void PlayOffline()
@@ -38,6 +43,25 @@ public class PlayMenu : MonoBehaviour
             return;
         if (!GameSession.StartOffline(gameScene.SceneName))
             SetStatus("Couldn't start the offline game.");
+    }
+
+    // The Continue button: back to the level and checkpoint of the last save, offline.
+    public void ContinueOffline()
+    {
+        if (busy)
+            return;
+        SaveData save = SaveSystem.Load();
+        if (save == null)
+        {
+            SetStatus("No saved game yet.");
+            return;
+        }
+        SaveSystem.Continuing = save; // the level's PlayerSpawner picks it up
+        if (!GameSession.StartOffline(save.sceneName))
+        {
+            SaveSystem.Continuing = null;
+            SetStatus("Couldn't start the offline game.");
+        }
     }
 
     public async void QuickMatch()

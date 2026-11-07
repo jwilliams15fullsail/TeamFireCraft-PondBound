@@ -96,6 +96,7 @@ public class FrogMotor : NetworkBehaviour
     Rigidbody support;
     PetriDishSlime currentSlime;
     Vector3 spawnPosition;
+    Quaternion spawnRotation = Quaternion.identity;
     bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
     float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
     Vector3 releaseVelocity; // the launch the owner worked out when letting go of jump
@@ -122,6 +123,7 @@ public class FrogMotor : NetworkBehaviour
     {
         base.OnStartServer();
         spawnPosition = transform.position;
+        spawnRotation = transform.rotation;
     }
     // Charge (0..1) after holding jump this many seconds. With Charge Ping Pong it swings up
     // to full and back down again while held, so the player picks the moment to let go.
@@ -674,6 +676,13 @@ public class FrogMotor : NetworkBehaviour
             rb.AddForce(Vector3.ClampMagnitude(-planar, tuning.groundBraking * dt), ForceMode.VelocityChange);
            rb.AddForce(-Vector3.ProjectOnPlane(Physics.gravity, hit.normal), ForceMode.Acceleration);
        }
+    // Host only: where this frog comes back after dying or falling off (Respawn). It starts
+    // where the frog first appeared; reaching a checkpoint moves it (PlayerSpawner).
+    public void SetSpawnPoint(Pose point)
+    {
+        spawnPosition = point.position;
+        spawnRotation = point.rotation;
+    }
 
     public void Respawn()
     {
@@ -688,8 +697,8 @@ public class FrogMotor : NetworkBehaviour
         jumpPressQueued = jumpReleaseQueued = stickQueued = false; // anything pressed while dead
         rb.linearVelocity = Vector3.zero;
         rb.position = spawnPosition;
-        rb.rotation = Quaternion.identity;
-        transform.SetPositionAndRotation(spawnPosition, Quaternion.identity);
+        rb.rotation = spawnRotation;
+        transform.SetPositionAndRotation(spawnPosition, spawnRotation);
         // Tell the NetworkTransform this move is a teleport, so clients don't watch the frog fly back.
         networkTransform.Teleport();
     }
