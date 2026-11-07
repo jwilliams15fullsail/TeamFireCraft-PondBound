@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class ObjectiveMarkers : MonoBehaviour
 {
     public Image markerImage;
     public ObjectiveSequence sequence;
-    public Text meter;
+    public TMP_Text meter;
     public Vector3 offset;
 
     void Update()
