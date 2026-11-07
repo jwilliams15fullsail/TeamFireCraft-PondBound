@@ -12,7 +12,7 @@ public class FrogClimb : NetworkBehaviour
     public readonly SyncVar<float> GripStrain = new();
 
     public Vector3 SurfaceNormal { get; private set; } = Vector3.up;
-    public bool IsAttached => surface != null;
+    public bool IsAttached { get; private set; }
 
     FrogMotor motor;
     Rigidbody rb;
@@ -61,19 +61,26 @@ public class FrogClimb : NetworkBehaviour
         Grab(best);
         return true;
     }
-
     // In the air: grab a climbable wall the frog is flying into, without pressing Stick.
     // Looks the way the frog is flying and the way the stick points, further when it's fast.
-    public bool TryAutoAttach(FrogInputState input)
+    // aimedWallNormal: the jump was aimed at this wall with the landing marker (zero when it
+    // wasn't), to come to rest with its centre at aimedWallTarget. Then it clings as soon as it
+    // touches the wall on the way down at the marker's height, however slowly it arrives, and
+    // stops dead there so it stays on the marker.
+    public bool TryAutoAttach(FrogInputState input, Vector3 aimedWallNormal, Vector3 aimedWallTarget)
     {
         FrogTuning t = motor.Tuning;
-        if (Time.time < cooldownUntil || Time.time < detachedAt + t.autoClimbCooldown)
+        bool aimed = aimedWallNormal.sqrMagnitude > 0.5f;
+        if (!aimed && (Time.time < cooldownUntil || Time.time < detachedAt + t.autoClimbCooldown))
             return false;
 
         Vector3 velocity = rb.linearVelocity;
+        if (aimed && (velocity.y > 0.5f || rb.position.y > aimedWallTarget.y + 0.1f))
+            return false; // not down to the marker yet: the arc comes down onto it
+
         Vector3 flying = Vector3.ProjectOnPlane(velocity, Vector3.up);
-        float reach = t.autoClimbReach + flying.magnitude * Time.fixedDeltaTime;
-        Vector3[] directions = { flying, input.WorldMove };
+        float reach = (aimed ? 0.05f : t.autoClimbReach) + flying.magnitude * Time.fixedDeltaTime;
+        Vector3[] directions = { aimed ? -aimedWallNormal : flying, flying, input.WorldMove };
         foreach (Vector3 dir in directions)
         {
             if (dir.sqrMagnitude < 0.01f)
@@ -83,14 +90,15 @@ public class FrogClimb : NetworkBehaviour
 
             float approach = Vector3.Dot(velocity, -hit.normal);     // speed into the wall
             float push = Vector3.Dot(input.WorldMove, -hit.normal);  // stick toward the wall
-            bool flyingIn = approach > t.autoClimbMinApproach;
+            bool flyingIn = aimed ? approach > -0.1f : approach > t.autoClimbMinApproach;
             bool pushingIn = push > 0.5f && approach > -0.5f;         // not while flying away (wall jumps)
             if (!flyingIn && !pushingIn)
                 continue;
 
             Grab(hit);
-            // Keep the slide along the wall, lose the part that slams into it.
-            rb.linearVelocity = velocity + hit.normal * Mathf.Max(0f, approach);
+            // Keep the slide along the wall, lose the part that slams into it. A jump aimed at
+            // the wall stops dead instead, so the frog stays on the marker.
+            rb.linearVelocity = aimed ? Vector3.zero : velocity + hit.normal * Mathf.Max(0f, approach);
             return true;
         }
         return false;
@@ -101,6 +109,7 @@ public class FrogClimb : NetworkBehaviour
         surface = hit.collider.GetComponentInParent<ClimbableSurface>();
         surfaceBody = hit.rigidbody;
         SurfaceNormal = hit.normal;
+        IsAttached = true;
         rb.useGravity = false; // the pads carry our weight now (see Simulate)
         overloadTime = 0f;
         externalForce = Vector3.zero;
@@ -112,6 +121,7 @@ public class FrogClimb : NetworkBehaviour
     {
         surface = null;
         surfaceBody = null;
+        IsAttached = false;
         rb.useGravity = true;
         cooldownUntil = Time.time + motor.Tuning.reattachCooldown;
     detachedAt = Time.time;
@@ -164,7 +174,7 @@ public class FrogClimb : NetworkBehaviour
         SurfaceNormal = n = Vector3.Slerp(n, hit.normal, 0.5f).normalized; // smooth small bumps
 
         // Pads: keep a small gap from the surface and move along it, limited by grip strength.
-        float gripForce = t.gripStrength * surface.gripMultiplier;
+        float gripForce = t.gripStrength * (surface != null ? surface.gripMultiplier : 1f); // unmarked walls: normal grip
         float centreToSurface = hit.distance + motor.Radius * 0.8f;
         float gapError = centreToSurface - (motor.Radius + 0.02f);
         Vector3 supportVelocity = surfaceBody != null ? surfaceBody.GetPointVelocity(rb.position) : Vector3.zero;
@@ -234,18 +244,23 @@ public class FrogClimb : NetworkBehaviour
 
     // attaching = true: pressing Stick only grabs walls and steep slopes (not floors).
     // attaching = false: once stuck, any climbable face counts, including flat tops.
+    // Any face too steep to stand on is climbable. Flatter ones (tops, gentle slopes) only
+    // when they have a ClimbableSurface.
     bool CastForSurface(Vector3 direction, float reach, bool attaching, out RaycastHit hit)
     {
         float castRadius = motor.Radius * 0.8f;
         float distance = (motor.Radius - castRadius) + reach;
         if (!Physics.SphereCast(rb.position, castRadius, direction, out hit, distance, surfaceMask, QueryTriggerInteraction.Ignore))
             return false;
-        if (hit.rigidbody == rb || hit.collider.GetComponentInParent<ClimbableSurface>() == null)
+        if (hit.rigidbody == rb)
             return false;
 
         float upDot = Vector3.Dot(hit.normal, Vector3.up);
         if (upDot < motor.Tuning.minWallUpDot)
             return false; // ceilings come later
+        bool tooSteepToStand = Vector3.Angle(hit.normal, Vector3.up) > motor.Tuning.maxSlopeAngle;
+        if (!tooSteepToStand && hit.collider.GetComponentInParent<ClimbableSurface>() == null)
+            return false;
         return !attaching || upDot <= motor.Tuning.maxWallUpDot;
     }
 }

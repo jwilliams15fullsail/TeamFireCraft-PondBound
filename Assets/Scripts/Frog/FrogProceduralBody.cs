@@ -50,6 +50,8 @@ public class FrogProceduralBody : MonoBehaviour
     float pitch, roll;
     bool sprintHopSoundPlayed;
     bool wasCharging;
+    double lastAudioHopStartTime = double.NaN;
+    float lastSprintHopSoundTime = -10f;
 
     void Awake()
     {
@@ -84,30 +86,40 @@ public class FrogProceduralBody : MonoBehaviour
 
         if (wasCharging && !charging && mode == FrogMode.Airborne)
         {
-            if (frogAudio != null)
+            // Only play charged-jump audio if no sprint hop is active
+            // or has just been synchronized.
+            bool sprintHopActive = motor.TryGetHopPhase(out _);
+
+            double timeSinceSprintHop = motor.NetworkTime - motor.Hop.Value.StartTime;
+
+            if (!sprintHopActive &&
+    timeSinceSprintHop > 0.15 &&
+    Time.time - lastSprintHopSoundTime > 0.3f &&
+    frogAudio != null)
+            {
                 frogAudio.PlayHop();
+            }
         }
 
         wasCharging = charging;
 
-        if (motor.TryGetHopPhase(out float sprintHopPhase))
+        if (mode == FrogMode.Grounded &&
+    !charging &&
+    motor.TryGetHopPhase(out float sprintHopPhase))
         {
-            // Play once when a sprint hop reaches its landing phase.
-            if (sprintHopPhase >= 0.9f && !sprintHopSoundPlayed)
-            {
-                if (frogAudio != null)
-                    frogAudio.PlayHop();
+            HopSync currentHop = motor.Hop.Value;
 
-                sprintHopSoundPlayed = true;
-            }
-            else if (sprintHopPhase < 0.5f)
+            if (currentHop.Duration > 0f &&
+                currentHop.StartTime != lastAudioHopStartTime)
             {
-                sprintHopSoundPlayed = false;
+                lastAudioHopStartTime = currentHop.StartTime;
+
+                if (frogAudio != null)
+                {
+                    lastSprintHopSoundTime = Time.time;
+                    frogAudio.PlayHop();
+                }
             }
-        }
-        else
-        {
-            sprintHopSoundPlayed = false;
         }
 
         bool supported = mode == FrogMode.Grounded || mode == FrogMode.Climbing;
@@ -124,7 +136,7 @@ public class FrogProceduralBody : MonoBehaviour
                 squashSpeed -= Mathf.Max(0f, -Vector3.Dot(previousVelocity, up)) * landingKickPerSpeed;
 
                 // Play landing feedback when the frog returns to a supported surface.
-                if (frogAudio != null)
+                 if (frogAudio != null)
                     frogAudio.PlayLanding();
             }
 

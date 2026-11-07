@@ -18,6 +18,9 @@ public class PressurePlate : MonoBehaviour
     [Tooltip("Let frogs standing on the plate add their own mass too.")]
     public bool frogsCount;
 
+    [Tooltip("Optional: objective to complete when the plate becomes pressed.")]
+    public ObjectiveSequence completesObjective;
+
     readonly Dictionary<Rigidbody, int> bodies = new(); // body -> its colliders inside
     readonly List<Rigidbody> gone = new();
     bool pressed;
@@ -83,5 +86,8 @@ public class PressurePlate : MonoBehaviour
             door.HoldOpen(this, pressed);
         if (hazards != null)
             hazards.HoldOff(this, pressed);
+
+        if (pressed && completesObjective != null)
+            completesObjective.CompleteCurrentObjective();
     }
 }

@@ -217,8 +217,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ac3a539535c6ec4386df20a085f0c64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PetriDishSlime
-  accelerationMultiplier: 0.35
-  brakingMultiplier: 0.08
+  accelerationMultiplier: 0.05
+  brakingMultiplier: 10
+  jumpMultiplier: 0.5
 --- !u!64 &5189674163036305178
 MeshCollider:
   m_ObjectHideFlags: 0
