@@ -423,6 +423,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Settings
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -485,7 +489,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 152.79999
+      value: 152
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -506,6 +510,14 @@ PrefabInstance:
     - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_text
       value: Settings
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -865,16 +877,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 157158899}
-  m_LocalRotation: {x: -0, y: -0, z: -0.061615106, w: 0.9981}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 436819664}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -7.065}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 403, y: -280}
+  m_AnchoredPosition: {x: 391, y: -280}
   m_SizeDelta: {x: 700, y: 700}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &157158901
@@ -897,7 +909,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3807722896295604221, guid: aaf81763ce60f4448a9619d6c8657692, type: 3}
+  m_Sprite: {fileID: 3036479250193613542, guid: 15ddc1c8edcfa7f4eaded6fee54f5dbe, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1573,6 +1585,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Play Offline
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1635,7 +1651,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 586
+      value: 407
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1660,6 +1676,14 @@ PrefabInstance:
         Offline
 
 '
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -1961,6 +1985,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1330639300}
   - {fileID: 1190728345}
   - {fileID: 409394721}
   - {fileID: 83025478}
@@ -1994,7 +2019,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2593915035899653338, guid: 6692f81e2818f704191fec219ac27ed6, type: 3}
+  m_Sprite: {fileID: 1074532627610777759, guid: 6930ef5c44f88964496ef768c5c915d6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6218,6 +6243,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Credits
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -6280,7 +6309,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 429
+      value: 407
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -6301,6 +6330,14 @@ PrefabInstance:
     - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_text
       value: Credits
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -6390,6 +6427,124 @@ PrefabInstance:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
   m_PrefabInstance: {fileID: 1310126042}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1330639299
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 436819664}
+    m_Modifications:
+    - target: {fileID: 294243279945329143, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Name
+      value: Lily Pad Button- Tutorial
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 230
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 230
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -304
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -132
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_text
+      value: Tutorial
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+--- !u!224 &1330639300 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+  m_PrefabInstance: {fileID: 1330639299}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1361775739
 PrefabInstance:
@@ -7203,6 +7358,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Exit Game
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -7265,7 +7424,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 706.2
+      value: 655
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -7288,6 +7447,14 @@ PrefabInstance:
       value: 'Exit
 
         Game'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 36
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 36
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -9614,6 +9781,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Play Online
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -9676,7 +9847,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 291
+      value: 152
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -9697,6 +9868,14 @@ PrefabInstance:
     - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_text
       value: "Play \nOnline"
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
