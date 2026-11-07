@@ -23,6 +23,9 @@ public class WallButton : NetworkBehaviour
     [SerializeField] Material lockedMaterial;
     //public float resetDelay; //optional for automatic reset
 
+    //For Objective Marker (line below)
+    public ObjectiveSequence completesObjective;
+
     readonly SyncVar<bool> isActive = new();
     readonly SyncVar<bool> isUnlocked = new();
 
@@ -43,6 +46,11 @@ public class WallButton : NetworkBehaviour
         if (IsLocked || (pressOnce && isActive.Value))
             return;
         isActive.Value = !isActive.Value;
+        //================================================
+        //For Objective Marker
+        if (completesObjective != null)
+            completesObjective.CompleteCurrentObjective();
+        //================================================
         if (door != null)
             door.HoldOpen(this, isActive.Value);
         if (hazards != null)
