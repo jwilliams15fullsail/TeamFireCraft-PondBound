@@ -7,7 +7,6 @@ public class CheckpointManager : NetworkBehaviour
     // Pass BOTH the checkpoint AND the GameObject of the specific player who touched it
     public static event Action<CheckpointManager, GameObject> OnCheckpointActivated;
 
-    // private bool isActivated = false;
     private Color originalColor;
     private Renderer flagRenderer;
 
@@ -35,30 +34,7 @@ public class CheckpointManager : NetworkBehaviour
             // Uniquely turn the flag green ONLY on the screen of the player who touched it
             TargetSetCheckpointVisual(playerNetworkObject.Owner, true);
         }
-
-        //if (other.CompareTag("Frog") && !isActivated)
-        //{
-        //    isActivated = true;
-
-        //    // Change color on the server and tell all clients to do the same
-        //    ObserversSetCheckpointState(true);
-
-        //    // Fire the event. The ?. ensures it only runs if something is listening
-        //    OnCheckpointActivated?.Invoke(this);
-        //}
     }
-
-    //public void DeactivateCheckpoint()
-    //{
-    //    // Ensure only the server can dictate deactivation state
-    //    if (!IsServerInitialized) return;
-
-    //    isActivated = false;
-    //    if (flagRenderer != null)
-    //    {
-    //        flagRenderer.material.color = originalColor;
-    //    }
-    //}
 
     public void DeactivateForPlayer(GameObject player)
     {
@@ -89,20 +65,4 @@ public class CheckpointManager : NetworkBehaviour
             flagRenderer.material.color = originalColor;
         }
     }
-
-    //// This RPC ensures the visual color changes happen perfectly across all players screens
-    //[ObserversRpc]
-    //private void ObserversSetCheckpointState(bool activated)
-    //{
-    //    if (flagRenderer == null) return;
-
-    //    if (activated)
-    //    {
-    //        flagRenderer.material.color = Color.green;
-    //    }
-    //    else
-    //    {
-    //        flagRenderer.material.color = originalColor;
-    //    }
-    //}
 }

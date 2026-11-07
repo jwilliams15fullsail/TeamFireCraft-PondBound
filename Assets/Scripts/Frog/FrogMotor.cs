@@ -33,7 +33,7 @@ public class FrogMotor : NetworkBehaviour
 {
     [SerializeField] FrogTuning tuning;
     [SerializeField] LayerMask groundMask = ~0;
-    [SerializeField] float respawnHeight = -20f;
+    [SerializeField] float respawnHeight = 1f;
 
     // FishNet's NetworkTransform shows other frogs this many ticks late (its Interpolation setting).
     const int TransformInterpolationTicks = 2;
@@ -69,7 +69,7 @@ public class FrogMotor : NetworkBehaviour
     float ignoreGroundUntil;
     Rigidbody support;
     PetriDishSlime currentSlime;
-    Vector3 spawnPosition;
+    public Vector3 spawnPosition;
     bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
     float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
     Vector3 releaseVelocity; // the launch the owner worked out when letting go of jump
