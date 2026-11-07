@@ -28,6 +28,14 @@ public class FrogAudio : MonoBehaviour
 
     public void PlayHop()
     {
+        // Respect the cooldown before stopping the previous sound.
+        if (Time.time - lastSoundTime < minimumSoundInterval)
+            return;
+
+        // Prevent overlapping movement sounds.
+        if (audioSource.isPlaying)
+            audioSource.Stop();
+
         PlayRandomSound(hopSounds);
     }
 
@@ -49,7 +57,10 @@ public class FrogAudio : MonoBehaviour
         if (clip == null)
             return;
 
-        audioSource.PlayOneShot(clip, movementVolume);
+        audioSource.Stop();
+        audioSource.clip = clip;
+        audioSource.volume = movementVolume;
+        audioSource.Play();
         lastSoundTime = Time.time;
     }
 }
