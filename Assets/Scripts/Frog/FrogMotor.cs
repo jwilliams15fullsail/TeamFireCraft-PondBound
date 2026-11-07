@@ -47,6 +47,32 @@ public class FrogMotor : NetworkBehaviour
     public readonly SyncVar<HopSync> Hop = new(new SyncTypeSettings(0.001f));
 
     public FrogTuning Tuning => tuning;
+    
+    public float SlimeJumpMultiplier =>
+    Mode.Value == FrogMode.Grounded && currentSlime != null
+        ? currentSlime.jumpMultiplier
+        : 1f;
+
+    public float LocalSlimeJumpMultiplier
+    {
+        get
+        {
+            if (Mode.Value != FrogMode.Grounded)
+                return 1f;
+
+            if (ProbeGround(out RaycastHit hit))
+            {
+                PetriDishSlime slime =
+                    hit.collider.GetComponentInParent<PetriDishSlime>();
+
+                if (slime != null)
+                    return slime.jumpMultiplier;
+            }
+
+            return 1f;
+        }
+    }
+
     public Rigidbody Body => rb;
     public float Radius => sphere.radius;
     public Vector3 GroundNormal { get; private set; } = Vector3.up;
@@ -68,11 +94,15 @@ public class FrogMotor : NetworkBehaviour
     float lastGroundedTime = -10f;
     float ignoreGroundUntil;
     Rigidbody support;
+    PetriDishSlime currentSlime;
     Vector3 spawnPosition;
     bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
     float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
     Vector3 releaseVelocity; // the launch the owner worked out when letting go of jump
     bool followingArc;      // a charged jump in flight: no air steering, so it follows its preview
+    Vector3 releaseWallNormal; // the jump being let go of was aimed at this wall (zero: it wasn't)
+    Vector3 aimedWallNormal;   // a jump aimed at a wall is in flight: cling to that wall on arrival
+    Vector3 releaseWallTarget, aimedWallTarget; // where the frog's centre comes to rest on that wall
 
     bool hopping;                           // host only: the hop being simulated
     float hopPhase, hopDuration, hopStride;
@@ -213,14 +243,17 @@ public class FrogMotor : NetworkBehaviour
         jumpPressQueued = true;
     }
 
-    // target: where the player put the landing marker (world x/z offset from the frog, metres).
     // velocity: the launch the owner worked out from what its preview showed (its charge,
-    // crosshair and wall), so the frog flies exactly the arc that player saw.
-    public void ReleaseJump(Vector3 velocity)
+    // crosshair and wall), so the frog flies exactly the arc that player saw. wallNormal: the
+    // landing marker was on this wall (zero when it wasn't), so the frog clings to it on arrival,
+    // with its centre at wallTarget.
+    public void ReleaseJump(Vector3 velocity, Vector3 wallNormal, Vector3 wallTarget)
     {
         jumpHeld = false;
         jumpReleaseQueued = true;
         releaseVelocity = Vector3.ClampMagnitude(velocity, MaxJumpSpeed());
+        releaseWallNormal = wallNormal.sqrMagnitude > 0.5f ? wallNormal.normalized : Vector3.zero;
+        releaseWallTarget = wallTarget;
     }
     public void PressStick() => stickQueued = true;
 
@@ -286,9 +319,13 @@ public class FrogMotor : NetworkBehaviour
     {
         if (Mode.Value == FrogMode.Grounded)
             autoClimbBlocked = false;
-        if (!tuning.autoClimb || autoClimbBlocked || Mode.Value != FrogMode.Airborne)
+        if (Mode.Value != FrogMode.Airborne)
+            aimedWallNormal = Vector3.zero; // landed, clinging or dead: the aimed jump is over
+        if (autoClimbBlocked || Mode.Value != FrogMode.Airborne)
             return;
-        if (climb.TryAutoAttach(input))
+        // A jump aimed at a wall clings to it even with Auto Climb off.
+        bool aimed = aimedWallNormal.sqrMagnitude > 0.5f;
+        if ((tuning.autoClimb || aimed) && climb.TryAutoAttach(input, aimedWallNormal, aimedWallTarget))
             StartClimbing();
     }
 
@@ -311,12 +348,22 @@ public class FrogMotor : NetworkBehaviour
     void UpdateGroundState()
     {
         bool hitGround = ProbeGround(out RaycastHit hit);
+
         if (hitGround)
         {
             lastGroundedTime = Time.time;
             GroundNormal = hit.normal;
             support = hit.rigidbody;
+
+            // Check whether the ground beneath this frog is slime.
+            currentSlime = hit.collider.GetComponentInParent<PetriDishSlime>();
         }
+        else
+        {
+            // Clear the slime effect when the frog is no longer touching the ground.
+            currentSlime = null;
+        }
+
 
         if (Mode.Value == FrogMode.Airborne && hitGround)
         {
@@ -414,6 +461,8 @@ public class FrogMotor : NetworkBehaviour
 
         airSpeedLimit = FlatSpeed();
         followingArc = tuning.followJumpArc;
+        aimedWallNormal = releaseWallNormal;
+        aimedWallTarget = releaseWallTarget;
         Mode.Value = FrogMode.Airborne;
         ignoreGroundUntil = Time.time + 0.15f;
         support = null;
@@ -447,11 +496,26 @@ public class FrogMotor : NetworkBehaviour
                 EndHop(); // switched back to running mid-hop
                 target = RunVelocity(wish, up);
             }
+
             // Speeding up uses Ground Acceleration, slowing down or stopping uses Ground Braking.
             float acceleration = hopping ? tuning.hopAcceleration
                 : target.sqrMagnitude > planar.sqrMagnitude ? tuning.groundAcceleration : tuning.groundBraking;
+
+            // Slime reduces traction, making it harder to accelerate, stop, and change direction.
+            if (currentSlime != null)
+            {
+                bool speedingUp = target.sqrMagnitude > planar.sqrMagnitude;
+
+                float multiplier = speedingUp
+                    ? currentSlime.accelerationMultiplier
+                    : currentSlime.brakingMultiplier;
+
+                acceleration *= multiplier;
+            }
+
             Vector3 change = Vector3.ClampMagnitude(target - planar, acceleration * dt);
             rb.AddForce(change, ForceMode.VelocityChange);
+
 
             // The body is frictionless, so cancel gravity's slide when standing still on a slope.
             if (target.sqrMagnitude < 0.0001f)
@@ -620,6 +684,7 @@ public class FrogMotor : NetworkBehaviour
         Mode.Value = FrogMode.Airborne;
         airSpeedLimit = 0f;
         followingArc = false;
+        aimedWallNormal = Vector3.zero;
         jumpPressQueued = jumpReleaseQueued = stickQueued = false; // anything pressed while dead
         rb.linearVelocity = Vector3.zero;
         rb.position = spawnPosition;

@@ -30,6 +30,7 @@ public class WallButton : NetworkBehaviour
     Material unpressedMaterial;
 
     bool IsLocked => startsLocked && !isUnlocked.Value;
+    public bool IsActive => isActive.Value;
 
     void Awake()
     {

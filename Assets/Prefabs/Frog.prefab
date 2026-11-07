@@ -318,6 +318,9 @@ GameObject:
   - component: {fileID: 4653001287088918300}
   - component: {fileID: 5962963085824486735}
   - component: {fileID: 1490099721687078629}
+  - component: {fileID: -1191942892440876961}
+  - component: {fileID: -5155841888614524783}
+  - component: {fileID: 5607508857603526025}
   m_Layer: 6
   m_Name: Frog
   m_TagString: Frog
@@ -614,7 +617,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 8
+  <PrefabId>k__BackingField: 10
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 7470963074175291217
   SceneId: 0
@@ -646,7 +649,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584088816688450223
+  _initializedTimestamp: -8584077892926718405
 --- !u!114 &5962963085824486735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -711,6 +714,140 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   maxFlightTime: 2
+--- !u!82 &-1191942892440876961
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960431495464794997}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 4183877485195976400, guid: f3318d7de8e10e74599cadc6852ccdc5, type: 2}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &-5155841888614524783
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960431495464794997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be09a37c17578f34ea63d01fab162d92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FrogAudio
+  hopSounds:
+  - {fileID: 8300000, guid: 768bd3b0beca99243a3864fb2f166f05, type: 3}
+  landingSounds:
+  - {fileID: 8300000, guid: abda90b0e307a5e47bfb0aec7e8163c2, type: 3}
+  movementVolume: 0.6
+  minimumSoundInterval: 0.15
+--- !u!114 &5607508857603526025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960431495464794997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86caaefbc093eef4895f5a127bac2d0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FrogTongueAudio
+  fireSounds:
+  - {fileID: 8300000, guid: 3d63a161809d60f4dafc8dc210786c90, type: 3}
+  attachSounds:
+  - {fileID: 8300000, guid: 2b719a77d5ec87a448a4557331761789, type: 3}
+  retractSounds:
+  - {fileID: 8300000, guid: 83457bcb6d7c8f4439cc88c914e8a7f7, type: 3}
+  tongueVolume: 0.6
 --- !u!1 &7591722043773449959
 GameObject:
   m_ObjectHideFlags: 0
