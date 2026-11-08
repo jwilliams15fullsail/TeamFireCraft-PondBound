@@ -66,7 +66,7 @@ public class FrogStats : NetworkBehaviour
 
     void FixedUpdate()
     {
-        if(!IsServerInitialized || !IsSpawned || motor.IsDead)
+        if (!IsServerInitialized || !IsSpawned || motor.IsDead)
             return;
         FrogTuning t = Tuning;
         float dt = Time.fixedDeltaTime;
@@ -98,9 +98,9 @@ public class FrogStats : NetworkBehaviour
         else if (hunger > t.maxHunger * 0.5f && hydration > t.maxHydration * 0.5f)
             health = Mathf.Min(t.maxHealth, health + t.healthRegenPerSecond * dt);
 
-           if (health <= 0f)
-           {
-               health = 0f;
+        if (health <= 0f)
+        {
+            health = 0f;
             motor.Die(); // stays dead until the death screen's countdown ends (see Revive)
         }
         Publish();
@@ -118,7 +118,7 @@ public class FrogStats : NetworkBehaviour
 
     public void Restore(float healthAmount, float hungerAmount, float hydrationAmount)
     {
-     if (!IsServerInitialized || motor.IsDead)
+        if (!IsServerInitialized || motor.IsDead)
             return;
         FrogTuning t = Tuning;
         health = Mathf.Min(t.maxHealth, health + healthAmount);
@@ -145,9 +145,9 @@ public class FrogStats : NetworkBehaviour
             return;
         motor.Respawn();
         RefillAll();
-   }
+    }
 
-void OnEaten(FrogTongue eater, TongueTarget food)
+    void OnEaten(FrogTongue eater, TongueTarget food)
     {
         if (eater.gameObject == gameObject)
             Restore(0f, food.nutrition, 0f);

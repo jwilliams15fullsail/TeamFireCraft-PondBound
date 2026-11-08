@@ -99,11 +99,6 @@ public class FrogNetworkDriver : NetworkBehaviour
         frogCamera = Camera.main != null ? Camera.main.GetComponent<FrogCamera>() : null;
         if (frogCamera != null)
             frogCamera.SetTarget(transform);
-
-        if (TestObserver.instance != null)
-        {
-            TestObserver.instance.RegisterLocalPlayer(this.gameObject, frogRigidbody, transform.position);
-        }
     }
 
     void Update()
