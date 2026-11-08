@@ -1,5 +1,4 @@
 using UnityEngine;
-using FishNet;
 using FishNet.Object;
 
 public class GlueTrap : NetworkBehaviour

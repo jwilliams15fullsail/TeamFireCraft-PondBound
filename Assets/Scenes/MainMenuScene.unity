@@ -423,6 +423,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Settings
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -485,7 +489,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 152.79999
+      value: 152
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -506,6 +510,14 @@ PrefabInstance:
     - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_text
       value: Settings
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -865,16 +877,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 157158899}
-  m_LocalRotation: {x: -0, y: -0, z: -0.061615106, w: 0.9981}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 436819664}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -7.065}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 403, y: -280}
+  m_AnchoredPosition: {x: 391, y: -280}
   m_SizeDelta: {x: 700, y: 700}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &157158901
@@ -897,7 +909,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3807722896295604221, guid: aaf81763ce60f4448a9619d6c8657692, type: 3}
+  m_Sprite: {fileID: 3036479250193613542, guid: 15ddc1c8edcfa7f4eaded6fee54f5dbe, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1573,6 +1585,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Play Offline
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1635,7 +1651,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 586
+      value: 394.2
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1660,6 +1676,14 @@ PrefabInstance:
         Offline
 
 '
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -1961,8 +1985,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1330639300}
   - {fileID: 1190728345}
   - {fileID: 409394721}
+  - {fileID: 1402043081}
   - {fileID: 83025478}
   - {fileID: 1310126043}
   - {fileID: 1604819776}
@@ -1994,7 +2020,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2593915035899653338, guid: 6692f81e2818f704191fec219ac27ed6, type: 3}
+  m_Sprite: {fileID: 1074532627610777759, guid: 6930ef5c44f88964496ef768c5c915d6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6218,6 +6244,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Credits
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -6280,7 +6310,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 429
+      value: 407
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -6301,6 +6331,14 @@ PrefabInstance:
     - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_text
       value: Credits
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -6390,6 +6428,128 @@ PrefabInstance:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
   m_PrefabInstance: {fileID: 1310126042}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1330639299
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 436819664}
+    m_Modifications:
+    - target: {fileID: 294243279945329143, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Name
+      value: Lily Pad Button- Tutorial
+      objectReference: {fileID: 0}
+    - target: {fileID: 294243279945329143, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 230
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 230
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 595
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -304
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -132
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_text
+      value: Tutorial
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+--- !u!224 &1330639300 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+  m_PrefabInstance: {fileID: 1330639299}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1361775739
 PrefabInstance:
@@ -6540,6 +6700,219 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Slider
+--- !u!1001 &1402043078
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 436819664}
+    m_Modifications:
+    - target: {fileID: 294243279945329143, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Name
+      value: Lily Pad Button- Continue
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 230
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 230
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 665.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 408
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_text
+      value: 'Continue
+
+        Offline
+
+'
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Colors.m_SelectedColor.b
+      value: 0.015686275
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Colors.m_SelectedColor.g
+      value: 0.78039217
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Colors.m_SelectedColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.b
+      value: 0.015686275
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.g
+      value: 0.78039217
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 895186612}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 757879030}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ContinueOffline
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: PlayMenu, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: PlayMenu, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 294243279945329143, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1402043082}
+  m_SourcePrefab: {fileID: 100100000, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+--- !u!114 &1402043079 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+  m_PrefabInstance: {fileID: 1402043078}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1402043080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!1 &1402043080 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 294243279945329143, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+  m_PrefabInstance: {fileID: 1402043078}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &1402043081 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+  m_PrefabInstance: {fileID: 1402043078}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1402043082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1402043080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc22fa4aced5fb478a64e988a02d3a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonAudio
+  hoverSound: {fileID: 8300000, guid: cee3d38072b26c049893aee429dac862, type: 3}
+  clickSound: {fileID: 8300000, guid: 63f2f7c04230ced448d97dc465fe88a7, type: 3}
+  volume: 1
+  sfxGroup: {fileID: 4183877485195976400, guid: f3318d7de8e10e74599cadc6852ccdc5, type: 2}
 --- !u!1 &1446317287 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 294243279945329143, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
@@ -7203,6 +7576,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Exit Game
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -7265,7 +7642,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 706.2
+      value: 655
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -7288,6 +7665,14 @@ PrefabInstance:
       value: 'Exit
 
         Game'
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 36
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 36
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -9614,6 +9999,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Lily Pad Button- Play Online
       objectReference: {fileID: 0}
+    - target: {fileID: 1259494392048070676, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 7138839645129406549, guid: 61b15f921adb1e24982b013c859d0e3c, type: 3}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -9676,7 +10065,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 291
+      value: 140.2
       objectReference: {fileID: 0}
     - target: {fileID: 2115326754440985457, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -9697,6 +10086,14 @@ PrefabInstance:
     - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_text
       value: "Play \nOnline"
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSize
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2136476882657477163, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 35
       objectReference: {fileID: 0}
     - target: {fileID: 5755297421931809311, guid: f0935b559ebdd924a956d643c6c3927d, type: 3}
       propertyPath: m_Colors.m_SelectedColor.b
@@ -10086,6 +10483,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1783166295}
     - target: {fileID: 4947122815495747006, guid: 2d39a77f0c08ca4458b36708dd661e3d, type: 3}
+      propertyPath: continueButton
+      value: 
+      objectReference: {fileID: 1402043079}
+    - target: {fileID: 4947122815495747006, guid: 2d39a77f0c08ca4458b36708dd661e3d, type: 3}
       propertyPath: multiplayerPanel
       value: 
       objectReference: {fileID: 92184544}
@@ -10095,12 +10496,12 @@ PrefabInstance:
       objectReference: {fileID: 979567931}
     - target: {fileID: 4947122815495747006, guid: 2d39a77f0c08ca4458b36708dd661e3d, type: 3}
       propertyPath: gameScene.sceneName
-      value: LabLevelShowcase
+      value: CutsceneScene
       objectReference: {fileID: 0}
     - target: {fileID: 4947122815495747006, guid: 2d39a77f0c08ca4458b36708dd661e3d, type: 3}
       propertyPath: gameScene.sceneAsset
       value: 
-      objectReference: {fileID: 102900000, guid: 26dbc1653d6583b4eb236e0d129bbe16, type: 3}
+      objectReference: {fileID: 102900000, guid: 270f6313b9f6c5c4bad08e8c662329c6, type: 3}
     - target: {fileID: 8961673880041530411, guid: 2d39a77f0c08ca4458b36708dd661e3d, type: 3}
       propertyPath: m_Name
       value: PlayMenu

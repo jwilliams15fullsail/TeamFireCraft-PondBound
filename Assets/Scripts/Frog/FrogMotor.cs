@@ -47,7 +47,7 @@ public class FrogMotor : NetworkBehaviour
     public readonly SyncVar<HopSync> Hop = new(new SyncTypeSettings(0.001f));
 
     public FrogTuning Tuning => tuning;
-    
+
     public float SlimeJumpMultiplier =>
     Mode.Value == FrogMode.Grounded && currentSlime != null
         ? currentSlime.jumpMultiplier
@@ -95,7 +95,10 @@ public class FrogMotor : NetworkBehaviour
     float ignoreGroundUntil;
     Rigidbody support;
     PetriDishSlime currentSlime;
+
     Vector3 spawnPosition;
+
+
     Quaternion spawnRotation = Quaternion.identity;
     bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
     float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
@@ -270,15 +273,15 @@ public class FrogMotor : NetworkBehaviour
         FrogInputState input = driver.CurrentInput;
 
         if (IsDead)
-                 {
-                     SettleBody(dt);
-                    return;
-                }
-              if (rb.position.y < respawnHeight)
-                   {
-                       Respawn();
-                       return;
-                 }
+        {
+            SettleBody(dt);
+            return;
+        }
+        if (rb.position.y < respawnHeight)
+        {
+            Respawn();
+            return;
+        }
 
         HandleStick(input);
         if (Mode.Value != FrogMode.Climbing)
@@ -649,33 +652,34 @@ public class FrogMotor : NetworkBehaviour
         Quaternion target = Quaternion.LookRotation(forward, up);
         rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, target, tuning.turnSpeed * dt));
     }
-      // Host only. Health ran out: stop simulating this frog and let go of everything. The body
-   // drops where it is and stays there until Respawn. Every machine sees the mode change and
-   // plays the death animation.
-   public void Die()
-   {
-       if (Mode.Value == FrogMode.Climbing)
-           climb.Detach();
-       EndHop();
-       IsCharging.Value = false;
-       followingArc = false;
-       Mode.Value = FrogMode.Disabled;
-       tongue.LetGo();
-   }
+    // Host only. Health ran out: stop simulating this frog and let go of everything. The body
+    // drops where it is and stays there until Respawn. Every machine sees the mode change and
+    // plays the death animation.
+    public void Die()
+    {
+        if (Mode.Value == FrogMode.Climbing)
+            climb.Detach();
+        EndHop();
+        IsCharging.Value = false;
+        followingArc = false;
+        Mode.Value = FrogMode.Disabled;
+        tongue.LetGo();
+    }
 
-    // Dead: no steering. The body falls and levels out, and once it's on something it brakes
-   // to a stop there (it's frictionless, so otherwise it would slide away).
-  void SettleBody(float dt)
-   {
-            bool onGround = ProbeGround(out RaycastHit hit);
-            FaceTowards(Vector3.zero, onGround ? hit.normal : Vector3.up, dt, Vector3.zero);
-           if (!onGround)
-                 return;
-          Vector3 supportVelocity = hit.rigidbody != null ? hit.rigidbody.GetPointVelocity(rb.position) : Vector3.zero;
-           Vector3 planar = Vector3.ProjectOnPlane(rb.linearVelocity - supportVelocity, hit.normal);
-            rb.AddForce(Vector3.ClampMagnitude(-planar, tuning.groundBraking * dt), ForceMode.VelocityChange);
-           rb.AddForce(-Vector3.ProjectOnPlane(Physics.gravity, hit.normal), ForceMode.Acceleration);
-       }
+  
+    // to a stop there (it's frictionless, so otherwise it would slide away).
+    void SettleBody(float dt)
+    {
+        bool onGround = ProbeGround(out RaycastHit hit);
+        FaceTowards(Vector3.zero, onGround ? hit.normal : Vector3.up, dt, Vector3.zero);
+        if (!onGround)
+            return;
+        Vector3 supportVelocity = hit.rigidbody != null ? hit.rigidbody.GetPointVelocity(rb.position) : Vector3.zero;
+        Vector3 planar = Vector3.ProjectOnPlane(rb.linearVelocity - supportVelocity, hit.normal);
+        rb.AddForce(Vector3.ClampMagnitude(-planar, tuning.groundBraking * dt), ForceMode.VelocityChange);
+        rb.AddForce(-Vector3.ProjectOnPlane(Physics.gravity, hit.normal), ForceMode.Acceleration);
+    }
+
     // Host only: where this frog comes back after dying or falling off (Respawn). It starts
     // where the frog first appeared; reaching a checkpoint moves it (PlayerSpawner).
     public void SetSpawnPoint(Pose point)
