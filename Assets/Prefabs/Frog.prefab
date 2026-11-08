@@ -649,7 +649,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584077892926718405
+  _initializedTimestamp: -8584075084129526744
 --- !u!114 &5962963085824486735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -714,6 +714,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   maxFlightTime: 2
+  markerSmoothTime: 0.05
+  markerTurnSpeed: 20
+  floorColor: {r: 0.03, g: 1, b: 0, a: 1}
+  wallColor: {r: 0.1, g: 0.6, b: 1, a: 1}
 --- !u!82 &-1191942892440876961
 AudioSource:
   m_ObjectHideFlags: 0

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Multiplayer;
+using UnityEditor.Overlays;
 using UnityEngine;
+using UnityEngine.UI;
 
 // The main menu's play buttons: Offline, plus the Multiplayer panel's Quick Match, Host,
 // Join by code and the Browse list. Button OnClick events call the public methods.
@@ -11,6 +13,8 @@ public class PlayMenu : MonoBehaviour
 {
     [Tooltip("The level to load: drag its scene file here. It must be in the Build Profiles scene list and must not contain its own NetworkManager.")]
     [SerializeField] SceneField gameScene;
+    [Tooltip("Optional: the Continue button, so it's greyed out while there's no saved game.")]
+    [SerializeField] Button continueButton;
 
     [Header("Multiplayer panel")]
     [SerializeField] CanvasGroup multiplayerPanel;  // greyed out while a request is running
@@ -27,9 +31,16 @@ public class PlayMenu : MonoBehaviour
         // Coming back from a game: the frog camera may have locked the mouse.
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+        busy = false;
 
         SetStatus(GameSession.LastMessage ?? "");
         GameSession.LastMessage = null;
+        if (continueButton != null)
+        {
+            bool canContinue = SaveSystem.HasSave;
+            continueButton.interactable = !canContinue;
+            continueButton.interactable = canContinue;
+        }
     }
 
     public void PlayOffline()
@@ -39,6 +50,52 @@ public class PlayMenu : MonoBehaviour
         if (!GameSession.StartOffline(gameScene.SceneName))
             SetStatus("Couldn't start the offline game.");
     }
+
+    // The Continue button: back to the level and checkpoint of the last save, offline.
+    public void ContinueOffline()
+    {
+        if (busy)
+            return;
+
+        //StartCoroutine(LoadAndStartOfflineRoutine());
+        SaveData save = SaveSystem.Load();
+        if (save == null)
+        {
+            SetStatus("No saved game yet.");
+            if (continueButton != null) continueButton.interactable = false;
+            return;
+        }
+        SaveSystem.Continuing = save; // the level's PlayerSpawner picks it up
+        if (!GameSession.StartOffline(save.sceneName))
+        {
+            SaveSystem.Continuing = null;
+            SetStatus("Couldn't start the offline game.");
+        }
+    }
+
+    //private System.Collections.IEnumerator LoadAndStartOfflineRoutine()
+    //{
+    //    SaveData save = SaveSystem.Load();
+    //    if (save == null)
+    //    {
+    //        SetStatus("No saved game yet.");
+    //        if (continueButton != null) continueButton.interactable = false;
+    //        yield break;
+    //    }
+
+    //    // Wait exactly 1 frame. This allows any unhandled scene changes or FishNet connection 
+    //    // cleanups from your previous exit to complete completely in RAM first.
+    //    yield return null;
+
+    //    SaveSystem.Continuing = save; // The level's PlayerSpawner picks it up safely now
+    //    Debug.Log($"[Play Menu Coroutine] Loaded Save committed safely to RAM. Scene: {save.sceneName}, Checkpoint: {save.checkpoint}");
+
+    //    if (!GameSession.StartOffline(save.sceneName))
+    //    {
+    //        SaveSystem.Continuing = null;
+    //        SetStatus("Couldn't start the offline game.");
+    //    }
+    //}
 
     public async void QuickMatch()
     {
