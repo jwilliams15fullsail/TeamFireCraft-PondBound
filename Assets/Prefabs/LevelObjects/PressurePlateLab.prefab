@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5349612269050791016}
   - component: {fileID: 7860867306290506838}
   m_Layer: 0
-  m_Name: PressurePlate
+  m_Name: PressurePlateLab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48,9 +48,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f30870a358c1274893bc181a00909b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PressurePlate
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
   door: {fileID: 0}
+  hazards: {fileID: 0}
   minMass: 2
   frogsCount: 0
+  pressOnce: 0
+  completesObjective: {fileID: 0}
+  startsLocked: 0
+  tinted: []
+  lockedColor: {r: 0.9, g: 0.15, b: 0.1, a: 1}
+  readyColor: {r: 1, g: 0.75, b: 0.1, a: 1}
+  pressedColor: {r: 0.2, g: 0.9, b: 0.25, a: 1}
 --- !u!33 &3282144919297880966
 MeshFilter:
   m_ObjectHideFlags: 0

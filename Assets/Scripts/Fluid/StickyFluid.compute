@@ -1,0 +1,389 @@
+// Sticky fluid (slime) simulation on the GPU, using Smoothed Particle Hydrodynamics.
+// Same three main steps as AJTech2002/Smoothed-Particle-Hydrodynamics
+// (ComputeDensityPressure -> ComputeForces -> Integrate), plus what makes it sticky:
+//   - a grid, so each particle only checks the 27 cells around it
+//   - Akinci et al. 2013 cohesion and curvature (surface tension)
+//   - XSPH velocity smoothing, for thick and syrupy motion
+//   - adhesion, friction and peel resistance on the walls and colliders
+// Everything runs in the StickyFluid object's local space.
+
+#pragma kernel ClearGrid
+#pragma kernel BuildGrid
+#pragma kernel ComputeDensityPressure
+#pragma kernel ComputeNormals
+#pragma kernel ComputeForces
+#pragma kernel Integrate
+
+#define THREADS 256
+#define MAX_PER_CELL 32
+
+struct Particle
+{
+    float3 position;
+    float density;
+    float3 velocity;
+    float pressure;
+    float3 normal; // surface normal (Akinci), points into the fluid
+    float pad0;
+    float3 force; // acceleration from ComputeForces
+    float pad1;
+};
+
+struct FluidCollider
+{
+    float3 a; // sphere/capsule start, box centre
+    float radius; // sphere/capsule radius
+    float3 b; // capsule end, box half size
+    float type; // 0 sphere, 1 capsule, 2 box
+    float3 velocity;
+    float pad;
+    float4 rotation; // box rotation (quaternion)
+};
+
+RWStructuredBuffer<Particle> _Particles;
+RWStructuredBuffer<uint> _CellCounts;
+RWStructuredBuffer<uint> _CellParticles;
+StructuredBuffer<FluidCollider> _Colliders;
+
+uint _ParticleCount;
+uint _CellCount;
+uint _ColliderCount;
+float4 _GridSize; // cells per axis in xyz
+float3 _HalfBox;
+float3 _Gravity;
+
+float _H; // smoothing radius
+float _H2;
+float _Mass;
+float _RestDensity;
+float _Stiffness;
+float _SurfaceTension;
+float _Poly6; // 315 / (64 pi h^9)
+float _SpikyGrad; // 45 / (pi h^6)
+float _CohesionCoef; // 32 / (pi h^9)
+
+float _DeltaTime;
+float _Xsph; // share of neighbour speed difference removed this step
+float _MaxSpeed;
+float _CollisionRadius;
+float _AdhesionRange;
+float _ContainerAdhesion; // m/s^2
+float _ContainerFriction; // share of sliding speed kept this step
+float _ColliderAdhesion;
+float _ColliderFriction;
+
+// ---------------------------------------------------------------- grid
+
+int3 CellOf(float3 p)
+{
+    int3 size = (int3) _GridSize.xyz;
+    int3 c = (int3) floor((p + _HalfBox) / _H);
+    return clamp(c, 0, size - 1);
+}
+
+bool InGrid(int3 c)
+{
+    int3 size = (int3) _GridSize.xyz;
+    return all(c >= 0) && all(c < size);
+}
+
+uint CellIndex(int3 c)
+{
+    int3 size = (int3) _GridSize.xyz;
+    return (uint) (c.x + size.x * (c.y + size.y * c.z));
+}
+
+[numthreads(THREADS, 1, 1)]
+void ClearGrid(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _CellCount)
+        return;
+    _CellCounts[id.x] = 0;
+}
+
+[numthreads(THREADS, 1, 1)]
+void BuildGrid(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= _ParticleCount)
+        return;
+
+    uint cell = CellIndex(CellOf(_Particles[i].position));
+    uint slot;
+    InterlockedAdd(_CellCounts[cell], 1, slot);
+    if (slot < MAX_PER_CELL)
+        _CellParticles[cell * MAX_PER_CELL + slot] = i;
+}
+
+// ---------------------------------------------------------------- density
+
+[numthreads(THREADS, 1, 1)]
+void ComputeDensityPressure(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= _ParticleCount)
+        return;
+
+    float3 pos = _Particles[i].position;
+    int3 cell = CellOf(pos);
+    float sum = 0;
+
+    for (uint n = 0; n < 27; n++)
+    {
+        int3 c = cell + int3(n % 3, (n / 3) % 3, n / 9) - 1;
+        if (!InGrid(c))
+            continue;
+        uint ci = CellIndex(c);
+        uint count = min(_CellCounts[ci], MAX_PER_CELL);
+        for (uint k = 0; k < count; k++)
+        {
+            uint j = _CellParticles[ci * MAX_PER_CELL + k];
+            float3 d = pos - _Particles[j].position;
+            float r2 = dot(d, d);
+            if (r2 < _H2)
+            {
+                float w = _H2 - r2;
+                sum += w * w * w;
+            }
+        }
+    }
+
+    float density = sum * _Mass * _Poly6;
+    _Particles[i].density = density;
+    _Particles[i].pressure = max(_Stiffness * (density - _RestDensity), 0);
+}
+
+// ---------------------------------------------------------------- surface normals
+
+[numthreads(THREADS, 1, 1)]
+void ComputeNormals(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= _ParticleCount)
+        return;
+
+    float3 pos = _Particles[i].position;
+    int3 cell = CellOf(pos);
+    float3 sum = 0;
+
+    for (uint n = 0; n < 27; n++)
+    {
+        int3 c = cell + int3(n % 3, (n / 3) % 3, n / 9) - 1;
+        if (!InGrid(c))
+            continue;
+        uint ci = CellIndex(c);
+        uint count = min(_CellCounts[ci], MAX_PER_CELL);
+        for (uint k = 0; k < count; k++)
+        {
+            uint j = _CellParticles[ci * MAX_PER_CELL + k];
+            float3 d = pos - _Particles[j].position;
+            float r2 = dot(d, d);
+            if (r2 < _H2)
+            {
+                float w = _H2 - r2;
+                sum += d * (w * w / _Particles[j].density);
+            }
+        }
+    }
+
+    // n = h * sum(m / rho * gradW). About 0 inside the goo, about 1 on its surface.
+    _Particles[i].normal = sum * (-6.0 * _H * _Mass * _Poly6);
+}
+
+// ---------------------------------------------------------------- forces
+
+// Akinci 2013 cohesion spline: pulls between h/2 and h, pushes closer than h/2.
+float Cohesion(float r)
+{
+    float hr = _H - r;
+    float c = hr * hr * hr * r * r * r;
+    if (2.0 * r <= _H)
+        c = 2.0 * c - _H2 * _H2 * _H2 / 64.0;
+    return c * _CohesionCoef;
+}
+
+[numthreads(THREADS, 1, 1)]
+void ComputeForces(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= _ParticleCount)
+        return;
+
+    Particle p = _Particles[i];
+    float pressureI = p.pressure / (p.density * p.density);
+    float3 pressure = 0;
+    float3 smoothing = 0;
+    float3 tension = 0;
+    int3 cell = CellOf(p.position);
+
+    for (uint n = 0; n < 27; n++)
+    {
+        int3 c = cell + int3(n % 3, (n / 3) % 3, n / 9) - 1;
+        if (!InGrid(c))
+            continue;
+        uint ci = CellIndex(c);
+        uint count = min(_CellCounts[ci], MAX_PER_CELL);
+        for (uint k = 0; k < count; k++)
+        {
+            uint j = _CellParticles[ci * MAX_PER_CELL + k];
+            if (j == i)
+                continue;
+
+            Particle q = _Particles[j];
+            float3 d = p.position - q.position;
+            float r2 = dot(d, d);
+            if (r2 >= _H2 || r2 < 1e-12)
+                continue;
+
+            float r = sqrt(r2);
+            float3 dir = d / r;
+            float hr = _H - r;
+            float w = _H2 - r2;
+
+            // Pressure pushes apart (spiky kernel), as in the reference
+            pressure += dir * ((pressureI + q.pressure / (q.density * q.density)) * hr * hr);
+
+            // XSPH: drift towards the neighbours' velocity
+            smoothing += (q.velocity - p.velocity) * (w * w * w / q.density);
+
+            // Surface tension: cohesion + curvature
+            float correction = 2.0 * _RestDensity / (p.density + q.density);
+            tension += correction * (_Mass * Cohesion(r) * dir + (p.normal - q.normal));
+        }
+    }
+
+    _Particles[i].force = _Gravity
+        + pressure * (_Mass * _SpikyGrad)
+        + smoothing * (_Mass * _Poly6 * _Xsph / _DeltaTime)
+        - tension * _SurfaceTension;
+}
+
+// ---------------------------------------------------------------- integrate
+
+float3 Rotate(float4 q, float3 v)
+{
+    float3 t = 2.0 * cross(q.xyz, v);
+    return v + q.w * t + cross(q.xyz, t);
+}
+
+// Signed distance from p to the collider surface, and the outward surface normal.
+float ColliderDistance(FluidCollider c, float3 p, out float3 n)
+{
+    if (c.type < 0.5)       // sphere
+    {
+        float3 d = p - c.a;
+        float len = length(d);
+        n = len > 1e-6 ? d / len : float3(0, 1, 0);
+        return len - c.radius;
+    }
+
+    if (c.type < 1.5)       // capsule
+    {
+        float3 ba = c.b - c.a;
+        float t = saturate(dot(p - c.a, ba) / max(dot(ba, ba), 1e-8));
+        float3 d = p - (c.a + ba * t);
+        float len = length(d);
+        n = len > 1e-6 ? d / len : float3(0, 1, 0);
+        return len - c.radius;
+    }
+
+    // box
+    float3 lp = Rotate(float4(-c.rotation.xyz, c.rotation.w), p - c.a);
+    float3 q = abs(lp) - c.b;
+    float3 s = float3(lp.x >= 0 ? 1.0 : -1.0, lp.y >= 0 ? 1.0 : -1.0, lp.z >= 0 ? 1.0 : -1.0);
+    float3 outsideVec = max(q, 0);
+    float outside = length(outsideVec);
+    float inside = min(max(q.x, max(q.y, q.z)), 0);
+    float3 ln;
+    if (outside > 1e-6)
+        ln = outsideVec * s / outside;
+    else if (q.x > q.y && q.x > q.z)
+        ln = float3(s.x, 0, 0);
+    else if (q.y > q.z)
+        ln = float3(0, s.y, 0);
+    else
+        ln = float3(0, 0, s.z);
+    n = Rotate(c.rotation, ln);
+    return outside + inside;
+}
+
+// 1 when touching the surface, fading to 0 at the edge of the sticky band.
+float Falloff(float d)
+{
+    return saturate((_AdhesionRange - d) / (_AdhesionRange - _CollisionRadius));
+}
+
+// Inside the sticky band: pull towards the surface, and slow sliding and peeling.
+void Stick(inout float3 v, float3 n, float d, float3 surfaceVelocity, float adhesion, float friction)
+{
+    if (d >= _AdhesionRange)
+        return;
+    float f = Falloff(d);
+    float keep = lerp(1.0, friction, f);
+    float3 rel = v - surfaceVelocity;
+    float vn = dot(rel, n);
+    float3 vt = (rel - vn * n) * keep;
+    if (vn > 0)
+        vn *= keep;
+    vn -= adhesion * f * _DeltaTime;
+    v = surfaceVelocity + vt + vn * n;
+}
+
+// Keep the particle on the outside of the surface.
+void Collide(inout float3 x, inout float3 v, float3 n, float d, float3 surfaceVelocity)
+{
+    if (d >= _CollisionRadius)
+        return;
+    x += n * (_CollisionRadius - d);
+    float vn = dot(v - surfaceVelocity, n);
+    if (vn < 0)
+        v -= vn * n;
+}
+
+[numthreads(THREADS, 1, 1)]
+void Integrate(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= _ParticleCount)
+        return;
+
+    float3 x = _Particles[i].position;
+    float3 v = _Particles[i].velocity + _Particles[i].force * _DeltaTime;
+    float3 lo = -_HalfBox;
+    float3 hi = _HalfBox;
+    float3 n;
+    float d;
+    uint c;
+
+    // Sticky band: colliders, the floor and the four walls. The lid is never sticky.
+    for (c = 0; c < _ColliderCount; c++)
+    {
+        d = ColliderDistance(_Colliders[c], x, n);
+        Stick(v, n, d, _Colliders[c].velocity, _ColliderAdhesion, _ColliderFriction);
+    }
+    Stick(v, float3(0, 1, 0), x.y - lo.y, 0, _ContainerAdhesion, _ContainerFriction);
+    Stick(v, float3(1, 0, 0), x.x - lo.x, 0, _ContainerAdhesion, _ContainerFriction);
+    Stick(v, float3(-1, 0, 0), hi.x - x.x, 0, _ContainerAdhesion, _ContainerFriction);
+    Stick(v, float3(0, 0, 1), x.z - lo.z, 0, _ContainerAdhesion, _ContainerFriction);
+    Stick(v, float3(0, 0, -1), hi.z - x.z, 0, _ContainerAdhesion, _ContainerFriction);
+
+    float speed = length(v);
+    if (speed > _MaxSpeed)
+        v *= _MaxSpeed / speed;
+    x += v * _DeltaTime;
+
+    for (c = 0; c < _ColliderCount; c++)
+    {
+        d = ColliderDistance(_Colliders[c], x, n);
+        Collide(x, v, n, d, _Colliders[c].velocity);
+    }
+    Collide(x, v, float3(0, 1, 0), x.y - lo.y, 0);
+    Collide(x, v, float3(0, -1, 0), hi.y - x.y, 0);
+    Collide(x, v, float3(1, 0, 0), x.x - lo.x, 0);
+    Collide(x, v, float3(-1, 0, 0), hi.x - x.x, 0);
+    Collide(x, v, float3(0, 0, 1), x.z - lo.z, 0);
+    Collide(x, v, float3(0, 0, -1), hi.z - x.z, 0);
+
+    _Particles[i].position = x;
+    _Particles[i].velocity = v;
+}

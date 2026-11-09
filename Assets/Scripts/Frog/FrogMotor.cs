@@ -76,8 +76,12 @@ public class FrogMotor : NetworkBehaviour
     public Rigidbody Body => rb;
     public float Radius => sphere.radius;
     public Vector3 GroundNormal { get; private set; } = Vector3.up;
+    // What the frog is standing on, if it has a Rigidbody (a floating platform, a box, a frog).
+    public Rigidbody Support => support;
     // A dead frog is in Disabled mode: the host stops simulating it until Respawn.
     public bool IsDead => Mode.Value == FrogMode.Disabled;
+    // Host only: floating in a RisingWater flood with nothing under its feet, so it swims.
+    public bool IsSwimming => swimming;
     // The host's clock (seconds), the same on every machine: FishNet's tick plus how far
     // into the next tick we are, so it moves smoothly every frame.
     public double NetworkTime => TimeManager.TicksToTime(TimeManager.GetPreciseTick(TickType.Tick));
@@ -95,7 +99,10 @@ public class FrogMotor : NetworkBehaviour
     float ignoreGroundUntil;
     Rigidbody support;
     PetriDishSlime currentSlime;
-    public Vector3 spawnPosition;
+
+    Vector3 spawnPosition;
+
+
     Quaternion spawnRotation = Quaternion.identity;
     bool autoClimbBlocked;  // let go of a wall with Stick: no grabbing in the air until we land
     float airSpeedLimit;    // sideways speed at takeoff: air steering never goes past it
@@ -107,6 +114,10 @@ public class FrogMotor : NetworkBehaviour
 
     bool hopping;                           // host only: the hop being simulated
     float hopPhase, hopDuration, hopStride;
+
+    bool floating;          // host only: deep enough in a flood that the water holds the frog up
+    bool swimming;          // host only: floating with nothing under its feet
+    float ignoreWaterUntil; // just jumped: the water lets go, so the jump flies its whole arc
 
     void Awake()
     {
@@ -280,9 +291,12 @@ public class FrogMotor : NetworkBehaviour
             return;
         }
 
-        HandleStick(input);
+        swimming = false;
         if (Mode.Value != FrogMode.Climbing)
+        {
+            Float();
             UpdateGroundState();
+        }
         HandleAutoClimb(input);
         UpdateJump(input);
         if (Mode.Value != FrogMode.Grounded)
@@ -350,6 +364,7 @@ public class FrogMotor : NetworkBehaviour
     void UpdateGroundState()
     {
         bool hitGround = ProbeGround(out RaycastHit hit);
+        swimming = floating && !hitGround; // held up by the water, with nothing under its feet
 
         if (hitGround)
         {
@@ -364,10 +379,17 @@ public class FrogMotor : NetworkBehaviour
         {
             // Clear the slime effect when the frog is no longer touching the ground.
             currentSlime = null;
+            if (swimming)
+            {
+                // Floating counts as standing on the water, so the frog can charge and jump from it.
+                lastGroundedTime = Time.time;
+                GroundNormal = Vector3.up;
+                support = null;
+            }
         }
 
 
-        if (Mode.Value == FrogMode.Airborne && hitGround)
+        if (Mode.Value == FrogMode.Airborne && (hitGround || swimming))
         {
             Mode.Value = FrogMode.Grounded;
             followingArc = false;
@@ -382,6 +404,25 @@ public class FrogMotor : NetworkBehaviour
             support = null;
             airSpeedLimit = FlatSpeed(); // walked off a ledge: steering can't speed the fall up
         }
+    }
+
+
+    // RisingWater floods hold the frog up. It floats with its back out of the water, bobs when
+    // it lands in it, and swims (Move) and jumps from there like from the ground.
+    void Float()
+    {
+        floating = false;
+        if (Time.time < ignoreWaterUntil || !RisingWater.SurfaceAt(rb.position, out float surfaceY))
+            return;
+        float under = Mathf.Clamp01((surfaceY - rb.position.y + Radius) / (2f * Radius)); // share of the body under water
+        if (under <= 0f)
+            return;
+        float restUnder = (1f + tuning.floatDepth) * 0.5f; // share under water when floating still
+        // Buoyancy: exactly the frog's weight at Float Depth, more the deeper it goes.
+        // Water Drag settles the bobbing.
+        float lift = -Physics.gravity.y * under / restUnder - rb.linearVelocity.y * tuning.waterDrag * under;
+        rb.AddForce(Vector3.up * lift, ForceMode.Acceleration);
+        floating = under >= restUnder * 0.5f;
     }
 
     // Landing drops most of the jump's sideways speed (Landing Keep Speed), so the frog
@@ -467,6 +508,7 @@ public class FrogMotor : NetworkBehaviour
         aimedWallTarget = releaseWallTarget;
         Mode.Value = FrogMode.Airborne;
         ignoreGroundUntil = Time.time + 0.15f;
+        ignoreWaterUntil = Time.time + 0.3f; // clear of the water before it can catch the frog again
         support = null;
     }
 
@@ -489,7 +531,12 @@ public class FrogMotor : NetworkBehaviour
             Vector3 supportVelocity = support != null ? support.GetPointVelocity(rb.position) : Vector3.zero;
             Vector3 planar = Vector3.ProjectOnPlane(rb.linearVelocity - supportVelocity, up);
             Vector3 target;
-            if (HopMode(input))
+            if (swimming)
+            {
+                EndHop(); // no hopping in the water: it swims
+                target = RunVelocity(wish, up) * (tuning.swimSpeed / Mathf.Max(0.01f, tuning.moveSpeed));
+            }
+            else if (HopMode(input))
             {
                 target = HopVelocity(wish, up, dt);
             }
@@ -500,7 +547,8 @@ public class FrogMotor : NetworkBehaviour
             }
 
             // Speeding up uses Ground Acceleration, slowing down or stopping uses Ground Braking.
-            float acceleration = hopping ? tuning.hopAcceleration
+            // Swimming speeds up and glides to a stop at Swim Acceleration.
+            float acceleration = swimming ? tuning.swimAcceleration : hopping ? tuning.hopAcceleration
                 : target.sqrMagnitude > planar.sqrMagnitude ? tuning.groundAcceleration : tuning.groundBraking;
 
             // Slime reduces traction, making it harder to accelerate, stop, and change direction.
@@ -663,7 +711,7 @@ public class FrogMotor : NetworkBehaviour
         tongue.LetGo();
     }
 
-    // Dead: no steering. The body falls and levels out, and once it's on something it brakes
+  
     // to a stop there (it's frictionless, so otherwise it would slide away).
     void SettleBody(float dt)
     {
@@ -676,6 +724,7 @@ public class FrogMotor : NetworkBehaviour
         rb.AddForce(Vector3.ClampMagnitude(-planar, tuning.groundBraking * dt), ForceMode.VelocityChange);
         rb.AddForce(-Vector3.ProjectOnPlane(Physics.gravity, hit.normal), ForceMode.Acceleration);
     }
+
     // Host only: where this frog comes back after dying or falling off (Respawn). It starts
     // where the frog first appeared; reaching a checkpoint moves it (PlayerSpawner).
     public void SetSpawnPoint(Pose point)

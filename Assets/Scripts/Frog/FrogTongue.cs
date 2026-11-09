@@ -55,6 +55,7 @@ public class FrogTongue : NetworkBehaviour
     Vector3 localAnchor;
     bool pressQueued;
     Vector3 aimOrigin, aimDirection;
+    float wheelReel; // mouse wheel reeling still to do (m): + reels in, - lets out
 
     FrogTuning Tuning => motor.Tuning;
 
@@ -96,6 +97,16 @@ public class FrogTongue : NetworkBehaviour
         if (state == TongueState.Extending || state == TongueState.Attached)
            StartRetract();
    }
+
+    // Mouse wheel (from FrogNetworkDriver): queue some reeling in (+) or letting out (-). Hold
+    // works through it at Reel Speed, so a quick flick reels smoothly. At most 4 notches wait.
+    public void ReelBy(float metres)
+    {
+        if (state != TongueState.Attached)
+            return;
+        float most = Tuning.reelPerNotch * 4f;
+        wheelReel = Mathf.Clamp(wheelReel + metres, -most, most);
+    }
 
     // Break free: drop every tongue currently holding this object.
     public static void ReleaseEverythingHolding(NetworkObject grabbed)
@@ -192,7 +203,8 @@ public class FrogTongue : NetworkBehaviour
             }
 
             TongueTarget hitTarget = hit.collider.GetComponentInParent<TongueTarget>();
-            if (hitTarget != null && hitTarget.NetObject.IsSpawned && !IsHeldByAnyone(hitTarget))
+            // Something with no Rigidbody (a fixed anchor) can be held by several frogs at once.
+            if (hitTarget != null && hitTarget.NetObject.IsSpawned && (hitTarget.Body == null || !IsHeldByAnyone(hitTarget)))
                 Attach(hitTarget, hit.distance > 0f ? hit.point : from);
             else
                 StartRetract(); // plain scenery: the first version doesn't wrap or stick
@@ -228,6 +240,7 @@ public class FrogTongue : NetworkBehaviour
         restLength = Vector3.Distance(mouth.position, point); // no sudden yank on contact
         tipDistance = restLength;
         blockedTime = 0f;
+        wheelReel = 0f;
         SetState(TongueState.Attached);
     }
     //needed for food pile -Tim
@@ -279,8 +292,15 @@ public class FrogTongue : NetworkBehaviour
             return;
         }
 
-        if (driver.CurrentInput.Reel)
-            restLength = Mathf.Max(Tuning.minRestLength, restLength - Tuning.reelSpeed * dt);
+        // Reeling, at Reel Speed: in while the gamepad trigger is held, otherwise in or out by
+        // the mouse wheel notches still waiting (ReelBy).
+        float step = Tuning.reelSpeed * dt;
+        float wheel = Mathf.Clamp(wheelReel, -step, step);
+        wheelReel -= wheel;
+        float reeled = driver.CurrentInput.Reel ? step : wheel;
+        if (reeled > 0f)
+            restLength = Mathf.Min(restLength, distance); // reeling in takes up any slack at once, so every notch pulls
+        restLength = Mathf.Clamp(restLength - reeled, Tuning.minRestLength, Tuning.tongueRange);
 
         // Tension-only spring: pulls when stretched past rest length, slack otherwise.
         float tension = 0f;
@@ -296,7 +316,13 @@ public class FrogTongue : NetworkBehaviour
             // Equal and opposite forces. Mass decides who moves more, except that a frog
             // standing on the ground braces its feet (see BracedPull).
             Vector3 force = dir * tension;
-            rb.AddForce(BracedPull(force));
+            Vector3 pull = BracedPull(force);
+            rb.AddForce(pull);
+            // The braced feet push on whatever the frog stands on, so reeling in while standing on
+            // a floating platform (or a box) pulls it along too, with the frog riding on it.
+            Rigidbody support = motor.Support;
+            if (support != null && !support.isKinematic)
+                support.AddForceAtPosition(force - pull, rb.position - motor.GroundNormal * motor.Radius);
             climb.AddExternalForce(force);
             if (other != null && !other.isKinematic)
             {
@@ -312,7 +338,7 @@ public class FrogTongue : NetworkBehaviour
     // light frog can drag a heavy box instead of being dragged to it. Lifts still work.
     Vector3 BracedPull(Vector3 force)
     {
-        if (motor.Mode.Value != FrogMode.Grounded)
+        if (motor.Mode.Value != FrogMode.Grounded || motor.IsSwimming) // swimming: nothing to brace on
             return force;
         Vector3 along = Vector3.ProjectOnPlane(force, motor.GroundNormal);
         if (along.sqrMagnitude < 1e-6f)

@@ -64,7 +64,7 @@ public class FrogNetworkDriver : NetworkBehaviour
     FrogTongue tongue;
     FrogStats stats;
     FrogCamera frogCamera;
-    InputAction moveAction, jumpAction, tongueAction, reelAction, stickAction, breakFreeAction, hopAction;
+    InputAction moveAction, jumpAction, tongueAction, reelAction, reelWheelAction, stickAction, breakFreeAction, hopAction;
     FrogInputState lastSent;
     uint lastSentTick;
     readonly RaycastHit[] aimHits = new RaycastHit[8];
@@ -91,6 +91,7 @@ public class FrogNetworkDriver : NetworkBehaviour
         jumpAction = actions.FindAction("Player/Jump", true);
         tongueAction = actions.FindAction("Player/Tongue", true);
         reelAction = actions.FindAction("Player/Reel", true);
+        reelWheelAction = actions.FindAction("Player/ReelWheel", true);
         stickAction = actions.FindAction("Player/Stick", true);
         breakFreeAction = actions.FindAction("Player/BreakFree", true);
         hopAction = actions.FindAction("Player/Sprint", true);
@@ -166,6 +167,13 @@ public class FrogNetworkDriver : NetworkBehaviour
             Ray aim = frogCamera != null ? frogCamera.AimRay : new Ray(transform.position, transform.forward);
             TonguePressed(aim.origin, aim.direction);
         }
+
+        // Mouse wheel: up reels the tongue in, down lets it out. Each scroll goes to the host at
+        // once, like a button press, so no notch gets lost.
+        float notches = Mathf.Clamp(reelWheelAction.ReadValue<float>(), -3f, 3f);
+        if (notches != 0f && tongue.Sync.Value.State == TongueState.Attached)
+            ReelWheel(notches * motor.Tuning.reelPerNotch);
+
         if (stickAction.WasPressedThisFrame())
             StickPressed();
         if (breakFreeAction.WasPressedThisFrame())
@@ -367,6 +375,8 @@ LocalJumpTarget = Vector3.ProjectOnPlane(direction, Vector3.up).normalized * rea
 
     [ServerRpc]
     void TonguePressed(Vector3 aimOrigin, Vector3 aimDirection) => tongue.PressTongue(aimOrigin, aimDirection);
+    [ServerRpc]
+    void ReelWheel(float metres) => tongue.ReelBy(metres);
 
     [ServerRpc]
     void StickPressed() => motor.PressStick();

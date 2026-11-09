@@ -148,6 +148,16 @@ public class FrogTuning : ScriptableObject
     [Tooltip("Seconds after letting go of a wall before grabbing in the air works again.")]
     public float autoClimbCooldown = 0.5f;
 
+    [Header("Swimming (in RisingWater floods)")]
+    [Tooltip("How low the frog floats: how far its centre sits under the water's surface, as a fraction of its radius. 0 = half under water, 1 = only the top of its back shows.")]
+    [Range(0f, 1f)] public float floatDepth = 0.4f;
+    [Tooltip("Swim speed (m/s) at full stick.")]
+    public float swimSpeed = 2f;
+    [Tooltip("How quickly the frog gets up to swim speed, and glides to a stop (m/s per second).")]
+    public float swimAcceleration = 8f;
+    [Tooltip("How quickly bobbing settles after landing in the water. Lower = bobs for longer.")]
+    public float waterDrag = 10f;
+
 
     [Header("Tongue")]
     public float tongueRange = 7f;
@@ -160,6 +170,7 @@ public class FrogTuning : ScriptableObject
     public float tongueBraceForce = 60f;      // pull (N) a grounded frog's feet absorb, so it can drag heavy things
     public float tongueBreakDistance = 10f;
     public float reelSpeed = 3f;              // metres per second of rest length removed
+    public float reelPerNotch = 0.4f;         // metres one mouse wheel notch reels in (or lets out)
     public float minRestLength = 0.6f;
     public float foodReelSpeed = 8f;
     public float eatDistance = 0.45f;

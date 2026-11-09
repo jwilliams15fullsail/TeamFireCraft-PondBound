@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Multiplayer;
-using UnityEditor.Overlays;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +14,8 @@ public class PlayMenu : MonoBehaviour
     [SerializeField] SceneField gameScene;
     [Tooltip("Optional: the Continue button, so it's greyed out while there's no saved game.")]
     [SerializeField] Button continueButton;
+    [Tooltip("Optional: where the player types the name shown above their frog.")]
+    [SerializeField] TMP_InputField playerNameInput;
 
     [Header("Multiplayer panel")]
     [SerializeField] CanvasGroup multiplayerPanel;  // greyed out while a request is running
@@ -31,15 +32,18 @@ public class PlayMenu : MonoBehaviour
         // Coming back from a game: the frog camera may have locked the mouse.
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        busy = false;
 
         SetStatus(GameSession.LastMessage ?? "");
         GameSession.LastMessage = null;
         if (continueButton != null)
+            continueButton.interactable = SaveSystem.HasCheckpointSave; // greyed out until a checkpoint has saved
+
+        // Your name above your frog. It's saved as you type, so it sticks between games.
+        if (playerNameInput != null)
         {
-            bool canContinue = SaveSystem.HasSave;
-            continueButton.interactable = !canContinue;
-            continueButton.interactable = canContinue;
+            playerNameInput.characterLimit = FrogIdentity.MaxNameLength;
+            playerNameInput.text = PlayerPrefs.GetString(FrogIdentity.NameKey, "");
+            playerNameInput.onValueChanged.AddListener(typed => PlayerPrefs.SetString(FrogIdentity.NameKey, typed.Trim()));
         }
     }
 
@@ -56,13 +60,10 @@ public class PlayMenu : MonoBehaviour
     {
         if (busy)
             return;
-
-        //StartCoroutine(LoadAndStartOfflineRoutine());
         SaveData save = SaveSystem.Load();
-        if (save == null)
+        if (save == null || save.checkpoint <= 0)
         {
             SetStatus("No saved game yet.");
-            if (continueButton != null) continueButton.interactable = false;
             return;
         }
         SaveSystem.Continuing = save; // the level's PlayerSpawner picks it up
@@ -72,30 +73,6 @@ public class PlayMenu : MonoBehaviour
             SetStatus("Couldn't start the offline game.");
         }
     }
-
-    //private System.Collections.IEnumerator LoadAndStartOfflineRoutine()
-    //{
-    //    SaveData save = SaveSystem.Load();
-    //    if (save == null)
-    //    {
-    //        SetStatus("No saved game yet.");
-    //        if (continueButton != null) continueButton.interactable = false;
-    //        yield break;
-    //    }
-
-    //    // Wait exactly 1 frame. This allows any unhandled scene changes or FishNet connection 
-    //    // cleanups from your previous exit to complete completely in RAM first.
-    //    yield return null;
-
-    //    SaveSystem.Continuing = save; // The level's PlayerSpawner picks it up safely now
-    //    Debug.Log($"[Play Menu Coroutine] Loaded Save committed safely to RAM. Scene: {save.sceneName}, Checkpoint: {save.checkpoint}");
-
-    //    if (!GameSession.StartOffline(save.sceneName))
-    //    {
-    //        SaveSystem.Continuing = null;
-    //        SetStatus("Couldn't start the offline game.");
-    //    }
-    //}
 
     public async void QuickMatch()
     {
