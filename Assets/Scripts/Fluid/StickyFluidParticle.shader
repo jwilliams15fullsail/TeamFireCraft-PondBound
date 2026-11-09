@@ -14,6 +14,9 @@ Shader "PondBound/StickyFluidParticle"
         _Translucency ("Translucency", Range(0, 1)) = 0.25
         _Refraction ("Refraction", Range(0, 0.1)) = 0.03
         _SmoothSurface ("Smooth Surface", Range(0, 1)) = 0.85
+        _Foam ("Foam", Range(0, 1)) = 0
+        _FoamSpeed ("Foam Speed", Range(0.1, 10)) = 2.5
+        _FoamColor ("Foam Color", Color) = (0.92, 0.96, 1, 1)
     }
 
     SubShader
@@ -50,6 +53,9 @@ Shader "PondBound/StickyFluidParticle"
             half _Translucency;
             half _Refraction;
             half _SmoothSurface;
+            half4 _FoamColor;
+            half _Foam;
+            half _FoamSpeed;
         CBUFFER_END
 
         struct Varyings
@@ -59,6 +65,8 @@ Shader "PondBound/StickyFluidParticle"
             float3 centerWS : TEXCOORD1;
             float3 fluidNormalWS : TEXCOORD2;   // outward goo normal, longer at the surface
             float thin : TEXCOORD3;             // 1 where the goo is stretched thin
+            float foam : TEXCOORD4;             // 1 where the water is fast or spraying
+            float radius : TEXCOORD5;           // drawn size, smaller for flying drops
         };
 
         static const float2 kCorners[6] =
@@ -77,12 +85,16 @@ Shader "PondBound/StickyFluidParticle"
             float3 right = UNITY_MATRIX_V[0].xyz;
             float3 up = UNITY_MATRIX_V[1].xyz;
 
-            Varyings o;
-            o.positionCS = TransformWorldToHClip(centerWS + (right * corner.x + up * corner.y) * _ParticleRadius);
+                       Varyings o;
+            float fill = p.density / _RestDensity;                // about 1 inside, lower at the edges and in flying drops
+            o.thin = saturate((0.85 - fill) * 2.0);
+            float spray = saturate((0.45 - fill) * 4.0);          // 1 for a drop flying on its own
+            o.foam = saturate(max(length(p.velocity) / _FoamSpeed - 1.0, spray)) * _Foam;
+            o.radius = _ParticleRadius * (1.0 - 0.5 * spray * _Foam);
+            o.positionCS = TransformWorldToHClip(centerWS + (right * corner.x + up * corner.y) * o.radius);
             o.uv = corner;
             o.centerWS = centerWS;
             o.fluidNormalWS = mul((float3x3)_SimToWorld, -p.normal);
-            o.thin = saturate((0.85 - p.density / _RestDensity) * 2.0);
             return o;
         }
 
@@ -95,7 +107,7 @@ Shader "PondBound/StickyFluidParticle"
             float3 up = UNITY_MATRIX_V[1].xyz;
             float3 back = UNITY_MATRIX_V[2].xyz;
             normalWS = right * i.uv.x + up * i.uv.y + back * sqrt(1.0 - r2);
-            positionWS = i.centerWS + normalWS * _ParticleRadius;
+            positionWS = i.centerWS + normalWS * i.radius;
         }
 
         float ClipDepth(float4 positionCS)
@@ -153,6 +165,9 @@ Shader "PondBound/StickyFluidParticle"
                 float2 bend = float2(dot(n, UNITY_MATRIX_V[0].xyz), dot(n, UNITY_MATRIX_V[1].xyz)) * _Refraction;
                 half3 behind = SampleSceneColor(screenUV - bend) * _BaseColor.rgb * 1.6;
                 color = lerp(color, behind, see);
+                
+                // White water where it is fast or spraying. Foam is 0 on the slime material.
+                color = lerp(color, _FoamColor.rgb * (0.45 + 0.55 * wrap) * light.color + SampleSH(n) * 0.25, i.foam);
 
                 // Wet highlight and rim
                 float3 halfDir = normalize(light.direction + v);

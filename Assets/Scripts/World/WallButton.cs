@@ -13,6 +13,8 @@ public class WallButton : NetworkBehaviour
     public HazardPower hazards;
     [Tooltip("Optional: a locked button that this one unlocks for good on its first press.")]
     public WallButton unlocks;
+    [Tooltip("Optional: locked pressure plates that work while this button is on (with Press Once, for good).")]
+    public PressurePlate[] unlocksPlates = new PressurePlate[0];
     [Tooltip("Stays on after the first press, instead of a second press switching it back off.")]
     [SerializeField] bool pressOnce;
     [Tooltip("Ignores the tongue until another button unlocks it.")]
@@ -48,8 +50,7 @@ public class WallButton : NetworkBehaviour
         isActive.Value = !isActive.Value;
         //================================================
         //For Objective Marker
-        if (completesObjective != null)
-            completesObjective.CompleteCurrentObjective();
+        ObjectiveSequence.Report(this);
         //================================================
         if (door != null)
             door.HoldOpen(this, isActive.Value);
@@ -57,6 +58,9 @@ public class WallButton : NetworkBehaviour
             hazards.HoldOff(this, isActive.Value);
         if (unlocks != null)
             unlocks.isUnlocked.Value = true;
+        foreach (PressurePlate plate in unlocksPlates)
+            if (plate != null)
+                plate.SetUnlocked(isActive.Value);
     }
     //void ResetButton()
     //{

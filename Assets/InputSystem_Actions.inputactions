@@ -145,6 +145,16 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "ReelWheel",
+                    "type": "Value",
+                    "id": "2b57a973-0211-40d8-b357-88431fbd97e1",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -557,17 +567,6 @@
                 },
                 {
                     "name": "",
-                    "id": "7db620ba-93dd-46bc-8e52-6898f0c07412",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "Reel",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "776ee114-eecc-4cb6-93fe-64adc2b9d435",
                     "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
@@ -640,6 +639,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Respawn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2f5b77ae-f1a3-4e79-afd1-8c5964922107",
+                    "path": "<Mouse>/position/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "ReelWheel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

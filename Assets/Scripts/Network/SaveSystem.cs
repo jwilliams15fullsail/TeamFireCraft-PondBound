@@ -18,6 +18,8 @@ public static class SaveSystem
     static string FilePath => Path.Combine(Application.persistentDataPath, "save.json");
 
     public static bool HasSave => File.Exists(FilePath);
+    // A save Continue can use: one made at a checkpoint, not just the start of a level.
+    public static bool HasCheckpointSave => Load() is SaveData save && save.checkpoint > 0;
 
     // Set by Continue, read by the level's PlayerSpawner as the level starts.
     public static SaveData Continuing { get; set; }

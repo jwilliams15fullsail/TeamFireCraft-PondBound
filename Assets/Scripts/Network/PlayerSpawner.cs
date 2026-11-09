@@ -93,10 +93,7 @@ public class PlayerSpawner : MonoBehaviour
         SaveData save = SaveSystem.Continuing;
         SaveSystem.Continuing = null;
         if (save == null || save.sceneName != gameObject.scene.name)
-        {
-            SaveSystem.Save(new SaveData { sceneName = gameObject.scene.name });
-            return;
-        }
+            return; // a new game: nothing is saved until the team reaches a checkpoint
         foreach (CheckpointManager each in FindObjectsByType<CheckpointManager>(FindObjectsInactive.Exclude))
         {
             if (each.Number == save.checkpoint)

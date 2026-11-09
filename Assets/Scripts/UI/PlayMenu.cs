@@ -14,6 +14,8 @@ public class PlayMenu : MonoBehaviour
     [SerializeField] SceneField gameScene;
     [Tooltip("Optional: the Continue button, so it's greyed out while there's no saved game.")]
     [SerializeField] Button continueButton;
+    [Tooltip("Optional: where the player types the name shown above their frog.")]
+    [SerializeField] TMP_InputField playerNameInput;
 
     [Header("Multiplayer panel")]
     [SerializeField] CanvasGroup multiplayerPanel;  // greyed out while a request is running
@@ -34,7 +36,15 @@ public class PlayMenu : MonoBehaviour
         SetStatus(GameSession.LastMessage ?? "");
         GameSession.LastMessage = null;
         if (continueButton != null)
-            continueButton.interactable = SaveSystem.HasSave; // greyed out until there's a save
+            continueButton.interactable = SaveSystem.HasCheckpointSave; // greyed out until a checkpoint has saved
+
+        // Your name above your frog. It's saved as you type, so it sticks between games.
+        if (playerNameInput != null)
+        {
+            playerNameInput.characterLimit = FrogIdentity.MaxNameLength;
+            playerNameInput.text = PlayerPrefs.GetString(FrogIdentity.NameKey, "");
+            playerNameInput.onValueChanged.AddListener(typed => PlayerPrefs.SetString(FrogIdentity.NameKey, typed.Trim()));
+        }
     }
 
     public void PlayOffline()
@@ -51,7 +61,7 @@ public class PlayMenu : MonoBehaviour
         if (busy)
             return;
         SaveData save = SaveSystem.Load();
-        if (save == null)
+        if (save == null || save.checkpoint <= 0)
         {
             SetStatus("No saved game yet.");
             return;

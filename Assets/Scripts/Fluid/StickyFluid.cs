@@ -1,7 +1,11 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+
 using UnityEngine;
+using UnityEngine.Events;
+
 using UnityEngine.Rendering;
+
 
 // Sticky, slime-like fluid simulated on the GPU with SPH (StickyFluid.compute)
 // and drawn with the PondBound/StickyFluidParticle shader.
@@ -45,8 +49,8 @@ public class StickyFluid : MonoBehaviour
     [Header("Particles")]
     [Tooltip("Gap between particles at rest, in metres. Smaller = finer goo, but many more particles. Read when the goo is built.")]
     [SerializeField, Range(0.02f, 0.1f)] float particleSpacing = 0.04f;
+    [Tooltip("Most particles this object can hold. Read when the goo is built (Play or Reset Fluid).")]
     [SerializeField, Min(1)] int maxParticles = 16384;
-    [Tooltip("Fill the spawn block with goo when the goo is built.")]
     [SerializeField] bool spawnBlock = true;
     [SerializeField] Vector3 spawnCenter = new Vector3(0f, -0.25f, 0f);
     [SerializeField] Vector3 spawnSize = new Vector3(0.6f, 0.3f, 0.6f);
@@ -58,6 +62,15 @@ public class StickyFluid : MonoBehaviour
     public bool emitting = true;
     [SerializeField, Min(0.1f)] float emitSpeed = 1f;
     [SerializeField, Min(0.01f)] float emitRadius = 0.06f;
+
+
+    [Header("Filling (optional)")]
+    [Tooltip("Stop pouring once the water reaches this share of the box height. 1 = keep pouring up to the lid.")]
+    [SerializeField, Range(0.05f, 1f)] float fillTarget = 1f;
+    [Tooltip("Optional Box Collider (Is Trigger) on this object. It grows with the water, so a StatRefillZone beside it only refills frogs that are in the water.")]
+    [SerializeField] BoxCollider waterVolume;
+    [Tooltip("Runs once when the water reaches Fill Target. It runs on every player's copy.")]
+    public UnityEvent onFilled = new UnityEvent();
 
     [Header("Goo")]
     [SerializeField] float restDensity = 1000f;
@@ -93,6 +106,14 @@ public class StickyFluid : MonoBehaviour
 
     public int ParticleCount => particleCount;
 
+
+    // Water height above the box floor, worked out from how much has been poured.
+    // Settled particles pack about 10% tighter than the spawn grid, hence the 0.9.
+    public float FillHeight => ready ? 0.9f * particleCount * mass / restDensity / (box.x * box.z) : 0f;
+
+    // FillHeight as a share of the box height: 0 = empty, 1 = up to the lid.
+    public float FillFraction => ready ? FillHeight / box.y : 0f;
+
     GraphicsBuffer particleBuffer, cellCountBuffer, cellParticleBuffer, colliderBuffer;
     Particle[] staging;
     readonly FluidCollider[] colliders = new FluidCollider[MaxColliders];
@@ -102,12 +123,13 @@ public class StickyFluid : MonoBehaviour
     readonly List<Vector2> nozzle = new List<Vector2>();
     MaterialPropertyBlock props;
     Vector3Int gridSize;
-    int cellCount, particleCount, colliderCount;
+    int cellCount, particleCount, colliderCount, capacity;
     Vector3 box;          // Box Size and Particle Spacing as they were when the goo was built
     float spacing, h, mass, emitTimer;
     int kClear, kBuild, kDensity, kNormals, kForces, kIntegrate;
     int[] kernels;
     bool ready;
+    bool filled;
 
     void OnEnable()
     {
@@ -136,6 +158,30 @@ public class StickyFluid : MonoBehaviour
         Build();
     }
 
+
+#if UNITY_EDITOR
+    [ContextMenu("Use Water Settings")]
+    void UseWaterSettings() => ApplySettings("Water", 0.05f, 150f, 0.15f, 0.5f, 10f, 0f, 0.05f, 0f, 0.1f);
+
+    [ContextMenu("Use Slime Settings")]
+    void UseSlimeSettings() => ApplySettings("Slime", 0.04f, 80f, 0.9f, 3f, 5f, 5f, 0.95f, 5f, 0.95f);
+
+    void ApplySettings(string label, float newSpacing, float newStiffness, float newThickness, float newTension,
+        float newMaxSpeed, float wallAdhesion, float wallFriction, float frogAdhesion, float frogFriction)
+    {
+        UnityEditor.Undo.RecordObject(this, $"Use {label} Settings");
+        particleSpacing = newSpacing;
+        stiffness = newStiffness;
+        thickness = newThickness;
+        surfaceTension = newTension;
+        maxSpeed = newMaxSpeed;
+        containerAdhesion = wallAdhesion;
+        containerFriction = wallFriction;
+        colliderAdhesion = frogAdhesion;
+        colliderFriction = frogFriction;
+    }
+#endif
+
     void Build()
     {
         box = boxSize;
@@ -146,12 +192,13 @@ public class StickyFluid : MonoBehaviour
             Mathf.Max(1, Mathf.CeilToInt(box.y / h)),
             Mathf.Max(1, Mathf.CeilToInt(box.z / h)));
         cellCount = gridSize.x * gridSize.y * gridSize.z;
-
-        particleBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, maxParticles, ParticleStride);
+        capacity = maxParticles;
+        particleBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, capacity, ParticleStride);
+        
         cellCountBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, cellCount, sizeof(uint));
         cellParticleBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, cellCount * MaxPerCell, sizeof(uint));
         colliderBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, MaxColliders, ColliderStride);
-        staging = new Particle[maxParticles];
+        staging = new Particle[capacity];
         props ??= new MaterialPropertyBlock();
 
         kClear = simulation.FindKernel("ClearGrid");
@@ -177,10 +224,17 @@ public class StickyFluid : MonoBehaviour
                 }
         mass = restDensity / (Poly6(h) * sum);
 
+
+        // Say so straight away if Max Particles can't hold enough water to reach Fill Target.
+        float needed = fillTarget * box.x * box.y * box.z * restDensity / (0.9f * mass);
+        if (emitter != null && fillTarget < 1f && needed > capacity)
+            Debug.LogWarning($"{name}: Max Particles ({capacity}) runs out before Fill Target. Set it to at least {Mathf.CeilToInt(needed)}.", this);
+
         BuildNozzle();
         particleCount = 0;
         colliderCount = 0;
         emitTimer = 0f;
+        filled = false;
         lastCenters.Clear();
         centers.Clear();
         if (spawnBlock) SpawnBlock();
@@ -206,6 +260,7 @@ public class StickyFluid : MonoBehaviour
         if (frameTime > 0f)
         {
             Emit(frameTime);
+            UpdateFill();
             GatherColliders(frameTime);
 
             if (particleCount > 0)
@@ -288,7 +343,7 @@ public class StickyFluid : MonoBehaviour
             for (int y = 0; y < ny; y++)
                 for (int x = 0; x < nx; x++)
                 {
-                    if (particleCount + added >= maxParticles) break;
+                    if (particleCount + added >= capacity) break;
                     Vector3 p = start + new Vector3(x, y, z) * spacing + Random.insideUnitSphere * (0.05f * spacing);
                     if (Mathf.Abs(p.x) > limit.x || Mathf.Abs(p.y) > limit.y || Mathf.Abs(p.z) > limit.z) continue;
                     staging[added++] = new Particle { position = p, density = restDensity };
@@ -311,7 +366,7 @@ public class StickyFluid : MonoBehaviour
     // Pours one disc of particles every time the stream has moved one Particle Spacing.
     void Emit(float frameTime)
     {
-        if (emitter == null || !emitting || particleCount >= maxParticles) return;
+        if (emitter == null || !emitting || filled || particleCount >= capacity) return;
 
         emitTimer = Mathf.Min(emitTimer + frameTime, 0.25f);
         float interval = spacing / emitSpeed;
@@ -319,7 +374,7 @@ public class StickyFluid : MonoBehaviour
         Vector3 velocity = toLocal * emitter.forward * emitSpeed;
         int added = 0;
 
-        while (emitTimer >= interval && particleCount + added + nozzle.Count <= maxParticles)
+        while (emitTimer >= interval && particleCount + added + nozzle.Count <= capacity)
         {
             emitTimer -= interval;
             Vector3 travelled = velocity * emitTimer;
@@ -338,6 +393,25 @@ public class StickyFluid : MonoBehaviour
         if (added == 0) return;
         particleBuffer.SetData(staging, 0, particleCount, added);
         particleCount += added;
+    }
+
+
+    // Moves the optional water trigger to the water height, and stops pouring at Fill Target.
+    void UpdateFill()
+    {
+        if (waterVolume != null)
+        {
+            float height = FillHeight;
+            waterVolume.enabled = height > spacing;
+            waterVolume.size = new Vector3(box.x, Mathf.Max(height, 0.01f), box.z);
+            waterVolume.center = new Vector3(0f, (height - box.y) * 0.5f, 0f);
+        }
+
+        if (!filled && FillFraction >= fillTarget)
+        {
+            filled = true;
+            onFilled.Invoke();
+        }
     }
 
     // Finds the colliders touching the box and sends them to the GPU in local space.
