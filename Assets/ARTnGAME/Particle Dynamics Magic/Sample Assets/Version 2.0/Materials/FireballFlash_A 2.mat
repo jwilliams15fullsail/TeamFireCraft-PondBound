@@ -1,0 +1,150 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: FireballFlash_A 2
+  m_Shader: {fileID: 4800000, guid: 730f40e8ffddb05469f48b6a9daa062a, type: 3}
+  m_ShaderKeywords: _COLORADDSUBDIFF_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - SHADOWCASTER
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: a6f125f698cd37a4ba7d3a56b8783a40, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BorderTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1.06, y: 2.83}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Diffuse:
+        m_Texture: {fileID: 2800000, guid: a6f125f698cd37a4ba7d3a56b8783a40, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FinalTex:
+        m_Texture: {fileID: 2800000, guid: a6f125f698cd37a4ba7d3a56b8783a40, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: e26e1b80a0281a449ad76661a721e567, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normal:
+        m_Texture: {fileID: 2800000, guid: a6f125f698cd37a4ba7d3a56b8783a40, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normals:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Refraction:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AlphaClip: 0
+    - _Blend: 0
+    - _BlendOp: 0
+    - _BulgeScale: 0.2
+    - _BulgeScale_copy: 1.2
+    - _BulgeShape: 5
+    - _BumpScale: 1
+    - _CameraFadingEnabled: 0
+    - _CameraFarFadeDistance: 2
+    - _CameraNearFadeDistance: 1
+    - _ColorMode: 1
+    - _Cull: 0
+    - _Cutoff: 0.739
+    - _DistortionBlend: 0.5
+    - _DistortionEnabled: 0
+    - _DistortionStrength: 1
+    - _DistortionStrengthScaled: 0.1
+    - _DstBlend: 10
+    - _EdgeFade: 1
+    - _FlipbookBlending: 0
+    - _FlipbookMode: 0
+    - _Glossiness: 0
+    - _Glow: 0.35
+    - _GlowIntensity: 1.2
+    - _Intensity: 1
+    - _InvFade: 1
+    - _LightIntensity: 3.88
+    - _Metallic: 0.13
+    - _MinLight: -0.38
+    - _Mode: 0
+    - _QueueOffset: 0
+    - _RandYScale: 1
+    - _ReceiveShadows: 1
+    - _RefractionIntensity: 0.1
+    - _RefractionIntensity_copy: 0.3
+    - _RippleScale: 0
+    - _Shininess: 0.7
+    - _Smoothness: 1
+    - _SoftParticlesEnabled: 0
+    - _SoftParticlesFarFadeDistance: 1
+    - _SoftParticlesNearFadeDistance: 0
+    - _SrcBlend: 5
+    - _Strength: 0.16
+    - _SunLightIntensity: 0.58
+    - _Surface: 1
+    - _ZWrite: 0
+    - _bodyDist: 1
+    - _effectPower: 44
+    - _fadeFalloff: 2
+    - _fadePower: 22
+    - _falloffPower: 5
+    - _worldBase: 1
+    m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 0.21960784}
+    - _BaseColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
+    - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorTrans: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _Diffuse: {r: 0.9019608, g: 0.7019608, b: 0.37647057, a: 1}
+    - _EmisColor: {r: 0.6981132, g: 0.6981132, b: 0.6981132, a: 0.69411767}
+    - _Emission: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GlowColor: {r: 1, g: 0.23914805, b: 0.11029408, a: 1}
+    - _LightWrapping: {r: 0.9058824, g: 0.49411756, b: 0.49019605, a: 1}
+    - _OceanCenter: {r: 0, g: 0, b: 0, a: 0}
+    - _Params1: {r: 1, g: 1, b: 0.8, a: 0}
+    - _Params2: {r: 1, g: 1, b: 0.8, a: 0}
+    - _Scale: {r: 1, g: 0.5, b: 0.5, a: 0}
+    - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}
+    - _SpecColor: {r: 1, g: 1, b: 1, a: 0}
+    - _SunColor: {r: 1, g: 1, b: 1, a: 0}
+    - _TimeControl1: {r: 1, g: 10, b: 0.02, a: 100}
+    - _TintColor: {r: 1, g: 1, b: 1, a: 0.7607843}
+    - _WaveControl1: {r: 1, g: 0.01, b: 0.001, a: 0}
+    - _bodyPos: {r: 21.69, g: 1.35, b: 0, a: 1}
+    - brightness: {r: 1, g: 1, b: 1, a: 1}
+--- !u!1002 &2100001
+EditorExtensionImpl:
+  serializedVersion: 6

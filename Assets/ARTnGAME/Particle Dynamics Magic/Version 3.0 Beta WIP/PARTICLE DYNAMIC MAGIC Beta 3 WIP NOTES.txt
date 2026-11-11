@@ -1,0 +1,39 @@
+This is the folder where the new Beta v3.0 WIP will be hosted, the new work involved a custom GPU particle system
+based on Keijiro Kvant Spray MIT licensed project (https://github.com/keijiro), which will be extended and adapted to work in all cases.
+
+A 3D fluid system (MIT license) has also been added and will be the base for fluid interaction with particles
+and other modules. This module is hosted in ARTnGAME -> CommonTools folder, as it may have use in other ARTnGAME assets
+in future.
+
+The extra work involves adapting 3D fluids with the GPU particles to create new effects and general flow effects.
+
+Work done so far (beyond the base Keijiro projects)
+- Added cutout shader for the GPU particles
+- Added optimizer for the 3D fluid system so can run at good frame rates, still need a strong PC if high quality
+is to be used
+
+Roadmap
+- Add full transparent mode for particles
+- Convert the systems for URP and HDRP (currently only support Stanard Pipeline)
+- Add 2D fluid solver
+- Adapt 3D and 2D fluids to drive the GPU particles for dynamic interactive effects
+- Adapt system to render obstacle map and pass to the shader for dynamic objects interaction
+- Integration with splines and other Particle Dynamic Magic modules for control of particles
+
+Note that this work is in progress and experimental, the final release will follow after the 
+completion of the road map above. 
+
+The main demos of the system are the following scenes
+"PDM 1.2 DEMO 1. Effects showcase SPLINES and LIGHTNING" 
+"PDM 1.5 DEMO Effects showcase FIRE and ICE"
+"PDM 2.0 DEMO U56 AMOEBA MESH EMIT"
+"PDM 2.5 DEMO U56 MAIN" 
+
+Each demo represents one major upgrade of the system with new effects, so all demos include unique features.
+
+The system also offers a number of prefabs with the various possibilities and sub systems for direct use
+and clean setup beyond the demo scenes of the various effects. The prefabs can be instantiated directly from
+the Window -> Particle Dynamic Magic -> Effects Library 1 & 2
+
+The Beta 3.0 Demo will include the WIP items and will be expanded as the Beta work progresses. 
+Prefabs for v3.0 will be provided during the progress of the work, in a separate library.

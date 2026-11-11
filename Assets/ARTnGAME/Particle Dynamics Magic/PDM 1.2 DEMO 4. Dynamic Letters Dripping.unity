@@ -1,0 +1,2637 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!29 &1
+OcclusionCullingSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_OcclusionBakeSettings:
+    smallestOccluder: 5
+    smallestHole: 0.25
+    backfaceThreshold: 100
+  m_SceneGUID: 00000000000000000000000000000000
+  m_OcclusionCullingData: {fileID: 0}
+--- !u!104 &2
+RenderSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 9
+  m_Fog: 1
+  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogMode: 3
+  m_FogDensity: 0.0006
+  m_LinearFogStart: 0
+  m_LinearFogEnd: 300
+  m_AmbientSkyColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  m_AmbientEquatorColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  m_AmbientGroundColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  m_AmbientIntensity: 1
+  m_AmbientMode: 3
+  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
+  m_SkyboxMaterial: {fileID: 0}
+  m_HaloStrength: 0.5
+  m_FlareStrength: 1
+  m_FlareFadeSpeed: 3
+  m_HaloTexture: {fileID: 0}
+  m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
+  m_DefaultReflectionMode: 0
+  m_DefaultReflectionResolution: 128
+  m_ReflectionBounces: 1
+  m_ReflectionIntensity: 1
+  m_CustomReflection: {fileID: 0}
+  m_Sun: {fileID: 0}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_UseRadianceAmbientProbe: 0
+--- !u!157 &4
+LightmapSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 12
+  m_GIWorkflowMode: 1
+  m_GISettings:
+    serializedVersion: 2
+    m_BounceScale: 1
+    m_IndirectOutputScale: 1
+    m_AlbedoBoost: 1
+    m_EnvironmentLightingMode: 0
+    m_EnableBakedLightmaps: 1
+    m_EnableRealtimeLightmaps: 0
+  m_LightmapEditorSettings:
+    serializedVersion: 12
+    m_Resolution: 1
+    m_BakeResolution: 50
+    m_AtlasSize: 1024
+    m_AO: 1
+    m_AOMaxDistance: 1
+    m_CompAOExponent: 1
+    m_CompAOExponentDirect: 0
+    m_ExtractAmbientOcclusion: 0
+    m_Padding: 2
+    m_LightmapParameters: {fileID: 0}
+    m_LightmapsBakeMode: 1
+    m_TextureCompression: 0
+    m_FinalGather: 0
+    m_FinalGatherFiltering: 1
+    m_FinalGatherRayCount: 256
+    m_ReflectionCompression: 2
+    m_MixedBakeMode: 1
+    m_BakeBackend: 0
+    m_PVRSampling: 1
+    m_PVRDirectSampleCount: 32
+    m_PVRSampleCount: 500
+    m_PVRBounces: 2
+    m_PVREnvironmentSampleCount: 500
+    m_PVREnvironmentReferencePointCount: 2048
+    m_PVRFilteringMode: 0
+    m_PVRDenoiserTypeDirect: 0
+    m_PVRDenoiserTypeIndirect: 0
+    m_PVRDenoiserTypeAO: 0
+    m_PVRFilterTypeDirect: 0
+    m_PVRFilterTypeIndirect: 0
+    m_PVRFilterTypeAO: 0
+    m_PVREnvironmentMIS: 0
+    m_PVRCulling: 1
+    m_PVRFilteringGaussRadiusDirect: 1
+    m_PVRFilteringGaussRadiusIndirect: 5
+    m_PVRFilteringGaussRadiusAO: 2
+    m_PVRFilteringAtrousPositionSigmaDirect: 0.5
+    m_PVRFilteringAtrousPositionSigmaIndirect: 2
+    m_PVRFilteringAtrousPositionSigmaAO: 1
+    m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
+  m_LightingDataAsset: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 97dca9cd4838b844d97ee324235155bf,
+    type: 2}
+--- !u!196 &5
+NavMeshSettings:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_BuildSettings:
+    serializedVersion: 2
+    agentTypeID: 0
+    agentRadius: 0.5
+    agentHeight: 2
+    agentSlope: 45
+    agentClimb: 0.4
+    ledgeDropHeight: 0
+    maxJumpAcrossDistance: 0
+    minRegionArea: 2
+    manualCellSize: 0
+    cellSize: 0.16666666
+    manualTileSize: 0
+    tileSize: 256
+    accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
+    debug:
+      m_Flags: 0
+  m_NavMeshData: {fileID: 0}
+--- !u!1 &407519511
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 407519512}
+  - component: {fileID: 407519515}
+  - component: {fileID: 407519514}
+  - component: {fileID: 407519513}
+  m_Layer: 0
+  m_Name: Sphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &407519512
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 407519511}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 6.2601542, y: 6.2601542, z: 6.2601542}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1119824194}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &407519513
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 407519511}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 4294967295
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: bb70bff5abd15314eabb4af1e886ce17, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!135 &407519514
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 407519511}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &407519515
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 407519511}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &500086946
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 500086950}
+  - component: {fileID: 500086949}
+  - component: {fileID: 500086948}
+  - component: {fileID: 500086947}
+  m_Layer: 0
+  m_Name: Sphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!23 &500086947
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500086946}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 4294967295
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: bb70bff5abd15314eabb4af1e886ce17, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!135 &500086948
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500086946}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &500086949
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500086946}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &500086950
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500086946}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 6.2601542, y: 6.2601542, z: 6.2601542}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 994024481}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &582264626
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 582264631}
+  - component: {fileID: 582264630}
+  - component: {fileID: 582264628}
+  - component: {fileID: 582264627}
+  m_Layer: 0
+  m_Name: 00 Main Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!81 &582264627
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582264626}
+  m_Enabled: 1
+--- !u!124 &582264628
+Behaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582264626}
+  m_Enabled: 1
+--- !u!20 &582264630
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582264626}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.06666667, g: 0.06666667, b: 0.16078432, a: 0.019607844}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_FocalLength: 50
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 3049.3
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 0
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!4 &582264631
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582264626}
+  m_LocalRotation: {x: 0.036207665, y: 0, z: 0, w: 0.9993443}
+  m_LocalPosition: {x: 452.2192, y: -261.95654, z: -904.264}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &994024480
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 994024481}
+  - component: {fileID: 994024482}
+  m_Layer: 0
+  m_Name: 0_Unerline
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &994024481
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 994024480}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -502.97028, y: 289.24246, z: 363.6071}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 500086950}
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &994024482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 994024480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83d7beda61c919740974df55b8518aee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Multithreaded: 0
+  DefineRotations: 0
+  Curve1: []
+  last_object_position_inspector_saw: {x: -502.97028, y: 289.24246, z: 363.6071}
+  control_points_children: []
+  last_object_rotation_inspector_saw: {x: -0, y: 0, z: 0}
+  last_object_scale_inspector_saw: {x: 0, y: 0, z: 0}
+  Handle_scale: 6.5
+  Thead_finished: 1
+  show_controls_play_mode: 0
+  show_controls_edit_mode: 1
+  Initialized: 0
+  Sphere_particles: {fileID: 0}
+  loop: 0
+  parent_moving: {fileID: 500086946}
+  Curve:
+  - position: {x: -502.07605, y: 289.25275, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -391.0384, y: 292.0489, z: 363.63168}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -288.93243, y: 298.18643, z: 363.70087}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -194.90182, y: 307.1332, z: 363.80756}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -108.09039, y: 318.35715, z: 363.94473}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -27.641876, y: 331.3261, z: 364.10535}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 47.299988, y: 345.50793, z: 364.2824}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 117.59137, y: 360.37054, z: 364.4688}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 184.08862, y: 375.3818, z: 364.6576}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 247.64795, y: 390.00958, z: 364.84167}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 309.12573, y: 403.72174, z: 365.01404}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 369.37793, y: 415.9862, z: 365.1676}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 429.261, y: 426.2708, z: 365.2954}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 489.6311, y: 434.04346, z: 365.39038}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 551.3445, y: 438.77197, z: 365.4455}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 615.25757, y: 439.9243, z: 365.4537}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 682.2263, y: 436.96826, z: 365.408}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 753.1073, y: 429.37177, z: 365.30127}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 828.7565, y: 416.6026, z: 365.1266}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 910.0299, y: 398.1288, z: 364.87683}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 997.7844, y: 373.41812, z: 364.54504}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1092.8761, y: 341.93848, z: 364.1241}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1196.1608, y: 303.15784, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.9298235, y: -0.36797318, z: -0.0049007856}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1196.1608, y: 303.15784, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1241.1556, y: 285.86066, z: 363.40048}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1285.1055, y: 269.78458, z: 363.2533}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1327.8613, y: 254.67209, z: 363.15524}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1369.274, y: 240.2657, z: 363.09622}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1409.1945, y: 226.30788, z: 363.066}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1447.4736, y: 212.54109, z: 363.0544}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1483.9624, y: 198.70782, z: 363.05124}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1518.5115, y: 184.5506, z: 363.04636}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1550.972, y: 169.81186, z: 363.0295}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1581.195, y: 154.23407, z: 362.9906}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1609.031, y: 137.55978, z: 362.91937}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1634.3313, y: 119.5314, z: 362.80566}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1656.9464, y: 99.89145, z: 362.6393}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1676.7275, y: 78.382355, z: 362.41013}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1693.5255, y: 54.746704, z: 362.1079}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1707.1912, y: 28.726898, z: 361.72247}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1717.5754, y: 0.06542969, z: 361.24362}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1724.5293, y: -31.495178, z: 360.66122}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1727.9036, y: -66.212524, z: 359.96506}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1727.5492, y: -104.344025, z: 359.14496}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1723.317, y: -146.14725, z: 358.1907}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1715.058, y: -191.87961, z: 357.0922}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: -0.21108875, y: -0.9771719, z: -0.024010459}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1715.058, y: -191.87961, z: 357.0922}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1664.5039, y: -353.56006, z: 353.08707}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1592.2932, y: -480.28165, z: 349.8739}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1500.7377, y: -575.5582, z: 347.36304}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1392.149, y: -642.9038, z: 345.46478}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1268.839, y: -685.83215, z: 344.0895}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1133.1194, y: -707.8574, z: 343.1475}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 987.302, y: -712.49304, z: 342.5491}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 833.6985, y: -703.2534, z: 342.20468}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 674.6207, y: -683.65234, z: 342.02454}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 512.3804, y: -657.2035, z: 341.919}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 349.28918, y: -627.4209, z: 341.79843}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 187.65881, y: -597.8186, z: 341.57315}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 29.80127, y: -571.9104, z: 341.15347}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -121.9718, y: -553.20996, z: 340.44977}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -265.34888, y: -545.2317, z: 339.3723}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -398.0177, y: -551.48926, z: 337.83148}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -517.6666, y: -575.4961, z: 335.7376}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -621.98425, y: -620.7666, z: 333.001}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -708.6588, y: -690.8154, z: 329.53204}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -775.3783, y: -789.155, z: 325.241}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -819.83044, y: -919.2988, z: 320.03824}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -839.70483, y: -1084.7638, z: 313.83408}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: -0.03692455, y: -0.9986515, z: -0.0364939}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -839.70483, y: -1084.7638, z: 313.83408}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -839.6157, y: -1100.9576, z: 313.24557}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -838.11017, y: -1115.0264, z: 312.7411}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -835.25055, y: -1127.123, z: 312.31467}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -831.09924, y: -1137.4011, z: 311.96036}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -825.7186, y: -1146.0138, z: 311.67215}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -819.17114, y: -1153.1144, z: 311.44418}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -811.5192, y: -1158.8561, z: 311.27045}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -802.82513, y: -1163.3923, z: 311.14502}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -793.15137, y: -1166.8762, z: 311.06192}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -782.56036, y: -1169.4612, z: 311.01523}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -771.1144, y: -1171.3005, z: 310.99896}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -758.8759, y: -1172.5474, z: 311.0072}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -745.9073, y: -1173.3551, z: 311.03397}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -732.271, y: -1173.877, z: 311.0733}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -718.02936, y: -1174.2664, z: 311.11932}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -703.24475, y: -1174.6763, z: 311.166}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -687.9796, y: -1175.2604, z: 311.2074}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -672.2964, y: -1176.1716, z: 311.23758}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -656.25745, y: -1177.5635, z: 311.2506}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -639.92505, y: -1179.5892, z: 311.2405}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -623.3618, y: -1182.4021, z: 311.20132}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -606.63, y: -1186.1552, z: 311.12714}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.9690922, y: -0.24663958, z: -0.0054061366}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -606.63, y: -1186.1552, z: 311.12714}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -543.0815, y: -1202.1387, z: 310.78952}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -484.8801, y: -1216.3519, z: 310.51443}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -431.48163, y: -1228.8896, z: 310.29736}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -382.3418, y: -1239.8464, z: 310.1337}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -336.91626, y: -1249.3169, z: 310.01886}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -294.6607, y: -1257.3956, z: 309.9483}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -255.03091, y: -1264.1774, z: 309.91742}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -217.48254, y: -1269.7566, z: 309.92163}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -181.47125, y: -1274.2279, z: 309.9564}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -146.45282, y: -1277.6862, z: 310.0171}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -111.882904, y: -1280.2257, z: 310.09918}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -77.217224, y: -1281.9413, z: 310.19806}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -41.911438, y: -1282.9275, z: 310.30917}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -5.4213257, y: -1283.2789, z: 310.42792}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 32.797485, y: -1283.0903, z: 310.54977}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 73.289185, y: -1282.4562, z: 310.6701}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 116.598145, y: -1281.4711, z: 310.78433}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 163.26868, y: -1280.2299, z: 310.88794}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 213.8451, y: -1278.8269, z: 310.97632}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 268.87152, y: -1277.3569, z: 311.04486}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 328.89246, y: -1275.9146, z: 311.08905}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 394.4519, y: -1274.5946, z: 311.10428}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.99983954, y: 0.017913485, z: -0.000011526877}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 394.4519, y: -1274.5946, z: 311.10428}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 472.3794, y: -1274.3593, z: 311.10342}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 544.6073, y: -1276.2771, z: 311.10272}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 611.64246, y: -1279.9333, z: 311.10217}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 673.9917, y: -1284.9128, z: 311.10178}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 732.16174, y: -1290.8007, z: 311.10147}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 786.6595, y: -1297.182, z: 311.1013}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 837.9917, y: -1303.6418, z: 311.1012}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 886.66516, y: -1309.7654, z: 311.1012}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 933.1868, y: -1315.1373, z: 311.1013}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 978.06335, y: -1319.343, z: 311.10144}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1021.8015, y: -1321.9675, z: 311.10162}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1064.9084, y: -1322.5958, z: 311.10187}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1107.8905, y: -1320.8129, z: 311.10214}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1151.2549, y: -1316.2039, z: 311.10242}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1195.5083, y: -1308.3539, z: 311.10272}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1241.1572, y: -1296.8479, z: 311.10303}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1288.709, y: -1281.271, z: 311.1033}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1338.6702, y: -1261.2083, z: 311.10355}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1391.5474, y: -1236.2448, z: 311.10376}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1447.8479, y: -1205.9653, z: 311.1039}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1508.0779, y: -1169.9553, z: 311.10403}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1572.7448, y: -1127.7998, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.8282455, y: 0.56036544, z: -0.000000100939424}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1572.7448, y: -1127.7998, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1595.9847, y: -1111.3423, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1616.281, y: -1095.4535, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1633.8812, y: -1080.0337, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1649.0327, y: -1064.983, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1661.983, y: -1050.2021, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1672.9796, y: -1035.5911, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1682.2701, y: -1021.0501, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1690.102, y: -1006.47974, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1696.7229, y: -991.7801, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1702.3801, y: -976.85156, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1707.3212, y: -961.5944, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1711.7937, y: -945.90894, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1716.0452, y: -929.69543, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1720.323, y: -912.85425, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1724.8748, y: -895.28564, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1729.9481, y: -876.88995, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1735.7903, y: -857.56744, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1742.6492, y: -837.2184, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1750.7719, y: -815.74316, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1760.406, y: -793.042, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1771.7993, y: -769.01526, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1785.199, y: -743.56323, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.4838832, y: 0.8751326, z: -0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  follow_curve: 1
+  Start_Point_object: {x: 89.735344, y: 14.753601, z: 367.27374}
+  Keep_last_pos: {x: -502.97028, y: 289.24246, z: 363.6071}
+  Keep_last_rot: {x: 0, y: 0, z: 0}
+  Scale_curve: 1
+  Keep_last_scale: 1
+  Motion_Speed: 7.3
+  Game_Mode_On: 0
+  Alter_mode: 0
+  Alter_mode2: 0
+  Accelerate: 0
+  Always_on: 0
+  Add_point: 0
+  With_manip: 0
+  Add_mid_point: 0
+  Add_in_Segment: 1
+  Node_toggle_dist: 1
+  repainted: 0
+  spread_frames: 0
+  Desynch: 0
+  NODES_DISABLED: 0
+  Start_Point: {x: 89.735344, y: 14.753601, z: 367.27374}
+  SplinePoints:
+  - position: {x: -502.07605, y: 289.25275, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.99996644, y: 0.008187682, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1196.1608, y: 303.15784, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.9298235, y: -0.36797318, z: -0.0049007856}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1715.058, y: -191.87961, z: 357.0922}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: -0.21108875, y: -0.9771719, z: -0.024010459}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -839.70483, y: -1084.7638, z: 313.83408}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: -0.03692455, y: -0.9986515, z: -0.0364939}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -606.63, y: -1186.1552, z: 311.12714}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.9690922, y: -0.24663958, z: -0.0054061366}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 394.4519, y: -1274.5946, z: 311.10428}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.99983954, y: 0.017913485, z: -0.000011526877}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1572.7448, y: -1127.7998, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.8282455, y: 0.56036544, z: -0.000000100939424}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1785.199, y: -743.56323, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.4838832, y: 0.8751326, z: -0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  Overide_seg_detail: 
+  PointGizmo_On: 1
+  extended: 0
+  CurveQuality: 22
+  rotate_mode: 0
+--- !u!1 &1119824192
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1119824194}
+  - component: {fileID: 1119824193}
+  m_Layer: 0
+  m_Name: 0_Unerline2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1119824193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119824192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83d7beda61c919740974df55b8518aee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Multithreaded: 0
+  DefineRotations: 0
+  Curve1: []
+  last_object_position_inspector_saw: {x: -524.9868, y: -113.127686, z: 363.6071}
+  control_points_children: []
+  last_object_rotation_inspector_saw: {x: -0, y: 0, z: 0}
+  last_object_scale_inspector_saw: {x: 0, y: 0, z: 0}
+  Handle_scale: 6.5
+  Thead_finished: 1
+  show_controls_play_mode: 0
+  show_controls_edit_mode: 1
+  Initialized: 0
+  Sphere_particles: {fileID: 0}
+  loop: 0
+  parent_moving: {fileID: 407519511}
+  Curve:
+  - position: {x: -524.0926, y: -113.11743, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -413.35413, y: -111.440125, z: 363.63754}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -312.08868, y: -108.44601, z: 363.7232}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -219.35452, y: -104.34753, z: 363.85535}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -134.20996, y: -99.35714, z: 364.02524}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -55.713196, y: -93.6873, z: 364.22415}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 17.077454, y: -87.55046, z: 364.4434}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 85.10358, y: -81.15909, z: 364.67426}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 149.30719, y: -74.72562, z: 364.90802}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 210.6297, y: -68.46252, z: 365.136}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 270.01324, y: -62.582237, z: 365.34943}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 328.3991, y: -57.29723, z: 365.53964}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 386.72943, y: -52.81996, z: 365.6979}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 445.9455, y: -49.362854, z: 365.81552}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 506.98932, y: -47.138412, z: 365.88376}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 570.8027, y: -46.35904, z: 365.89392}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 638.3271, y: -47.237206, z: 365.8373}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 710.50433, y: -49.9854, z: 365.70517}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 788.2763, y: -54.816055, z: 365.48883}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 872.5844, y: -61.941616, z: 365.17957}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 964.3704, y: -71.5745, z: 364.76865}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1064.5769, y: -83.92729, z: 364.24738}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1174.1442, y: -99.21228, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.98937243, y: -0.14527652, z: -0.006069103}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1174.1442, y: -99.21228, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1210.698, y: -103.474724, z: 363.4492}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1246.9828, y: -105.73125, z: 363.4117}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1282.8538, y: -106.326, z: 363.47464}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1318.1658, y: -105.60312, z: 363.61792}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1352.774, y: -103.90677, z: 363.82147}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1386.5337, y: -101.581085, z: 364.0653}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1419.2999, y: -98.97023, z: 364.32938}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1450.9277, y: -96.41834, z: 364.59363}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1481.2721, y: -94.26956, z: 364.838}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1510.1884, y: -92.86804, z: 365.04254}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1537.5315, y: -92.55794, z: 365.18713}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1563.1567, y: -93.683395, z: 365.25177}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1586.919, y: -96.58854, z: 365.2164}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1608.6735, y: -101.61756, z: 365.06104}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1628.2753, y: -109.11459, z: 364.76556}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1645.5795, y: -119.42373, z: 364.31}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1660.4412, y: -132.8892, z: 363.67426}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1672.7156, y: -149.8551, z: 362.83835}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1682.2577, y: -170.66565, z: 361.78223}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1688.9226, y: -195.66486, z: 360.48584}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1692.5656, y: -225.19711, z: 358.92917}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1693.0414, y: -259.6062, z: 357.0922}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: -0.03121047, y: -0.9980763, z: -0.05356885}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1693.0414, y: -259.6062, z: 357.0922}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1675.0723, y: -418.9352, z: 348.25784}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1633.7526, y: -541.5828, z: 340.87653}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1571.1826, y: -631.17584, z: 334.82837}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1489.4626, y: -691.3412, z: 329.99356}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1390.6932, y: -725.7057, z: 326.25226}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1276.9745, y: -737.8961, z: 323.48462}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1150.407, y: -731.53937, z: 321.57083}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1013.0911, y: -710.2623, z: 320.39102}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 867.127, y: -677.6918, z: 319.82535}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 714.6152, y: -637.4546, z: 319.75403}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 557.6561, y: -593.1775, z: 320.0572}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 398.3496, y: -548.48804, z: 320.61496}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 238.79663, y: -507.01147, z: 321.30756}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 81.09729, y: -472.37646, z: 322.01514}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -72.64807, y: -448.20874, z: 322.6178}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -220.33923, y: -438.13574, z: 322.99582}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -359.87537, y: -445.78345, z: 323.02927}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -489.15588, y: -474.78003, z: 322.59833}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -606.08215, y: -528.751, z: 321.5832}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -708.55164, y: -611.323, z: 319.86398}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -794.46497, y: -726.12476, z: 317.3209}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -861.72144, y: -876.7826, z: 313.83408}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: -0.31931373, y: -0.9473864, z: -0.022310855}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -861.72144, y: -876.7826, z: 313.83408}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -868.6311, y: -899.76337, z: 313.31064}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -873.3405, y: -921.0891, z: 312.8599}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -875.92975, y: -940.8657, z: 312.47662}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -876.47876, y: -959.19885, z: 312.1557}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -875.06744, y: -976.19446, z: 311.89194}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -871.7758, y: -991.9583, z: 311.68008}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -866.6839, y: -1006.5962, z: 311.51505}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -859.87164, y: -1020.214, z: 311.39157}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -851.41895, y: -1032.9175, z: 311.3045}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -841.4058, y: -1044.8124, z: 311.24866}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -829.91235, y: -1056.0046, z: 311.21884}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -817.0183, y: -1066.6001, z: 311.2099}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -802.80383, y: -1076.7043, z: 311.2166}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -787.3488, y: -1086.4235, z: 311.23383}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -770.7333, y: -1095.863, z: 311.25635}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -753.0371, y: -1105.1292, z: 311.279}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -734.34033, y: -1114.3273, z: 311.29657}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -714.7229, y: -1123.5635, z: 311.3039}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -694.2649, y: -1132.9436, z: 311.2958}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -673.04614, y: -1142.5732, z: 311.26712}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -651.1467, y: -1152.5583, z: 311.21262}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -628.6466, y: -1163.0048, z: 311.12714}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.9048852, y: -0.42563614, z: -0.0040802713}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -628.6466, y: -1163.0048, z: 311.12714}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -569.3132, y: -1189.4276, z: 310.87326}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -514.52124, y: -1210.8365, z: 310.66638}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -463.78723, y: -1227.601, z: 310.50305}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -416.6275, y: -1240.0901, z: 310.37985}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -372.5583, y: -1248.6736, z: 310.2933}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -331.09595, y: -1253.7207, z: 310.24002}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -291.7569, y: -1255.6008, z: 310.21655}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -254.05737, y: -1254.6833, z: 310.21945}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -217.51373, y: -1251.3378, z: 310.24527}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -181.6424, y: -1245.9333, z: 310.2906}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -145.95956, y: -1238.8396, z: 310.35196}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -109.98163, y: -1230.4259, z: 310.42596}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -73.22485, y: -1221.0616, z: 310.50916}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -35.20569, y: -1211.1162, z: 310.5981}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 4.5595703, y: -1200.959, z: 310.68936}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 46.554565, y: -1190.9592, z: 310.7795}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 91.26318, y: -1181.4868, z: 310.86508}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 139.1687, y: -1172.9106, z: 310.94266}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 190.75513, y: -1165.6001, z: 311.00882}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 246.50592, y: -1159.925, z: 311.0601}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 306.9048, y: -1156.2544, z: 311.09308}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 372.43536, y: -1154.9584, z: 311.10428}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 1, y: -0.00020014941, z: -0.000011496727}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 372.43536, y: -1154.9584, z: 311.10428}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 459.21155, y: -1155.0093, z: 311.10333}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 538.4852, y: -1155.1234, z: 311.10254}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 611.00653, y: -1155.2981, z: 311.10193}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 677.52576, y: -1155.5304, z: 311.10147}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 738.7932, y: -1155.8171, z: 311.10114}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 795.559, y: -1156.1555, z: 311.10095}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 848.5735, y: -1156.5426, z: 311.10086}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 898.58685, y: -1156.9755, z: 311.10086}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 946.3493, y: -1157.451, z: 311.10095}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 992.61115, y: -1157.9666, z: 311.1011}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1038.1226, y: -1158.519, z: 311.10135}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1083.634, y: -1159.1055, z: 311.10162}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1129.8953, y: -1159.7229, z: 311.10193}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1177.657, y: -1160.3685, z: 311.10223}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1227.6694, y: -1161.0393, z: 311.10257}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1280.6826, y: -1161.7323, z: 311.1029}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1337.4468, y: -1162.4446, z: 311.1032}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1398.7124, y: -1163.1732, z: 311.10352}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1465.2295, y: -1163.9152, z: 311.10373}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1537.748, y: -1164.6677, z: 311.1039}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1617.019, y: -1165.4277, z: 311.10403}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0, y: 0, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1703.7921, y: -1166.1924, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.9999644, y: -0.0084377155, z: -0.00000016044945}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  follow_curve: 1
+  Start_Point_object: {x: 89.735344, y: 14.753601, z: 367.27374}
+  Keep_last_pos: {x: -524.9868, y: -113.127686, z: 363.6071}
+  Keep_last_rot: {x: 0, y: 0, z: 0}
+  Scale_curve: 1
+  Keep_last_scale: 1
+  Motion_Speed: 7.3
+  Game_Mode_On: 0
+  Alter_mode: 0
+  Alter_mode2: 0
+  Accelerate: 0
+  Always_on: 0
+  Add_point: 0
+  With_manip: 0
+  Add_mid_point: 0
+  Add_in_Segment: 1
+  Node_toggle_dist: 1
+  repainted: 0
+  spread_frames: 0
+  Desynch: 0
+  NODES_DISABLED: 0
+  Start_Point: {x: 89.735344, y: 14.753601, z: 367.27374}
+  SplinePoints:
+  - position: {x: -524.0926, y: -113.11743, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.99996644, y: 0.008187719, z: 0}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1174.1442, y: -99.21228, z: 363.60706}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.98937243, y: -0.14527652, z: -0.006069103}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1693.0414, y: -259.6062, z: 357.0922}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: -0.03121047, y: -0.9980763, z: -0.05356885}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -861.72144, y: -876.7826, z: 313.83408}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: -0.31931373, y: -0.9473864, z: -0.022310855}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: -628.6466, y: -1163.0048, z: 311.12714}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.9048852, y: -0.42563614, z: -0.0040802713}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 372.43536, y: -1154.9584, z: 311.10428}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 1, y: -0.00020014941, z: -0.000011496727}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  - position: {x: 1703.7921, y: -1166.1924, z: 311.10406}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    direction: {x: 0.9999644, y: -0.0084377155, z: -0.00000016044945}
+    directionB: {x: 0, y: 0, z: 0}
+    directionC: {x: 0, y: 0, z: 0}
+    Type: 0
+  Overide_seg_detail: 
+  PointGizmo_On: 1
+  extended: 0
+  CurveQuality: 22
+  rotate_mode: 0
+--- !u!4 &1119824194
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119824192}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -524.9868, y: -113.127686, z: 363.6071}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 407519512}
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1809641060
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1809641065}
+  - component: {fileID: 1809641064}
+  - component: {fileID: 1809641062}
+  - component: {fileID: 1809641061}
+  m_Layer: 0
+  m_Name: 00 Main Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!81 &1809641061
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809641060}
+  m_Enabled: 1
+--- !u!124 &1809641062
+Behaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809641060}
+  m_Enabled: 1
+--- !u!20 &1809641064
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809641060}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.06666667, g: 0.06666667, b: 0.16078432, a: 0.019607844}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_FocalLength: 50
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 3049.3
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 0
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!4 &1809641065
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809641060}
+  m_LocalRotation: {x: 0.08563426, y: 0, z: 0, w: 0.9963267}
+  m_LocalPosition: {x: 452.2192, y: -131.77248, z: -1300.7704}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 9.825, y: 0, z: 0}
+--- !u!1001 &5214786430701424645
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082676, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5214786432016082677, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a,
+        type: 3}
+      propertyPath: m_Name
+      value: LETTERS A
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 98abd3ce62b9b7a4ea00fd6d5193ec6a, type: 3}
