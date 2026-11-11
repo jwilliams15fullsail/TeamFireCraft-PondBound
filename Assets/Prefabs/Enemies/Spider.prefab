@@ -94,10 +94,16 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       insertIndex: -1
+      addedObject: {fileID: -8500829525717716543}
+    - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 9200414658186100439}
     - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7382786652424249559}
+    - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2213638344316116127}
     - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2226346620006041265}
@@ -106,10 +112,10 @@ PrefabInstance:
       addedObject: {fileID: 5261652211245686176}
     - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2213638344316116127}
+      addedObject: {fileID: 3896142107109698524}
     - targetCorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3896142107109698524}
+      addedObject: {fileID: -6902800556252622917}
     - targetCorrespondingSourceObject: {fileID: 100138, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2290723857535773271}
@@ -395,6 +401,30 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 100140, guid: bc600cce01eb57a409f4e69025868a2c, type: 3}
   m_PrefabInstance: {fileID: 5457529088477386530}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &-8500829525717716543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5457529088477483022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df2490ce179e53a49a4c6229dacc3b40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpiderAnimationController
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 3896142107109698524}
+  _networkObjectCache: {fileID: 0}
+  idleClip: idle
+  walkClip: walk
+  runClip: run
+  tauntClip: taunt
+  attackClips:
+  - attack1
+  - attack2
+  walkSpeed: 1
+  runSpeed: 1.4
 --- !u!114 &9200414658186100439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -411,7 +441,10 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 3896142107109698524}
   _networkObjectCache: {fileID: 3896142107109698524}
   spiderDamage: 10
+  spiderAttackCooldown: 1.3
   currentState: 0
+  wanderRadius: 10
+  wanderPauseTime: 3
   viewRadius: 10
   viewAngle: 90
   targetMask:
@@ -422,6 +455,8 @@ MonoBehaviour:
     m_Bits: 1
   searchDuration: 8
   stopDistance: 0.7
+  tauntDuration: 1.5
+  hasTauntAnimation: 1
   patrolSpeed: 2.8
   chaseSpeed: 4.3
   returnSpeed: 2.9
@@ -445,7 +480,19 @@ MonoBehaviour:
   moveSpeed: 2.8
   pauseTime: 2
   rotationSpeed: 5
-  isWaiting: 0
+--- !u!114 &2213638344316116127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5457529088477483022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37e128652a4997743bdda5104e8b0ce1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStun
+  defaultStunDuration: 2
 --- !u!54 &2226346620006041265
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -494,19 +541,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.0999999, y: 0.55, z: 1.25}
   m_Center: {x: 0, y: 0.275, z: -0.2249999}
---- !u!114 &2213638344316116127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5457529088477483022}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37e128652a4997743bdda5104e8b0ce1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyStun
-  defaultStunDuration: 2
 --- !u!114 &3896142107109698524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -539,7 +573,7 @@ MonoBehaviour:
   _teleportThreshold: 1
   <PrefabId>k__BackingField: 4
   <SpawnableCollectionId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 3489394509671476646
+  <AssetPathHash>k__BackingField: 4567600974279512847
   SceneId: 0
   SerializedTransformProperties:
     Position: {x: -71.911896, y: 0.01612529, z: 8.405932}
@@ -565,3 +599,49 @@ MonoBehaviour:
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
   _initializedTimestamp: -8584074319314143770
+--- !u!114 &-6902800556252622917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5457529088477483022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.NetworkTransform
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 3896142107109698524}
+  _networkObjectCache: {fileID: 0}
+  _componentConfiguration: 0
+  _synchronizeParent: 0
+  _packing:
+    Position: 1
+    Rotation: 1
+    Scale: 0
+  _useScaledTime: 1
+  _interpolation: 2
+  _extrapolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  _clientAuthoritative: 1
+  _sendToOwner: 1
+  _interval: 1
+  _synchronizePosition: 1
+  _positionSensitivity: 0.001
+  _positionSnapping:
+    X: 0
+    Y: 0
+    Z: 0
+  _synchronizeRotation: 1
+  _rotationSnapping:
+    X: 0
+    Y: 0
+    Z: 0
+  _synchronizeScale: 1
+  _scaleSensitivity: 0.001
+  _scaleSnapping:
+    X: 0
+    Y: 0
+    Z: 0
