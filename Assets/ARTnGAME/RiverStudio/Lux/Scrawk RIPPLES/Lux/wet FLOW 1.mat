@@ -1,0 +1,137 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: wet FLOW 1
+  m_Shader: {fileID: 4800000, guid: 98b667d8366f36648b926485e2445cee, type: 3}
+  m_ShaderKeywords: DIFFCUBE_ON LUX_AO_OFF SPECCUBE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AO:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 2800000, guid: 11f03d9db1a617e40b7ece71f0a84f6f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DiffCubeIBL:
+        m_Texture: {fileID: 8900000, guid: 4c837836726c4b64798a5fe3d9fea001, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTex:
+        m_Texture: {fileID: 2800000, guid: e26d75c65dcd32d458bc4b8d8802c163, type: 3}
+        m_Scale: {x: 3, y: 3}
+        m_Offset: {x: 0, y: 0}
+    - _HeightWetness:
+        m_Texture: {fileID: 2800000, guid: ae47b4178b7b38846a55c2760f025a36, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Lux_RainRipples:
+        m_Texture: {fileID: 2800000, guid: fee185c9a3308224d860f0978ff5aa1b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: e26d75c65dcd32d458bc4b8d8802c163, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecCubeIBL:
+        m_Texture: {fileID: 8900000, guid: 4c837836726c4b64798a5fe3d9fea001, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterBumpMap:
+        m_Texture: {fileID: 2800000, guid: 6405b98efc144274fa7758d16774df80, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterCaustics:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterFlowRT:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - RefractionAmount: -1
+    - Ydistance: 2.4
+    - _BumpScale: 1
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _FlowHeight: 0
+    - _FlowHeightScale: 11
+    - _FlowRefraction: 0.6
+    - _FlowSpeed: -0.14
+    - _GlossMapScale: 1
+    - _Glossiness: 0.5
+    - _GlossyReflections: 1
+    - _Lux_RainIntensity: 0.28
+    - _Lux_RippleAnimSpeed: 1
+    - _Lux_RippleTiling: 0.22
+    - _Lux_WaterBumpDistance: 2111.95
+    - _Metallic: 0
+    - _MipBias: 0.75
+    - _Mode: 0
+    - _OcclusionStrength: 1
+    - _Parallax: 0.0269
+    - _Shininess: 0.5
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _TextureSize: 1028.33
+    - _UVSec: 0
+    - _WaterBumpScale: 1
+    - _WetnessHeightMapInfluence: 0.524
+    - _WetnessWorldNormalDamp: 0.336
+    - _ZWrite: 1
+    m_Colors:
+    - Amplitude: {r: 0.06, g: 3.95, b: 0, a: 0}
+    - _Color: {r: 0.32169116, g: 0.34863082, b: 0.36764705, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Lux_RippleWindSpeed: {r: 0, g: 0, b: 0, a: 0}
+    - _Lux_WaterFloodlevel: {r: 1, g: 1.12, b: 1, a: 1}
+    - _ViewDirection: {r: 0, g: 0, b: 1, a: 0}

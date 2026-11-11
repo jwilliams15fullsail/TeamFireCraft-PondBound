@@ -1,0 +1,150 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: wet FLOW 2 URP
+  m_Shader: {fileID: 4800000, guid: e8b098126d9e48d43a764f44940392a7, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - DIFFCUBE_ON
+  - LUX_AO_OFF
+  - SPECCUBE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AO:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 2800000, guid: f78e0902ed251fb4a93f2267290ab7bb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DiffCubeIBL:
+        m_Texture: {fileID: 8900000, guid: 4c837836726c4b64798a5fe3d9fea001, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTex:
+        m_Texture: {fileID: 2800000, guid: e26d75c65dcd32d458bc4b8d8802c163, type: 3}
+        m_Scale: {x: 3, y: 3}
+        m_Offset: {x: 0, y: 0}
+    - _HeightWetness:
+        m_Texture: {fileID: 2800000, guid: b3adade36dffba74bafdf8829606f667, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Lux_RainRipples:
+        m_Texture: {fileID: 2800000, guid: fee185c9a3308224d860f0978ff5aa1b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 633e14749b3eb34468e192f690bc4cfb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecCubeIBL:
+        m_Texture: {fileID: 8900000, guid: 4c837836726c4b64798a5fe3d9fea001, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecTex:
+        m_Texture: {fileID: 2800000, guid: 2859381d5ade4b649b2ec38204ad16e6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterBumpMap:
+        m_Texture: {fileID: 2800000, guid: 08d180cbb3ba5e147a22abdefe4d2edf, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterCaustics:
+        m_Texture: {fileID: 8400000, guid: f780b4bbf32b579478a3faac1c9a2ff6, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterFlowRT:
+        m_Texture: {fileID: 8400000, guid: 8ffb42fd0e9e79d449f8147bfab13548, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - RefractionAmount: 0.8
+    - Ydistance: 0.18
+    - _BumpScale: 1
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _FlowHeight: 0.1
+    - _FlowHeightScale: 11
+    - _FlowRefraction: 0.6
+    - _FlowSpeed: -0.14
+    - _GlossMapScale: 1
+    - _Glossiness: 0.5
+    - _GlossyReflections: 1
+    - _Lux_RainIntensity: 0.28
+    - _Lux_RippleAnimSpeed: 0.12
+    - _Lux_RippleTiling: 0.55
+    - _Lux_WaterBumpDistance: 11111.95
+    - _Metallic: 0
+    - _MipBias: 0.75
+    - _Mode: 0
+    - _OcclusionStrength: 1
+    - _Parallax: 0.0065
+    - _Shininess: 0.5
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _TextureSize: 1028.33
+    - _UVSec: 0
+    - _WaterBumpScale: 1
+    - _WetnessHeightMapInfluence: 0.185
+    - _WetnessWorldNormalDamp: 0.6
+    - _ZWrite: 1
+    - emissionPower: 4
+    m_Colors:
+    - Amplitude: {r: 0.01, g: 3.95, b: 0, a: 0}
+    - _Color: {r: 0.5435321, g: 0.575578, b: 0.61082846, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Lux_RippleWindSpeed: {r: 0, g: 0, b: 0, a: 0}
+    - _Lux_WaterFloodlevel: {r: 1, g: 3.45, b: 1, a: 1}
+    - _OffsetScaleBumpTex: {r: 0, g: 0, b: 1, a: 1}
+    - _OffsetScaleMainTex: {r: 0, g: 0, b: 1, a: 1}
+    - _ViewDirection: {r: 0, g: 0, b: 1, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
