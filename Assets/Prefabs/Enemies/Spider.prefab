@@ -443,8 +443,13 @@ MonoBehaviour:
   spiderDamage: 10
   spiderAttackCooldown: 1.3
   currentState: 0
-  wanderRadius: 10
+  wanderRadius: 6
   wanderPauseTime: 3
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 1
+  ledgeLookAhead: 1.2
+  maxDropHeight: 2
   viewRadius: 10
   viewAngle: 90
   targetMask:
@@ -469,7 +474,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5457529088477483022}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1ebcf9e69323ec844856f7e11784eb4b, type: 3}
   m_Name: 
@@ -592,8 +597,8 @@ MonoBehaviour:
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
   RuntimeChildNetworkBehaviours: []
-  _isNetworked: 1
-  _isSpawnable: 1
+  _isNetworked: 0
+  _isSpawnable: 0
   _isGlobal: 0
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0

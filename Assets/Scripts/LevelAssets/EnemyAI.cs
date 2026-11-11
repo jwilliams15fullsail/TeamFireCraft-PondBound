@@ -31,6 +31,11 @@ public class EnemyAI : NetworkBehaviour
     private float wanderWaitTimer = 0f;
     private bool isWaitingAtWanderPoint = false;
 
+    [Header("Ledge Detection Settings")]
+    [SerializeField] private LayerMask groundMask;          // Set to your floor/terrain layers
+    [SerializeField] private float ledgeLookAhead = 1.2f;   // How far in front of the spider to check
+    [SerializeField] private float maxDropHeight = 2.0f;    // How deep a drop counts as a ledge
+
     [Header("FOV Settings")]
     [SerializeField] private float viewRadius = 13f;
     [SerializeField] private float viewAngle = 90f;
@@ -198,6 +203,14 @@ public class EnemyAI : NetworkBehaviour
         }
         Vector3 flatSelf = new Vector3(transform.position.x, 0, transform.position.z);
         Vector3 flatTarget = new Vector3(currentWanderTarget.x, 0, currentWanderTarget.z);
+        Vector3 moveDirection = (flatTarget - flatSelf).normalized;
+
+        // LEDGE CHECK ON WANDER: Pick a new point immediately if approaching a cliff
+        if (IsLedgeAhead(moveDirection))
+        {
+            PickNewWanderPoint();
+            return;
+        }
 
         if (Vector3.Distance(flatSelf, flatTarget) > 0.5f)
         {
@@ -338,12 +351,20 @@ public class EnemyAI : NetworkBehaviour
 
     void MoveTowards(Vector3 targetPosition, float moveSpeed, float offsetDistance, bool isRunning)
     {
-        if (isRunning) OnRun?.Invoke();
-        else OnWalk?.Invoke();
-
         // Keep calculations on a flat 2D plane to avoid floating/burying model
         Vector3 direction = (targetPosition - transform.position);
         direction.y = 0;
+
+        // LEDGE CHECK ON CHASE/SEARCH/RETURN: Stop at the edge instead of falling
+        if (IsLedgeAhead(direction.normalized))
+        {
+            OnIdle?.Invoke();
+            LookAtTarget(targetPosition);
+            return;
+        }
+
+        if (isRunning) OnRun?.Invoke();
+        else OnWalk?.Invoke();
 
         if (direction.magnitude > offsetDistance)
         {
@@ -366,6 +387,18 @@ public class EnemyAI : NetworkBehaviour
         }
     }
 
+    bool IsLedgeAhead(Vector3 moveDirection)
+    {
+        if (moveDirection == Vector3.zero) return false;
+
+        // Start slightly above the spider's pivot and ahead in the direction of movement
+        Vector3 checkOrigin = transform.position + (Vector3.up * 0.5f) + (moveDirection.normalized * ledgeLookAhead);
+
+        // If the downward ray does NOT hit ground within maxDropHeight, there is a ledge ahead
+        bool hasGround = Physics.Raycast(checkOrigin, Vector3.down, maxDropHeight + 0.5f, groundMask);
+        return !hasGround;
+    }
+
     void ResetAttackCooldown()
     {
         isAttacking = false;
@@ -382,13 +415,19 @@ public class EnemyAI : NetworkBehaviour
         isTaunting = false;
     }
 
-    // Visualize the wander sphere and view radius in the Unity Scene Editor
+    // Visualize aspects of the selected enemies movements/vision
     private void OnDrawGizmosSelected()
     {
+        // Search FOV
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, viewRadius);
+        // Wandering radius
         Gizmos.color = Color.cyan;
         Vector3 center = Application.isPlaying ? startOrigin : transform.position;
         Gizmos.DrawWireSphere(center, wanderRadius);
+        // Ledge check
+        Vector3 rayStart = transform.position + (Vector3.up * 0.5f) + (transform.forward * ledgeLookAhead);
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(rayStart, rayStart + Vector3.down * (maxDropHeight + 0.5f));
     }
 }
