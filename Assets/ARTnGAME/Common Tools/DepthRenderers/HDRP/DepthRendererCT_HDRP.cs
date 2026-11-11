@@ -339,7 +339,7 @@ namespace Artngame.CommonTools.DepthRenderer
         private Camera CreateMirrorObjects(Camera currentCamera)
         {
             GameObject go =
-                new GameObject("Depth Camera id" + GetEntityId() + " for " + currentCamera.GetEntityId(),
+                new GameObject("Depth Camera id" + GetInstanceID() + " for " + currentCamera.GetInstanceID(),
                     typeof(Camera));
 
             //HDAdditionalCameraData lwrpCamData = go.AddComponent(typeof(HDAdditionalCameraData)) as HDAdditionalCameraData;

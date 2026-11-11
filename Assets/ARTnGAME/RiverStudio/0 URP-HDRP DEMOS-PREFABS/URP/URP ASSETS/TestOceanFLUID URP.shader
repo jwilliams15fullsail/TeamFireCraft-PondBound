@@ -560,10 +560,7 @@ Shader "Test/OceanFLUID URP"
 		//+ saturate(flowBumpMYFLOWER.r)*0.75*(0.15 + 1.5*saturate(i.normal.x) + 0.2*saturate(i.normal.y));
 		//+ saturate(flowBumpMYFLOWER.r)*0.75*(0.01 +pow(saturate(normalEffect),2))*saturate(1/foam);
 		//+fluid;
-		if ((flowBumpMYFLOWER.r) == 0) {
-			//finalA = float4(0.6, 0.3, 0.4, 1);
-			finalA = float4(0.96, 0.93, 0.94, 1);
-		}
+		
 
 		//v0.3 - refract
 		//half2 offset = i.normal.xz  * _GrabTexture_TexelSize.xy * _Distortion * 1000;// worldNormal.xz * _GrabTexture_TexelSize.xy * _Distortion;

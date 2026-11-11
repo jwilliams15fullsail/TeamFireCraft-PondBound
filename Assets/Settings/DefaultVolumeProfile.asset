@@ -299,6 +299,41 @@ MonoBehaviour:
   cropToFit:
     m_OverrideState: 1
     m_Value: 1
+--- !u!114 &-2688444800223433278
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688fcf2a7e979054e9a86239702ecbcb, type: 3}
+  m_Name: LightShaftOCEANIS
+  m_EditorClassIdentifier: Assembly-CSharp::Artngame.Oceanis.LightShaftOCEANIS
+  active: 1
+  maxIterations:
+    m_OverrideState: 1
+    m_Value: 64
+  maxDistance:
+    m_OverrideState: 1
+    m_Value: 12
+  minDistance:
+    m_OverrideState: 1
+    m_Value: 0.4
+  maskTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 0}
+    dimension: 1
+  shaftsDensity:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: 1}
+  cutoffHeigth:
+    m_OverrideState: 1
+    m_Value: 0
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0
 --- !u!114 &-1410297666881709256
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -468,6 +503,8 @@ MonoBehaviour:
   - {fileID: -6288072647309666549}
   - {fileID: 7518938298396184218}
   - {fileID: -1410297666881709256}
+  - {fileID: 6715027374657392281}
+  - {fileID: -2688444800223433278}
 --- !u!114 &853819529557874667
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -853,6 +890,39 @@ MonoBehaviour:
   m_Name: ChromaticAberration
   m_EditorClassIdentifier: 
   active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &6715027374657392281
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f392b6cdd97b084ca4ad1b8360658a1, type: 3}
+  m_Name: GradientFogOCEANIS
+  m_EditorClassIdentifier: Assembly-CSharp::Artngame.Oceanis.GradientFogOCEANIS
+  active: 1
+  gradientTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 0}
+    dimension: 1
+  maskTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 0}
+    dimension: 1
+  cutoffHeigth:
+    m_OverrideState: 1
+    m_Value: 0
+  depthFade:
+    m_OverrideState: 1
+    m_Value: 0
+  fogTint:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
   intensity:
     m_OverrideState: 1
     m_Value: 0

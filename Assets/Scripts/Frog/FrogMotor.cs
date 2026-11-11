@@ -290,7 +290,7 @@ public class FrogMotor : NetworkBehaviour
             Respawn();
             return;
         }
-
+        HandleStick(input);
         swimming = false;
         if (Mode.Value != FrogMode.Climbing)
         {
