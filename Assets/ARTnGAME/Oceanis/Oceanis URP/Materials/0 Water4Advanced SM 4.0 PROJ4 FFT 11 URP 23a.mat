@@ -1,0 +1,381 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 0 Water4Advanced SM 4.0 PROJ4 FFT 11 URP 23a
+  m_Shader: {fileID: 4800000, guid: c9b20215c1340de46bf9df91ec73b007, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BumpMap:
+        m_Texture: {fileID: 2800000, guid: 3946e6f826c2d704e8d748db28ea51fc, type: 3}
+        m_Scale: {x: 8, y: 8}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMapA:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Caustics:
+        m_Texture: {fileID: 2800000, guid: eb9e91ee4c264b942a46baeec92ca0a4, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DecalTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DepthMap:
+        m_Texture: {fileID: 2800000, guid: ff6e0fbcfc24e4f95a2711ea0e73dd6a, type: 3}
+        m_Scale: {x: 0.014, y: 0.014}
+        m_Offset: {x: 0, y: 0}
+    - _Derivatives_c0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Derivatives_c1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Derivatives_c2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Displace_T3D:
+        m_Texture: {fileID: 11700000, guid: 779a0ae5aca39844e808f29eeb9fb2af, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DisplacementHeightMap:
+        m_Texture: {fileID: 2800000, guid: a782b26d6436b48d9882906b9f8ca31a, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Displacement_c0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Displacement_c1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Displacement_c2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTexture:
+        m_Texture: {fileID: 2800000, guid: 85bfb555bb9896342864cba724ae2d66, type: 3}
+        m_Scale: {x: 8, y: 8}
+        m_Offset: {x: 0, y: 0}
+    - _Fresnel:
+        m_Texture: {fileID: 2800000, guid: 5b5c5575fd4c74abd9f7b30862fb76a3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HeightMask:
+        m_Texture: {fileID: 2800000, guid: cff6f2c02e93742c095cd0c69d3d92ce, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Lux_RainRipples:
+        m_Texture: {fileID: 2800000, guid: 0f473078ebbef874da8e63d94cef5e40, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 1, y: 1}
+    - _Map0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Map1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Map2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Map3:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Map4:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalTex:
+        m_Texture: {fileID: 2800000, guid: 36698108b4a9af34785514b294107b17, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normals_T3D:
+        m_Texture: {fileID: 11700000, guid: cc09f49b7c344a5448cf2e7fbb110c0b, type: 2}
+        m_Scale: {x: 1.96, y: 2.06}
+        m_Offset: {x: 0, y: 0}
+    - _RampTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ReflectionTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ReflectiveColor:
+        m_Texture: {fileID: 2800000, guid: 17680dc3bf8f74b498b01cf1481e2593, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ReflectiveColorCube:
+        m_Texture: {fileID: 8900000, guid: 0620bdf0302d84423be4aa15b82a0e11, type: 2}
+        m_Scale: {x: 0.15, y: 0.1}
+        m_Offset: {x: 0, y: 0}
+    - _RefractionTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SecondDisplacementHeightMap:
+        m_Texture: {fileID: 2800000, guid: 4facc21e08e3a43ed97c930f7dae6e7b, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShoreContourTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShoreTex:
+        m_Texture: {fileID: 2800000, guid: 85bfb555bb9896342864cba724ae2d66, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 1, y: 1}
+    - _SpecialWavesTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ThirdDisplacementHeightMap:
+        m_Texture: {fileID: 2800000, guid: dc30b984e8e3c4cdfb38d5fceb411602, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Turbulence_c0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Turbulence_c1:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Turbulence_c2:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterHolesTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WavesTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _fluidTexture:
+        m_Texture: {fileID: 8400000, guid: 62018307480ac3a48b0e5814bc6a4e50, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _fluidTextureADVECT:
+        m_Texture: {fileID: 8400000, guid: 61735d08362137a4587cd53164d85326, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - m_DisplacementHeightMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - m_SecondDisplacementHeightMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - ripplesTex:
+        m_Texture: {fileID: 8400000, guid: 8ffb42fd0e9e79d449f8147bfab13548, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - DepthPyramidScale: 0.19
+    - FresnelFactor: 12.5
+    - _Ambient: 1
+    - _ContactFoam: 1.8
+    - _Displacement: 0.27863377
+    - _DisplacementTiling: 18.586807
+    - _FadeExp: 0.91503274
+    - _FoamBiasLOD0: 0.1
+    - _FoamBiasLOD1: 1.45
+    - _FoamBiasLOD2: 2.65
+    - _FoamScale: 1.1
+    - _FoamWaveDependency: 0.10205479
+    - _FresnelPower: 1.7931035
+    - _FresnelScale: 54.4
+    - _GerstnerIntensity: 111
+    - _GerstnerIntensity1: 0
+    - _GerstnerIntensity2: 0
+    - _GlobalPowerFFT: 2.07
+    - _HeightDisplacement: 3.2722514
+    - _InvFade: 0.628783
+    - _InvFadeDepthFade: 0.07197756
+    - _InvFadeFoam: 0.1217
+    - _LOD_scale: 15.5
+    - _Lux_RainIntensity: 1
+    - _Lux_RippleAnimSpeed: 1.88
+    - _Lux_RippleTiling: 0.2
+    - _Lux_WaterBumpDistance: 16
+    - _MaxGloss: -1.16
+    - _MultiplyEffect: 2.7
+    - _NormalsDisplacement: 0
+    - _PowerFFT: -0.5
+    - _PowerFFT1Y: -0.21
+    - _PowerFFT2Y: 2
+    - _ReflDistort: 0.9267696
+    - _RefrDistort: 1.4393286
+    - _Roughness: 0.308
+    - _RoughnessScale: 0.342
+    - _SSSBase: 0.81
+    - _SSSScale: 41.3
+    - _SSSStrength: 0.52
+    - _Shininess: 379
+    - _ShoreFadeFactor: 0
+    - _ShoreTiling: 56.862743
+    - _Speed: 0.4137931
+    - _TerrainScale: 2048
+    - _TilingFFT: 44
+    - _WaterDepth: 40.98077
+    - _WaveCapsAmount: 0.18275861
+    - _WaveFoamDistort: 0.27931035
+    - _WaveScale: 0.046289656
+    - _WorldScale: 2.9001408
+    - _localLightRange: 2.88
+    - _regulateShoreWavesHeight: 1.3
+    - _regulateShoreWavesHeightA: 1.41
+    - _regulateShoreWavesHeightB: 0
+    - _regulateShoreWavesHeightC: 0
+    - cameraNearClip: 34
+    - cameraOffset: 0
+    - depthBelowZero: 22
+    - depthFade: 15
+    - depthFadePower: -0.3
+    - enableProjectedGrid: 1
+    - foamContrast: 0.02
+    - fogBias: 522.73
+    - fogDepth: 0.19
+    - fogThres: 283.99988
+    - isUnderwater: 0
+    - offsetTopWaterLight: -2.52
+    - sssBackSideFactor: 0
+    - sssFactor: 1.53
+    - waterAirMode: 1
+    - waterHeight: 10.009996
+    m_Colors:
+    - DepthPyramidScale: {r: 1, g: 1, b: 0, a: 0}
+    - NearClipAdjust: {r: 1.24, g: 7.71, b: 10, a: 1}
+    - RippleFoamAdjust: {r: -0.04, g: 0.35, b: 2, a: 14}
+    - RippleSpecularAdjust: {r: 1, g: 1, b: 1, a: 1}
+    - WaveSpeed: {r: 1.086165, g: 4.440575, b: 12.105146, a: -3.0206447}
+    - _AnimationDirection: {r: 2, g: 4, b: 2, a: -1}
+    - _AnimationTiling: {r: 0.003, g: 0.003, b: 0.03, a: 0.039}
+    - _BaseColor: {r: 0.38882062, g: 0.5842972, b: 0.79622644, a: 0.77254903}
+    - _BumpDirection: {r: 57.999977, g: 28.000011, b: 28.000011, a: 1}
+    - _BumpMap_ST: {r: 1, g: 1, b: 0, a: 0}
+    - _BumpTiling: {r: 1.37, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.23912296, g: 0.7340384, b: 1, a: 0.3529412}
+    - _DepthCameraPos: {r: -471.20276, g: 2000, b: -1293.471, a: 1}
+    - _DepthColor: {r: 0.027511697, g: 0.14179105, b: 0.13226777, a: 0.4627451}
+    - _DepthColorFade: {r: 0.8880597, g: 0.27834705, b: 0.44463244, a: 0.22352941}
+    - _Displacement: {r: 6.6371665, g: 20.353983, b: -1, a: -0.681416}
+    - _DisplacementXz: {r: 0.6499999, g: -2.9203715, b: 1.6599998, a: -3.9363046}
+    - _DistortParams: {r: 2.8, g: 8.3, b: -0.1, a: 7.1}
+    - _Extinction: {r: 4.5, g: 75, b: 300, a: 1}
+    - _Foam: {r: 0, g: 0, b: 0, a: 1}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FoamWaveParams: {r: 0, g: 0.24918434, b: 3.3395782, a: 1}
+    - _Fresnel_ST: {r: 1, g: 1, b: 0, a: 0}
+    - _GAmplitude: {r: 0, g: 0, b: 0, a: 0}
+    - _GDirectionAB: {r: -0.49, g: 0.53, b: -0.01, a: 1.51}
+    - _GDirectionCD: {r: 0.11, g: 0.02, b: 0.1, a: 0.02}
+    - _GFrequency: {r: 0.3, g: 0.17, b: 0.44, a: 2.5}
+    - _GSpeed: {r: 2.3, g: -1.88, b: -1.42, a: 1}
+    - _GSteepness: {r: 1.2, g: 1.33, b: 2.3, a: 2.26}
+    - _GerstnerIntensities: {r: 0.4, g: 2.2, b: 12, a: -0.5}
+    - _Gerstnerfactors: {r: -0.6, g: 0.26, b: -0.5, a: 0.2}
+    - _Gerstnerfactors2: {r: 0.12, g: 1, b: 1, a: 0.36}
+    - _GerstnerfactorsDir: {r: -0.03, g: 0.3, b: -0.14, a: -0.7}
+    - _GerstnerfactorsDirA: {r: -3.33, g: 0.67, b: 1, a: 0.41}
+    - _GerstnerfactorsSpeed: {r: 1, g: 1, b: -1.3, a: 1}
+    - _GerstnerfactorsSteep: {r: 1.24, g: 1.36, b: 1.93, a: 1.8}
+    - _HorizonColor: {r: 0.052907113, g: 0.24486735, b: 0.2835821, a: 1}
+    - _InteractAmpFreqRad: {r: 0, g: 0, b: 0, a: 0}
+    - _InvFadeParemeter: {r: 1.26, g: -2.66, b: 0.043, a: -0.002}
+    - _LocalWaveDirection: {r: 0.1, g: 0.9, b: 0.5, a: 0.5}
+    - _LocalWaveParams: {r: 2, g: 31.897032, b: 0.1, a: 8}
+    - _LocalWavePosition: {r: -784.4319, g: 3.1311462, b: 10978.2295, a: 5}
+    - _LocalWaveVelocity: {r: 0.41071385, g: 2.6167097, b: -2.3547595, a: 0}
+    - _Lux_RippleWindSpeed: {r: 4, g: 2, b: 1, a: 1}
+    - _Lux_WaterFloodlevel: {r: 1, g: 1, b: 1, a: 1}
+    - _MainTex_ST: {r: 1, g: 1, b: 0, a: 0}
+    - _NormalsOffset3DControls: {r: 0.5, g: 0.1, b: 0.03, a: 0}
+    - _ReflectionColor: {r: 0.16926998, g: 0.16926998, b: 0.16926998, a: 0.9019608}
+    - _ReflectionTex_ST: {r: 1, g: 1, b: 0, a: 0}
+    - _ReflectiveColorCube_ST: {r: 1, g: 1, b: 0, a: 0}
+    - _ReflectiveColor_ST: {r: 1, g: 1, b: 0, a: 0}
+    - _RefrColor: {r: 0.5233905, g: 0.9477612, b: 0.9121496, a: 1}
+    - _RefrColorDepth: {r: 0.050066825, g: 0.23134327, b: 0.17049524, a: 1}
+    - _RefractionFog: {r: 0.50543475, g: 0.50543475, b: 0.50543475, a: 0.5}
+    - _RefractionTex_ST: {r: 1, g: 1, b: 0, a: 0}
+    - _SSSColor: {r: 0.58679235, g: 1, b: 0.96732587, a: 0.15686275}
+    - _ShoreColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ShorePerturbation: {r: 0, g: 0, b: 0, a: 0}
+    - _ShoreTiling: {r: 1, g: 1, b: 0.1, a: 0.1}
+    - _SpecularColor: {r: 0.8415094, g: 0.31016266, b: 0.31016266, a: 1}
+    - _SunColor: {r: 0.8399999, g: 0.8399999, b: 0.8399999, a: 0.5}
+    - _TerrainScale: {r: 956, g: 710, b: 0, a: 0}
+    - _UnderwaterColor: {r: 0.6950323, g: 0.89552236, b: 0.7502397, a: 1}
+    - _WaveOffset: {r: 1, g: 1, b: -0.01, a: -0.01}
+    - _WaveScale4: {r: 0.1, g: 0.1, b: 0.01, a: 0.01}
+    - _WorldLightDir: {r: 0.8310884, g: -0.28116918, b: 0.4798291, a: 0}
+    - _controlReflect: {r: 4071, g: 63, b: 1, a: 1}
+    - _controlSkyColor: {r: 0.9773584, g: 0.35177675, b: 0.1879656, a: 0.49411765}
+    - _controlSkyRadiance: {r: 0.06, g: 7, b: -115804, a: 0.23}
+    - _controlSkyRadianceA: {r: 0.32, g: 61, b: 29, a: 1}
+    - _foamColor: {r: 0.9433962, g: 0.9211463, b: 0.9211463, a: 0.92941177}
+    - _localLightAPos: {r: 0, g: 0, b: 0, a: 0}
+    - _localLightAProps: {r: 0, g: 0, b: 0, a: 0}
+    - _sssColor: {r: 0.43454075, g: 0.5720421, b: 0.5943396, a: 0.7764706}
+    - _sssParams: {r: 0.006, g: 20, b: -90, a: -9609}
+    - cameraNearColor: {r: 0, g: 0, b: 0, a: 1}
+    - cameraNearControl: {r: 0.1, g: 1, b: 9.79, a: 13350}
+    - controlProjection: {r: 0.8, g: -0.6, b: 0, a: 0.016}
+    - decalEdgeTweak: {r: 0, g: 0, b: 0, a: 0}
+    - decalPosRot: {r: -1976.5, g: -370, b: 78, a: 1191.4}
+    - decalPower: {r: 0, g: 0, b: 0, a: 0}
+    - dynamicFoamControls: {r: 43, g: 43, b: 1.33, a: 0.92}
+    - dynamicFoamControlsA: {r: 12, g: 1, b: 1, a: 1}
+    - foamHighSea: {r: -3.74, g: -0.34, b: -16.06, a: 0}
+    - fogColor: {r: 0.4470588, g: 0.75686276, b: 0.8117647, a: 1}
+    - lengthScales: {r: 1, g: 1, b: 1, a: 1}
+    - offsetRflect: {r: 0.0001739911, g: 0, b: 0, a: 0}
+    - offsetScale: {r: 740, g: -175, b: 0, a: 0}
+    - projectedGridControl: {r: 1, g: 1, b: 1, a: 0}
+    - rippleWaveParams: {r: 1.4, g: 2, b: 0.2, a: 0.23}
+    - ripplesPos: {r: 0, g: 0, b: 0, a: 12000}
+    - shoreGlow: {r: 0.08, g: 0.78, b: 0.1, a: 0.84}
+    - shoreWaveControl: {r: 0.5, g: 0, b: 0, a: 0}
+    - shoreWaveControlB: {r: 0.2, g: 0.2, b: 0.2, a: 0.2}
+    - shoreWaves: {r: -0.07, g: -0.01, b: 4.08, a: 1.006}
+    - shoreWavesExtra: {r: 0, g: 0, b: 0, a: 0}
+    - vortexPosScale: {r: -3068, g: 1, b: 5484, a: 111.9}
+  m_BuildTextureStacks: []
+--- !u!1002 &2100001
+EditorExtensionImpl:
+  serializedVersion: 6
