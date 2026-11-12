@@ -183,6 +183,27 @@ namespace Artngame.CommonTools.FluidSim2D
 
         }
 
+
+        // One ripple at a spot in the ripple texture (0 to 1 across each side), for scripts such as
+        // WaterRipples on frogs and floating boxes. Size is half the ripple's width, 0 to 1 of the texture.
+        // Strength paints it that many times over, for a harder push.
+        public void AddRipple(Vector2 uv, float size, int strength = 1)
+        {
+            CheckInitRipples();
+            if (brushTexture == null || uv.x < 0f || uv.x > 1f || uv.y < 0f || uv.y > 1f)
+                return;
+            Vector2 pos = uv * resolution;
+            float brushWidth = size * resolution;
+            GL.PushMatrix();
+            GL.LoadIdentity();
+            GL.LoadProjectionMatrix(Matrix4x4.Ortho(0f, resolution, 0f, resolution, -1f, 1f));
+            RenderTexture.active = TexA;
+            for (int i = 0; i < strength; i++)
+                Graphics.DrawTexture(new Rect(pos.x - brushWidth, pos.y - brushWidth, brushWidth * 2f, brushWidth * 2f), brushTexture);
+            RenderTexture.active = null;
+            GL.PopMatrix();
+        }
+
         public Material CausticsMaterial;
 
         Vector3 prevCamPos;

@@ -45,6 +45,8 @@ public class FrogMotor : NetworkBehaviour
     public readonly SyncVar<bool> IsCharging = new(new SyncTypeSettings(0.001f));
     public readonly SyncVar<double> ChargeStartTime = new(new SyncTypeSettings(0.001f));
     public readonly SyncVar<HopSync> Hop = new(new SyncTypeSettings(0.001f));
+    // Swimming: floating in a flood with nothing under its feet. The host decides it, every screen animates it.
+    public readonly SyncVar<bool> Swimming = new(new SyncTypeSettings(0.001f));
 
     public FrogTuning Tuning => tuning;
 
@@ -297,6 +299,8 @@ public class FrogMotor : NetworkBehaviour
             Float();
             UpdateGroundState();
         }
+        if (Swimming.Value != swimming)
+            Swimming.Value = swimming;
         HandleAutoClimb(input);
         UpdateJump(input);
         if (Mode.Value != FrogMode.Grounded)
@@ -414,6 +418,9 @@ public class FrogMotor : NetworkBehaviour
         floating = false;
         if (Time.time < ignoreWaterUntil || !RisingWater.SurfaceAt(rb.position, out float surfaceY))
             return;
+        // A slow swell lifts and lowers the water, so a floating frog keeps bobbing gently.
+        // Each frog gets its own timing, so two frogs side by side don't bob in step.
+        surfaceY += tuning.bobHeight * Mathf.Sin((Time.time + ObjectId * 0.37f) * 2f * Mathf.PI / Mathf.Max(0.1f, tuning.bobPeriod));
         float under = Mathf.Clamp01((surfaceY - rb.position.y + Radius) / (2f * Radius)); // share of the body under water
         if (under <= 0f)
             return;
@@ -535,6 +542,7 @@ public class FrogMotor : NetworkBehaviour
             {
                 EndHop(); // no hopping in the water: it swims
                 target = RunVelocity(wish, up) * (tuning.swimSpeed / Mathf.Max(0.01f, tuning.moveSpeed));
+                target += WaterCurrent.At(rb.position); // drifts with the current from the tube
             }
             else if (HopMode(input))
             {

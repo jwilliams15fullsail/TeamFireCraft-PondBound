@@ -157,6 +157,10 @@ public class FrogTuning : ScriptableObject
     public float swimAcceleration = 8f;
     [Tooltip("How quickly bobbing settles after landing in the water. Lower = bobs for longer.")]
     public float waterDrag = 10f;
+    [Tooltip("How far (m) the frog rises and sinks while floating still, like the water gently swelling. 0 = floats dead still.")]
+    [Min(0f)] public float bobHeight = 0.025f;
+    [Tooltip("Seconds for one bob up and down.")]
+    [Min(0.1f)] public float bobPeriod = 2.2f;
 
 
     [Header("Tongue")]

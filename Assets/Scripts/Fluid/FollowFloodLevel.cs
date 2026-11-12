@@ -1,3 +1,4 @@
+using Artngame.CommonTools.DepthRenderer;
 using UnityEngine;
 
 // Keeps this object at a RisingWater flood's water height, so River Studio's water rises as the
@@ -10,6 +11,10 @@ public class FollowFloodLevel : MonoBehaviour
     public Renderer showWhenWet;
     [Tooltip("Optional: the flood's own surface, hidden so only River Studio's water shows (SewerFlood > Surface).")]
     public Renderer hideSurface;
+    [Tooltip("Optional: River Studio's depth camera (DEPTH RENDERERS). Keeps its cut-off at the water's surface, so frogs and boxes in the water bend the flow around them.")]
+    public DepthRendererCT_URP obstacleCamera;
+    [Tooltip("How far (m) something must stick out of the water to block the flow.")]
+    [Min(0f)] public float obstacleHeight = 0.05f;
 
     void LateUpdate()
     {
@@ -22,5 +27,15 @@ public class FollowFloodLevel : MonoBehaviour
             showWhenWet.enabled = water.Level > 0.01f; // nothing to show while the room is dry
         if (hideSurface != null)
             hideSurface.enabled = false; // RisingWater switches it back on every frame; this runs after it
+
+        if (obstacleCamera != null)
+        {
+            // River Studio's flow treats anything in the top 80% of its depth camera's range as solid.
+            // Ending that range just above the water means only things sticking out of the water,
+            // like floating frogs and boxes, block the flow, and the floor under the water never does.
+            float toWater = obstacleCamera.depthCameraHeight - at.y - obstacleHeight;
+            float near = obstacleCamera.depthCameraNearPlane;
+            obstacleCamera.depthCameraFarPlane = near + Mathf.Max(0.01f, toWater - near) / 0.8f;
+        }
     }
 }

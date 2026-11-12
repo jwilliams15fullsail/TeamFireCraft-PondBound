@@ -503,6 +503,7 @@ GameObject:
   - component: {fileID: -5155841888614524783}
   - component: {fileID: 5607508857603526025}
   - component: {fileID: 165210988004468114}
+  - component: {fileID: 1779736828643968118}
   m_Layer: 6
   m_Name: Frog
   m_TagString: Frog
@@ -1063,6 +1064,28 @@ MonoBehaviour:
   nameLabel: {fileID: 8678006909758069804}
   labelHeight: 0.6
   hideOwnName: 1
+--- !u!114 &1779736828643968118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6960431495464794997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a28524b61895c98489c85a6e2a588196, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WaterRipples
+  ripples: {fileID: 0}
+  water: {fileID: 0}
+  size: 1.5
+  strength: 5
+  splashSize: 2
+  touchDistance: 0.35
+  trailSpacing: 0.3
+  always: 0
+  interval: 0.12
+  scatter: 0.8
 --- !u!1 &7591722043773449959
 GameObject:
   m_ObjectHideFlags: 0

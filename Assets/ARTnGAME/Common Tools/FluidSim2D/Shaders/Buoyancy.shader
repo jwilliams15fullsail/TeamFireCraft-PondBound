@@ -3,6 +3,10 @@
 
 Shader "FluidSim/Buoyancy" 
 {
+		Properties
+	{
+		_JetDirection ("Jet Direction (x = east, y = north)", Vector) = (0, 1, 0, 0)
+	}
 	SubShader 
 	{
     	Pass 
@@ -25,6 +29,7 @@ Shader "FluidSim/Buoyancy"
 
 			//v0.1
 			uniform float4 _Wind;
+			uniform float4 _JetDirection; // which way warm water pushes the flow (it was always (0, 1))
 		
 			struct v2f 
 			{
@@ -54,7 +59,7 @@ Shader "FluidSim/Buoyancy"
 			
 			    if(T > _AmbientTemperature) 
 			    {
-			        result += (_TimeStep * (T - _AmbientTemperature) * _Sigma - D * _Kappa ) * float2(0, 1);
+			        			        result += (_TimeStep * (T - _AmbientTemperature) * _Sigma - D * _Kappa ) * (dot(_JetDirection.xy, _JetDirection.xy) > 0 ? normalize(_JetDirection.xy) : float2(0, 1));
 			    }
 			    
 			    return float4(result, 0, 1);

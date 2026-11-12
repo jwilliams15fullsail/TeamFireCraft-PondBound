@@ -62,7 +62,7 @@ public class FrogAnimatorDriver : MonoBehaviour
     static readonly int TonguePhaseId = Animator.StringToHash("TonguePhase");
     static readonly int TongueAttachedId = Animator.StringToHash("TongueAttached");
     static readonly int DeadId = Animator.StringToHash("Dead");
-
+    static readonly int SwimmingId = Animator.StringToHash("Swimming");
     enum JumpStep { None, Charging, Takeoff, Air, Landing }
 
     FrogMotor motor;
@@ -147,7 +147,7 @@ public class FrogAnimatorDriver : MonoBehaviour
       animator.SetBool(DeadId, motor.IsDead);
            if (motor.IsDead)
                jumpStep = JumpStep.None;
-     
+        animator.SetBool(SwimmingId, motor.Swimming.Value && !motor.IsDead); // plays the Float loop
 
         UpdateLocomotion(mode, supported, dt);
         UpdateJump(mode, supported, dt);
@@ -167,8 +167,8 @@ public class FrogAnimatorDriver : MonoBehaviour
 
         Vector3 offset = Vector3.zero;
 
-        // Height: cancel the clip's hop while airborne.
-        bool airborne = jumpStep == JumpStep.Takeoff || jumpStep == JumpStep.Air;
+        // Height: cancel the clip's hop while airborne, and the Float pose's lift while swimming.
+        bool airborne = jumpStep == JumpStep.Takeoff || jumpStep == JumpStep.Air || motor.Swimming.Value;
         liftWeight = Mathf.MoveTowards(liftWeight, airborne ? 1f : 0f, liftBlendSpeed * Time.deltaTime);
         if (liftBone != null)
             offset.y = liftWeight * Mathf.Max(0f, model.InverseTransformPoint(liftBone.position).y - restLiftHeight);
