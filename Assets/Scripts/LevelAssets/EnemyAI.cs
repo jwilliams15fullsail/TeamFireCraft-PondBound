@@ -35,6 +35,14 @@ public class EnemyAI : NetworkBehaviour
     [SerializeField] private LayerMask groundMask;          // Set to your floor/terrain layers
     [SerializeField] private float ledgeLookAhead = 1.2f;   // How far in front of the spider to check
     [SerializeField] private float maxDropHeight = 2.0f;    // How deep a drop counts as a ledge
+    [SerializeField] private float ledgeGiveUpTime = 2f;    // Seconds to wait at a cliff before giving up chase
+    private float ledgeBlockedTimer = 0f;
+    private float ignorePlayerTimer = 0f;                   // Prevents immediately re-chasing player at bottom of cliff
+
+    [Header("Stuck Recovery")]
+    [SerializeField] private float stuckTimeThreshold = 2.0f;// Seconds before assuming the spider is stuck
+    private Vector3 lastStuckCheckPosition;
+    private float stuckTimer = 0f;
 
     [Header("FOV Settings")]
     [SerializeField] private float viewRadius = 13f;
@@ -91,6 +99,7 @@ public class EnemyAI : NetworkBehaviour
         // Record spawn position for sphere wandering and returning
         startOrigin = transform.position;
         PickNewWanderPoint();
+        lastStuckCheckPosition = transform.position;
 
         isTaunting = false;
         hasTauntedThisChase = false;
@@ -103,8 +112,10 @@ public class EnemyAI : NetworkBehaviour
         if (enemyStun != null && enemyStun.IsStunned)
             return;
         if (stateLockTimer > 0f) { stateLockTimer -= Time.deltaTime; }
+        if (ignorePlayerTimer > 0f) { ignorePlayerTimer -= Time.deltaTime; }
 
         LookForPlayer();
+        CheckIfStuck(false);
 
         switch (currentState)
         {
@@ -126,13 +137,21 @@ public class EnemyAI : NetworkBehaviour
 
     void LookForPlayer()
     {
+        if (ignorePlayerTimer > 0f) return;
+
         // Collection of all targets within enemy FOV
         Collider[] targetsInRadius = Physics.OverlapSphere(transform.position, viewRadius, targetMask);
 
-        if (targetsInRadius.Length > 0)
+        // Loop through colliders in radius so we skip dead players and find another alive player in multiplayer
+        for (int targetIndex = 0; targetIndex < targetsInRadius.Length; targetIndex++)
         {
             // First to enter enemy FOV is the target
-            Transform target = targetsInRadius[0].transform;
+            Transform target = targetsInRadius[targetIndex].transform;
+
+            // --- DEAD TARGET FILTER ---
+            FrogMotor motor = target.GetComponentInParent<FrogMotor>();
+            if (motor != null && motor.Mode.Value == FrogMode.Disabled) continue;
+
             Vector3 directionToTarget = (target.position - transform.position).normalized;
             float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
@@ -254,6 +273,18 @@ public class EnemyAI : NetworkBehaviour
     {
         if (player == null) { return; }
 
+        // If our target just died, drop aggro immediately and return to patrol
+        FrogMotor motor = player.GetComponentInParent<FrogMotor>();
+        if (motor != null && motor.Mode.Value == FrogMode.Disabled)
+        {
+            player = null;
+            isAttacking = false;
+            isTaunting = false;
+            hasTauntedThisChase = false;
+            currentState = AIState.returning;
+            return;
+        }
+
         // Trigger taunt coroutine before chase starts
         if (hasTauntAnimation && !hasTauntedThisChase && !isTaunting)
         {
@@ -279,7 +310,6 @@ public class EnemyAI : NetworkBehaviour
                 OnIdle?.Invoke();   // Broadcast idle stance between attacks
                 isAttacking = true;
                 OnAttack?.Invoke(); // Broadcast attack trigger
-                Invoke(nameof(ResetAttackCooldown), 1.2f);
 
                 FrogStats stats = player.GetComponent<FrogStats>();
                 if (stats != null)
@@ -360,7 +390,43 @@ public class EnemyAI : NetworkBehaviour
         {
             OnIdle?.Invoke();
             LookAtTarget(targetPosition);
+            CheckIfStuck(false);
+
+            // If chasing a player who jumped off a ledge, give up after ledgeGiveUpTime
+            if (currentState == AIState.chasing)
+            {
+                ledgeBlockedTimer += Time.deltaTime;
+                if (ledgeBlockedTimer >= ledgeGiveUpTime)
+                {
+                    ledgeBlockedTimer = 0f;
+                    player = null;
+                    isTaunting = false;
+                    hasTauntedThisChase = false;
+                    ignorePlayerTimer = 3.0f; // Gives spider time to turn around and walk away
+
+                    // Look around briefly at the cliff edge before returning to patrol
+                    searchTimer = 2.0f;
+                    lastPlayerPosition = transform.position;
+                    currentState = AIState.searching;
+                    stateLockTimer = 0.5f;
+                }
+            }
+            // SEARCHING: If the last known position is over a cliff, snap lastPlayerPosition to the edge
+            else if (currentState == AIState.searching)
+            {
+                lastPlayerPosition = transform.position;
+            }
+            // RETURNING: If a ledge blocks the return path, pick a new wander point or resume patrol
+            else if (currentState == AIState.returning)
+            {
+                RecoverFromStuck();
+            }
             return;
+        }
+        else
+        {
+            // Reset timer whenever the spider has safe ground ahead
+            ledgeBlockedTimer = 0f;
         }
 
         if (isRunning) OnRun?.Invoke();
@@ -374,6 +440,11 @@ public class EnemyAI : NetworkBehaviour
             else transform.position = nextPosition;
 
             LookAtTarget(targetPosition);
+            CheckIfStuck(true);
+        }
+        else
+        {
+            CheckIfStuck(false);
         }
     }
 
@@ -397,6 +468,57 @@ public class EnemyAI : NetworkBehaviour
         // If the downward ray does NOT hit ground within maxDropHeight, there is a ledge ahead
         bool hasGround = Physics.Raycast(checkOrigin, Vector3.down, maxDropHeight + 0.5f, groundMask);
         return !hasGround;
+    }
+
+    void CheckIfStuck(bool isTryingToMove)
+    {
+        if (!isTryingToMove)
+        {
+            stuckTimer = 0f;
+            lastStuckCheckPosition = transform.position;
+            return;
+        }
+
+        // Check how far we actually moved on the flat ground
+        float distanceMoved = Vector2.Distance(
+            new Vector2(transform.position.x, transform.position.z),
+            new Vector2(lastStuckCheckPosition.x, lastStuckCheckPosition.z)
+        );
+
+        // If we moved less than 0.15 units, tick up the stuck timer
+        if (distanceMoved < 0.15f)
+        {
+            stuckTimer += Time.deltaTime;
+
+            if (stuckTimer >= stuckTimeThreshold)
+            {
+                stuckTimer = 0f;
+                RecoverFromStuck();
+            }
+        }
+        else
+        {
+            // Spider is moving fine; reset timer and update checkpoint
+            stuckTimer = 0f;
+            lastStuckCheckPosition = transform.position;
+        }
+    }
+
+    void RecoverFromStuck()
+    {
+        if (currentState == AIState.patrolling && !HasValidPathing)
+        {
+            // Pick a completely new random wander destination
+            PickNewWanderPoint();
+        }
+        else if (currentState == AIState.searching || currentState == AIState.returning)
+        {
+            // Give up on unreachable spot and return to patrol
+            if (HasValidPathing) pathing.ResumePatrol();
+            else PickNewWanderPoint();
+
+            currentState = AIState.patrolling;
+        }
     }
 
     void ResetAttackCooldown()

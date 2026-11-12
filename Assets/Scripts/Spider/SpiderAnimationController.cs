@@ -1,6 +1,5 @@
 using FishNet.Object;
 using UnityEngine;
-using UnityEngineInternal;
 
 public class SpiderAnimationController : NetworkBehaviour
 {
@@ -16,17 +15,20 @@ public class SpiderAnimationController : NetworkBehaviour
     [SerializeField] private float runSpeed = 1.4f;
 
     private Animation animation;
-    private string currentClip = "";
     private string lastBroadcastedClip = "";
 
     private EnemyAI enemyAI;
     private WaypointMover waypointMover;
+    private ProceduralLegIK legIK;
+    private Coroutine resumeIKRoutine;
+    private bool isIKPaused = false;
 
     private void Awake()
     {
         animation = GetComponent<Animation>();
         enemyAI = GetComponent<EnemyAI>();
         waypointMover = GetComponent<WaypointMover>();
+        legIK = GetComponent<ProceduralLegIK>();
     }
 
     private void OnEnable()
@@ -66,17 +68,36 @@ public class SpiderAnimationController : NetworkBehaviour
     }
 
     // --- EVENT HANDLERS (RUN ON HOST/SERVER) ---
-    private void HandleIdle() => RequestPlayClip(idleClip, 0.2f, 1.0f, forceReplay: false);
-    private void HandleWalk() => RequestPlayClip(walkClip, 0.2f, walkSpeed, forceReplay: false);
-    private void HandleRun() => RequestPlayClip(runClip, 0.2f, runSpeed, forceReplay: false);
-    private void HandleTaunt() => RequestPlayClip(tauntClip, 0.15f, 1.0f, forceReplay: true);
+    private void HandleIdle()
+    {
+        ResumeIKIfPaused();
+        RequestPlayClip(idleClip, 0.2f, 1.0f, forceReplay: false);
+    }
+
+    private void HandleWalk()
+    {
+        ResumeIKIfPaused();
+        RequestPlayClip(walkClip, 0.2f, walkSpeed, forceReplay: false);
+    }
+
+    private void HandleRun()
+    {
+        ResumeIKIfPaused();
+        RequestPlayClip(runClip, 0.2f, runSpeed, forceReplay: false);
+    }
+
+    private void HandleTaunt()
+    {
+        PauseIKForAction(tauntClip);
+        RequestPlayClip(tauntClip, 0.15f, 1.0f, forceReplay: true);
+    }
 
     private void HandleAttack()
     {
         if (attackClips.Length == 0) return;
 
-        // Pick the random attack on the Host so every client sees the exact same bite variation
         string chosenAttack = attackClips[Random.Range(0, attackClips.Length)];
+        PauseIKForAction(chosenAttack);
         RequestPlayClip(chosenAttack, 0.1f, 1.0f, forceReplay: true);
     }
 
@@ -116,6 +137,8 @@ public class SpiderAnimationController : NetworkBehaviour
     private void PlayClipLocally(string clipName, float fadeTime, float speed)
     {
         if (animation == null) return;
+        PauseIKForAction(clipName);
+        ResumeIKIfPaused();
 
         animation.CrossFade(clipName, fadeTime);
 
@@ -123,43 +146,6 @@ public class SpiderAnimationController : NetworkBehaviour
         {
             animation[clipName].speed = speed;
         }
-    }
-
-    //private void HandleIdle() => PlayIdle();
-    //private void HandleWalk() => PlayWalk();
-    //private void HandleRun() => PlayRun();
-    //private void HandleTaunt() => PlayTaunt();
-    //private void HandleAttack() => PlayRandomAttack();
-
-    public void PlayIdle(float fadeTime = 0.2f)
-    {
-        PlayClip(idleClip, fadeTime, 1.0f);
-    }
-
-    public void PlayWalk(float fadeTime = 0.2f)
-    {
-        PlayClip(walkClip, fadeTime, walkSpeed);
-    }
-
-    public void PlayRun(float fadeTime = 0.2f)
-    {
-        PlayClip(runClip, fadeTime, runSpeed);
-    }
-
-    public void PlayTaunt(float fadeTime = 0.15f)
-    {
-        // Force play even if already called recently
-        currentClip = tauntClip;
-        if (animation != null) animation.CrossFade(tauntClip, fadeTime);
-    }
-
-    public void PlayRandomAttack(float fadeTime = 0.1f)
-    {
-        if (animation == null || attackClips.Length == 0) return;
-
-        string chosenAttack = attackClips[Random.Range(0, attackClips.Length)];
-        currentClip = chosenAttack;
-        animation.CrossFade(chosenAttack, fadeTime);
     }
 
     public bool IsPlayingAttack()
@@ -172,18 +158,38 @@ public class SpiderAnimationController : NetworkBehaviour
         return false;
     }
 
-    // Internal helper to prevent spamming CrossFade on looping animations
-    private void PlayClip(string clipName, float fadeTime, float speed)
+    private void PauseIKForAction(string clipName)
     {
-        if (animation == null || string.IsNullOrEmpty(clipName)) return;
-        if (currentClip == clipName && animation.IsPlaying(clipName)) return;
+        if (legIK == null) return;
 
-        currentClip = clipName;
-        animation.CrossFade(clipName, fadeTime);
+        isIKPaused = true;
+        if (resumeIKRoutine != null) StopCoroutine(resumeIKRoutine);
+        legIK.SetIKActive(false);
 
-        if (animation[clipName] != null)
+        // Automatically re-enable IK once the animation clip finishes playing
+        float clipLength = (animation != null && animation[clipName] != null) ? animation[clipName].length : 1.2f;
+        resumeIKRoutine = StartCoroutine(AutoResumeIKAfterDelay(clipLength));
+    }
+
+    private void ResumeIKIfPaused()
+    {
+        // Only run once if IK was actually paused!
+        if (legIK == null || !isIKPaused) return;
+
+        isIKPaused = false;
+        if (resumeIKRoutine != null)
         {
-            animation[clipName].speed = speed;
+            StopCoroutine(resumeIKRoutine);
+            resumeIKRoutine = null;
         }
+
+        legIK.ResetFeetToGround();
+        legIK.SetIKActive(true);
+    }
+
+    private System.Collections.IEnumerator AutoResumeIKAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ResumeIKIfPaused();
     }
 }
