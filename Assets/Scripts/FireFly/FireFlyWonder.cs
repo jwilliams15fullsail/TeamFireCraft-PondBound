@@ -48,10 +48,33 @@ public class FireflyWander : NetworkBehaviour
             PickNewTarget();
         }
 
+
         Vector3 direction =
             (targetPosition - rb.position).normalized;
 
         rb.linearVelocity = direction * moveSpeed;
+
+        // Rotate smoothly to face the direction of travel.
+        Vector3 flatDirection = new Vector3(
+            direction.x,
+            0f,
+            direction.z
+        );
+
+        if (flatDirection.sqrMagnitude > 0.001f)
+        {
+            Quaternion targetRotation =
+                Quaternion.LookRotation(flatDirection);
+
+            Quaternion newRotation = Quaternion.Slerp(
+                rb.rotation,
+                targetRotation,
+                5f * Time.fixedDeltaTime
+            );
+
+            rb.MoveRotation(newRotation);
+        }
+
     }
 
     private void PickNewTarget()
