@@ -451,7 +451,7 @@ namespace Artngame.CommonTools.DepthRenderer
             QualitySettings.lodBias = bias;
             Shader.SetGlobalTexture(planarReflectionTextureID, m_ReflectionTextureDEPTH);
 
-            if (followCamera || Time.fixedTime < 1 || !Application.isPlaying)
+         if (followCamera || Time.fixedTime < 1 || !Application.isPlaying || (Materials.Count > 0 && Materials[0] != null && Materials[0].GetTexture(depthTextureName) != m_ReflectionTextureDEPTH)) // also when a level loads after the game's first second
             {
                 //apply to materials
                 for (int i = 0; i < Materials.Count; i++)
