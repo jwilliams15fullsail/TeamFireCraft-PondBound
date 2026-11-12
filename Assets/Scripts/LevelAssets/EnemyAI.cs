@@ -1,35 +1,70 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using FishNet.Object;
+using FishNet;
 
 [RequireComponent(typeof(Rigidbody))]
 public class EnemyAI : NetworkBehaviour
 {
     public enum AIState { patrolling, chasing, searching, returning }
 
+    // --- MODULAR AI EVENTS ---
+    public event Action OnIdle;
+    public event Action OnWalk;
+    public event Action OnRun;
+    public event Action OnTaunt;
+    public event Action OnAttack;
+
+    [Header("Enemy Stats")]
     [SerializeField] float spiderDamage = 10f;
+    [SerializeField] float spiderAttackCooldown = 1.3f;
 
     [Header("State Machine")]
-    [SerializeField] AIState currentState = AIState.patrolling;
+    [SerializeField] private AIState currentState = AIState.patrolling;
+
+    [Header("Random Wander Settings (Fallback if no WaypointMover)")]
+    [SerializeField] private float wanderRadius = 6f;
+    [SerializeField] private float wanderPauseTime = 3f;
+    private Vector3 startOrigin;
+    private Vector3 currentWanderTarget;
+    private float wanderWaitTimer = 0f;
+    private bool isWaitingAtWanderPoint = false;
+
+    [Header("Ledge Detection Settings")]
+    [SerializeField] private LayerMask groundMask;          // Set to your floor/terrain layers
+    [SerializeField] private float ledgeLookAhead = 1.2f;   // How far in front of the spider to check
+    [SerializeField] private float maxDropHeight = 2.0f;    // How deep a drop counts as a ledge
+    [SerializeField] private float ledgeGiveUpTime = 2f;    // Seconds to wait at a cliff before giving up chase
+    private float ledgeBlockedTimer = 0f;
+    private float ignorePlayerTimer = 0f;                   // Prevents immediately re-chasing player at bottom of cliff
+
+    [Header("Stuck Recovery")]
+    [SerializeField] private float stuckTimeThreshold = 2.0f;// Seconds before assuming the spider is stuck
+    private Vector3 lastStuckCheckPosition;
+    private float stuckTimer = 0f;
 
     [Header("FOV Settings")]
-    [SerializeField] float viewRadius = 13f;
-    [SerializeField] float viewAngle = 90f;
-    [SerializeField] LayerMask targetMask;      // What the AI targets/responds to
-    [SerializeField] LayerMask obstacleMask;    // Set to environment/obstacle layer
+    [SerializeField] private float viewRadius = 13f;
+    [SerializeField] private float viewAngle = 90f;
+    [SerializeField] private LayerMask targetMask;      // What the AI targets/responds to
+    [SerializeField] private LayerMask obstacleMask;    // Set to environment/obstacle layer
 
-    [Header("Search Settings")]
-    [SerializeField] float searchDuration = 8f; // How long the AI searches
-    [SerializeField] float stopDistance = 0.7f;    // How far away from the target it stops moving
+    [Header("Search & Taunt Settings")]
+    [SerializeField] private float searchDuration = 8f; // How long the AI searches
+    [SerializeField] private float stopDistance = 0.7f;    // How far away from the target it stops moving
+    [SerializeField] private float tauntDuration = 1.5f;
+    [SerializeField] private bool hasTauntAnimation = true; // Toggle off for future assets without taunts!
+
     private Vector3 lastPlayerPosition;
     private float searchTimer;
 
     [Header("AI Movement")]
-    [SerializeField] float patrolSpeed = 2.8f;
-    [SerializeField] float chaseSpeed = 4.5f;
-    [SerializeField] float returnSpeed = 2.9f;
-    [SerializeField] float rotationSpeed = 5f;
-    [SerializeField] float pauseTime = 2f;
+    [SerializeField] private float patrolSpeed = 3f;
+    [SerializeField] private float chaseSpeed = 5.5f;
+    [SerializeField] private float returnSpeed = 2.8f;
+    [SerializeField] private float rotationSpeed = 5f;
+    [SerializeField] private float pauseTime = 2f;
 
     private Transform player;
     private WaypointMover pathing;
@@ -37,53 +72,50 @@ public class EnemyAI : NetworkBehaviour
     private EnemyStun enemyStun;
 
     /////   ANIMATION INTEGRATION   /////
-    private Animator animator;
-    private Animation animation;
-    private static readonly int speedHash = Animator.StringToHash("speed");
-    private static readonly int attackHash = Animator.StringToHash("attack");
-    private static readonly int attackIndexHash = Animator.StringToHash("attackIndex");
     private bool isAttacking = false;
     private float stateLockTimer = 0f;  // Stops state flickering for animations
     private bool isTaunting = false;
     private bool hasTauntedThisChase = false; // Ensure spider only taunts once when it spots the player
     // -------------------------------
 
-    /////   NETWORKING   /////
-    // Track the last played animation name to prevent spamming network calls every frame
-    private string lastNetworkedClip = "";
-    // -----------------------------------------
+    // Helper property to check if we have an active WaypointMover
+    private bool HasValidPathing => pathing != null && pathing.enabled;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Only the Host/Server runs AI vision, state switching, and damage checks
+        if (InstanceFinder.NetworkManager != null && InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted) return;
+
         pathing = GetComponent<WaypointMover>();
         rigidBody = GetComponent<Rigidbody>();
         enemyStun = GetComponent<EnemyStun>();
-        animator = GetComponent<Animator>();
-        animation = GetComponent<Animation>();
+
+        if (rigidBody != null)
+        {
+            rigidBody.freezeRotation = true;
+            rigidBody.useGravity = true;
+            rigidBody.isKinematic = false;
+        }
+        // Record spawn position for sphere wandering and returning
+        startOrigin = transform.position;
+        PickNewWanderPoint();
+        lastStuckCheckPosition = transform.position;
 
         isTaunting = false;
         hasTauntedThisChase = false;
-
-        // !!CRUCIAL FOR RIGIDBODY!! Prevents falling over from physics
-        rigidBody.freezeRotation = true;
-        rigidBody.useGravity = true;
-        rigidBody.isKinematic = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        // NETWORK SAFETY: Only the Host/Server machine should process AI states and calculations
-        if (!IsServerStarted) return;
-        // -----------------------------------------
-
         // Do not chase, patrol, search, or attack while stunned.
         if (enemyStun != null && enemyStun.IsStunned)
             return;
         if (stateLockTimer > 0f) { stateLockTimer -= Time.deltaTime; }
+        if (ignorePlayerTimer > 0f) { ignorePlayerTimer -= Time.deltaTime; }
 
         LookForPlayer();
+        CheckIfStuck(false);
 
         switch (currentState)
         {
@@ -105,13 +137,21 @@ public class EnemyAI : NetworkBehaviour
 
     void LookForPlayer()
     {
+        if (ignorePlayerTimer > 0f) return;
+
         // Collection of all targets within enemy FOV
         Collider[] targetsInRadius = Physics.OverlapSphere(transform.position, viewRadius, targetMask);
 
-        if (targetsInRadius.Length > 0)
+        // Loop through colliders in radius so we skip dead players and find another alive player in multiplayer
+        for (int targetIndex = 0; targetIndex < targetsInRadius.Length; targetIndex++)
         {
             // First to enter enemy FOV is the target
-            Transform target = targetsInRadius[0].transform;
+            Transform target = targetsInRadius[targetIndex].transform;
+
+            // --- DEAD TARGET FILTER ---
+            FrogMotor motor = target.GetComponentInParent<FrogMotor>();
+            if (motor != null && motor.Mode.Value == FrogMode.Disabled) continue;
+
             Vector3 directionToTarget = (target.position - transform.position).normalized;
             float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
@@ -119,6 +159,7 @@ public class EnemyAI : NetworkBehaviour
             bool isCloseEnoughToTrack = (currentState == AIState.chasing && distanceToTarget <= stopDistance + 3f);
             bool isInFOVCone = Vector3.Angle(transform.forward, directionToTarget) < viewAngle / 2;
 
+            if (currentState == AIState.chasing) isInFOVCone = true;
             // Check if player is within our FOV
             if (isInFOVCone || isCloseEnoughToTrack)
             {
@@ -130,7 +171,7 @@ public class EnemyAI : NetworkBehaviour
                     player = target;        // Continuously update players last known position
                     lastPlayerPosition = player.position;
                     
-                    if (currentState != AIState.chasing)
+                    if (currentState != AIState.chasing && stateLockTimer <= 0)
                     {
                         currentState = AIState.chasing;
                         pathing.canMove = false;    // Disable patrol script when chasing
@@ -146,7 +187,7 @@ public class EnemyAI : NetworkBehaviour
             searchTimer = searchDuration;   // Set the countdown timer
             currentState = AIState.searching;
             stateLockTimer = 0.5f;          // Prevent immediately switching back to chase state
-
+            isTaunting = false;
             hasTauntedThisChase = false;    // Player escaped FOV, can taunt again if it finds the player
         }
     }
@@ -154,88 +195,136 @@ public class EnemyAI : NetworkBehaviour
     /////   STATE BEHAVIOURS   /////
     void PerformPatrol()
     {
-        pathing.moveSpeed = patrolSpeed;
-        pathing.rotationSpeed = rotationSpeed;
-        pathing.pauseTime = pauseTime;
-        pathing.canMove = true;     // Hand patrol movement back to WaypointMover script
-
-        if (animator != null)       // Assign proper animation based moving along path or pausing at a waypoint
+        // Use WaypointMover script if attached
+        if (HasValidPathing)
         {
-            float currentSpeed = (pathing.canMove && !pathing.isWaiting) ? patrolSpeed : 0f;
-            animator.SetFloat(speedHash, currentSpeed);
+            pathing.moveSpeed = patrolSpeed;
+            pathing.rotationSpeed = rotationSpeed;
+            pathing.pauseTime = pauseTime;
+            pathing.canMove = true;     // Hand patrol movement back to WaypointMover script
         }
+        // Wander in a sphereical radius randomly
+        if (isWaitingAtWanderPoint)
+        {
+            OnIdle?.Invoke();
+            wanderWaitTimer -= Time.deltaTime;
+
+            // Gentle look-around sweep while pausing at random point
+            float sweepSpeed = Mathf.Sin(Time.time * 3f) * 35f;
+            transform.Rotate(0, sweepSpeed * Time.deltaTime, 0);
+
+            if (wanderWaitTimer <= 0f)
+            {
+                isWaitingAtWanderPoint = false;
+                PickNewWanderPoint();
+            }
+            return;
+        }
+        Vector3 flatSelf = new Vector3(transform.position.x, 0, transform.position.z);
+        Vector3 flatTarget = new Vector3(currentWanderTarget.x, 0, currentWanderTarget.z);
+        Vector3 moveDirection = (flatTarget - flatSelf).normalized;
+
+        // LEDGE CHECK ON WANDER: Pick a new point immediately if approaching a cliff
+        if (IsLedgeAhead(moveDirection))
+        {
+            PickNewWanderPoint();
+            return;
+        }
+
+        if (Vector3.Distance(flatSelf, flatTarget) > 0.5f)
+        {
+            MoveTowards(currentWanderTarget, patrolSpeed, 0f, isRunning: false);
+        }
+        else
+        {
+            isWaitingAtWanderPoint = true;
+            wanderWaitTimer = wanderPauseTime;
+        }
+    }
+
+    void PickNewWanderPoint()
+    {
+        // Try up to 5 times to find a random point inside the sphere that isn't blocked by a wall
+        for (int i = 0; i < 5; i++)
+        {
+            Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * wanderRadius;
+            Vector3 candidatePoint = new Vector3(
+                startOrigin.x + randomCircle.x,
+                transform.position.y,
+                startOrigin.z + randomCircle.y
+            );
+
+            Vector3 dirToCandidate = candidatePoint - transform.position;
+            float distToCandidate = dirToCandidate.magnitude;
+
+            // Raycast check ensures the spider doesn't pick a wander spot behind a solid wall
+            if (distToCandidate > 0.5f && !Physics.Raycast(transform.position + Vector3.up * 0.5f, dirToCandidate.normalized, distToCandidate, obstacleMask))
+            {
+                currentWanderTarget = candidatePoint;
+                return;
+            }
+        }
+
+        // Fallback to returning directly to spawn origin if surrounded by obstacles
+        currentWanderTarget = startOrigin;
     }
 
     void PerformChase()
     {
         if (player == null) { return; }
 
+        // If our target just died, drop aggro immediately and return to patrol
+        FrogMotor motor = player.GetComponentInParent<FrogMotor>();
+        if (motor != null && motor.Mode.Value == FrogMode.Disabled)
+        {
+            player = null;
+            isAttacking = false;
+            isTaunting = false;
+            hasTauntedThisChase = false;
+            currentState = AIState.returning;
+            return;
+        }
+
         // Trigger taunt coroutine before chase starts
-        if (!hasTauntedThisChase && !isTaunting)
+        if (hasTauntAnimation && !hasTauntedThisChase && !isTaunting)
         {
             StartCoroutine(PerformTaunt());
             return;
         }
         if (isTaunting)
         {
-            Vector3 lookDirection = (player.position - transform.position).normalized;
-            lookDirection.y = 0;
-            if (lookDirection != Vector3.zero)
-            {
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), rotationSpeed * Time.deltaTime);
-            }
-            return; // Skip the rest of the chase movement code below until taunt completes
+            LookAtTarget(player.position);
+            return;
         }
-        // --------------------------------------------
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        Vector3 flatSelf = new Vector3(transform.position.x, 0, transform.position.z);
+        Vector3 flatPlayer = new Vector3(player.position.x, 0, player.position.z);
+        float distanceToPlayer = Vector3.Distance(flatSelf, flatPlayer);
 
         // If player in attack range, stop chasing animation, perform attack animations
         if (distanceToPlayer <= stopDistance + 0.5f)
         {
-            if (animator != null) { animator.SetFloat(speedHash, 0f); }
-            else if (animation != null && !animation.IsPlaying("attack1") && !animation.IsPlaying("attack2") && !animation.IsPlaying("idle"))
-            { animation.CrossFade("idle", 0.2f); } // Legacy spider animation
-
             // Trigger random attack animation once
             if (!isAttacking)
             {
+                OnIdle?.Invoke();   // Broadcast idle stance between attacks
                 isAttacking = true;
-                if (animator != null)
-                {
-                    // Choose random attack between 0 and 1
-                    int randomAttack = Random.Range(0, 2);
-                    animator.SetInteger(attackIndexHash, randomAttack);
-                    animator.SetTrigger(attackHash);
-                }
-                else if (animation != null)     // Legacy spider animation
-                {
-                    string attackClip = (Random.Range(0, 2) == 0) ? "attack1" : "attack2";
-                    animation.CrossFade(attackClip, 0.1f);
-                }
+                OnAttack?.Invoke(); // Broadcast attack trigger
 
                 FrogStats stats = player.GetComponent<FrogStats>();
                 if (stats != null)
                 {
                     stats.Damage(spiderDamage);
                 }
-                Invoke(nameof(ResetAttackCooldown), 1.5f);
+                Invoke(nameof(ResetAttackCooldown), spiderAttackCooldown);
             }
             // Continue facing player while attacking
-            Vector3 lookDirection = (player.position - transform.position).normalized;
-            lookDirection.y = 0;
-            if (lookDirection != Vector3.zero)
-            {
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), rotationSpeed * Time.deltaTime);
-            }
+            LookAtTarget(player.position);
         }
-        else
-            if (!isAttacking)
-            {
-                {
-                    MoveTowards(player.position, chaseSpeed, stopDistance);
-                }
-            }
+        else if (!isAttacking)
+        {
+            MoveTowards(player.position, chaseSpeed, stopDistance, isRunning: true);
+        }
     }
 
     void PerformSearch()
@@ -245,16 +334,14 @@ public class EnemyAI : NetworkBehaviour
         Vector3 flatTarget = new Vector3(lastPlayerPosition.x, 0, lastPlayerPosition.z);
 
         // Lost sight of player, move to players last known position
-        if (Vector3.Distance(flatSelf, flatTarget) > 0.5f)
+        if (Vector3.Distance(flatSelf, flatTarget) > 0.6f)
         {
-            MoveTowards(lastPlayerPosition, patrolSpeed, 0f);
+            MoveTowards(lastPlayerPosition, patrolSpeed, 0f, isRunning: false);
         }
         // At last known position but no player, start searching
         else
         {
-            if (animator != null) { animator.SetFloat(speedHash, 0f); }
-            else if (animation != null) { animation.CrossFade("idle"); } // Legacy spider animation
-
+            OnIdle?.Invoke();
             searchTimer -= Time.deltaTime;
 
             // Sweep back and forth while searching
@@ -264,79 +351,205 @@ public class EnemyAI : NetworkBehaviour
             if (searchTimer <= 0)       // End search after a time and return to patrol
             {
                 currentState = AIState.returning;
+                stateLockTimer = 0.5f;
             }
         }
     }
 
     void PerformReturn()
     {
-        Vector3 targetWaypointPosition = pathing.CurrentWaypoint.position;
-        MoveTowards(targetWaypointPosition, returnSpeed, 0f);
+        Vector3 returnDestination = HasValidPathing ? pathing.CurrentWaypoint.position : startOrigin;
+        MoveTowards(returnDestination, returnSpeed, 0f, isRunning: false);
 
         Vector3 flatSelf = new Vector3(transform.position.x, 0, transform.position.z);
-        Vector3 flatTarget = new Vector3(targetWaypointPosition.x, 0, targetWaypointPosition.z);
+        Vector3 flatTarget = new Vector3(returnDestination.x, 0, returnDestination.z);
 
-        if (Vector3.Distance(flatSelf, flatTarget) < 0.4f)
+        if (Vector3.Distance(flatSelf, flatTarget) < 0.5f)
         {
-            pathing.ResumePatrol();
+            if (HasValidPathing)
+            {
+                pathing.ResumePatrol();
+            }
+            else
+            {
+                isWaitingAtWanderPoint = false;
+                PickNewWanderPoint();
+            }
             currentState = AIState.patrolling;
         }
     }
 
-    void MoveTowards(Vector3 targetPosition, float moveSpeed, float offsetDistance)
+    void MoveTowards(Vector3 targetPosition, float moveSpeed, float offsetDistance, bool isRunning)
     {
-        // Tell animator we're moving
-        if (animator != null) { animator.SetFloat(speedHash, moveSpeed); }
-        else if (animation != null)     // Legacy spider animation
-        { 
-            string clipName = (currentState == AIState.chasing) ? "run" : "walk";
-            if (!animation.IsPlaying(clipName))
-            {
-                animation.CrossFade(clipName);
-                animation[clipName].speed = 1f;     // Adjust speed of animation
-            }
-        }
-
         // Keep calculations on a flat 2D plane to avoid floating/burying model
         Vector3 direction = (targetPosition - transform.position);
         direction.y = 0;
 
+        // LEDGE CHECK ON CHASE/SEARCH/RETURN: Stop at the edge instead of falling
+        if (IsLedgeAhead(direction.normalized))
+        {
+            OnIdle?.Invoke();
+            LookAtTarget(targetPosition);
+            CheckIfStuck(false);
+
+            // If chasing a player who jumped off a ledge, give up after ledgeGiveUpTime
+            if (currentState == AIState.chasing)
+            {
+                ledgeBlockedTimer += Time.deltaTime;
+                if (ledgeBlockedTimer >= ledgeGiveUpTime)
+                {
+                    ledgeBlockedTimer = 0f;
+                    player = null;
+                    isTaunting = false;
+                    hasTauntedThisChase = false;
+                    ignorePlayerTimer = 3.0f; // Gives spider time to turn around and walk away
+
+                    // Look around briefly at the cliff edge before returning to patrol
+                    searchTimer = 2.0f;
+                    lastPlayerPosition = transform.position;
+                    currentState = AIState.searching;
+                    stateLockTimer = 0.5f;
+                }
+            }
+            // SEARCHING: If the last known position is over a cliff, snap lastPlayerPosition to the edge
+            else if (currentState == AIState.searching)
+            {
+                lastPlayerPosition = transform.position;
+            }
+            // RETURNING: If a ledge blocks the return path, pick a new wander point or resume patrol
+            else if (currentState == AIState.returning)
+            {
+                RecoverFromStuck();
+            }
+            return;
+        }
+        else
+        {
+            // Reset timer whenever the spider has safe ground ahead
+            ledgeBlockedTimer = 0f;
+        }
+
+        if (isRunning) OnRun?.Invoke();
+        else OnWalk?.Invoke();
+
         if (direction.magnitude > offsetDistance)
         {
             Vector3 destination = transform.position + direction.normalized * (direction.magnitude - offsetDistance);
-
             Vector3 nextPosition = Vector3.MoveTowards(transform.position, destination, moveSpeed * Time.deltaTime);
-            rigidBody.MovePosition(nextPosition);
+            if (rigidBody != null) { rigidBody.MovePosition(nextPosition); }
+            else transform.position = nextPosition;
 
-            if (direction != Vector3.zero)
+            LookAtTarget(targetPosition);
+            CheckIfStuck(true);
+        }
+        else
+        {
+            CheckIfStuck(false);
+        }
+    }
+
+    void LookAtTarget(Vector3 targetPosition)
+    {
+        Vector3 lookDir = (targetPosition - transform.position).normalized;
+        lookDir.y = 0;
+        if (lookDir != Vector3.zero)
+        {
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), rotationSpeed * Time.deltaTime);
+        }
+    }
+
+    bool IsLedgeAhead(Vector3 moveDirection)
+    {
+        if (moveDirection == Vector3.zero) return false;
+
+        // Start slightly above the spider's pivot and ahead in the direction of movement
+        Vector3 checkOrigin = transform.position + (Vector3.up * 0.5f) + (moveDirection.normalized * ledgeLookAhead);
+
+        // If the downward ray does NOT hit ground within maxDropHeight, there is a ledge ahead
+        bool hasGround = Physics.Raycast(checkOrigin, Vector3.down, maxDropHeight + 0.5f, groundMask);
+        return !hasGround;
+    }
+
+    void CheckIfStuck(bool isTryingToMove)
+    {
+        if (!isTryingToMove)
+        {
+            stuckTimer = 0f;
+            lastStuckCheckPosition = transform.position;
+            return;
+        }
+
+        // Check how far we actually moved on the flat ground
+        float distanceMoved = Vector2.Distance(
+            new Vector2(transform.position.x, transform.position.z),
+            new Vector2(lastStuckCheckPosition.x, lastStuckCheckPosition.z)
+        );
+
+        // If we moved less than 0.15 units, tick up the stuck timer
+        if (distanceMoved < 0.15f)
+        {
+            stuckTimer += Time.deltaTime;
+
+            if (stuckTimer >= stuckTimeThreshold)
             {
-                Quaternion lookRotation = Quaternion.LookRotation(direction.normalized);
-                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, rotationSpeed * Time.deltaTime);
+                stuckTimer = 0f;
+                RecoverFromStuck();
             }
         }
         else
         {
-            if (animator != null) { animator.SetFloat(speedHash, 0f); }
-            else if (animation != null) { animation.CrossFade("idle"); } // Legacy spider animation
+            // Spider is moving fine; reset timer and update checkpoint
+            stuckTimer = 0f;
+            lastStuckCheckPosition = transform.position;
         }
+    }
+
+    void RecoverFromStuck()
+    {
+        if (currentState == AIState.patrolling && !HasValidPathing)
+        {
+            // Pick a completely new random wander destination
+            PickNewWanderPoint();
+        }
+        else if (currentState == AIState.searching || currentState == AIState.returning)
+        {
+            // Give up on unreachable spot and return to patrol
+            if (HasValidPathing) pathing.ResumePatrol();
+            else PickNewWanderPoint();
+
+            currentState = AIState.patrolling;
+        }
+    }
+
+    void ResetAttackCooldown()
+    {
+        isAttacking = false;
     }
 
     IEnumerator PerformTaunt()
     {
         isTaunting = true;
         hasTauntedThisChase = true;
+        OnTaunt?.Invoke(); // Broadcast taunt trigger
 
-        if (animation != null && !animation.IsPlaying("taunt"))
-        {
-            animation.CrossFade("taunt", .15f);
-        }
-        yield return new WaitForSeconds(1.15f);
+        yield return new WaitForSeconds(tauntDuration);
 
         isTaunting = false;
     }
 
-    void ResetAttackCooldown()
+    // Visualize aspects of the selected enemies movements/vision
+    private void OnDrawGizmosSelected()
     {
-        isAttacking = false;
+        // Search FOV
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, viewRadius);
+        // Wandering radius
+        Gizmos.color = Color.cyan;
+        Vector3 center = Application.isPlaying ? startOrigin : transform.position;
+        Gizmos.DrawWireSphere(center, wanderRadius);
+        // Ledge check
+        Vector3 rayStart = transform.position + (Vector3.up * 0.5f) + (transform.forward * ledgeLookAhead);
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(rayStart, rayStart + Vector3.down * (maxDropHeight + 0.5f));
     }
 }
