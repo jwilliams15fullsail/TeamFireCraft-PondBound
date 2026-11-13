@@ -7,7 +7,8 @@ using FishNet;
 [RequireComponent(typeof(Rigidbody))]
 public class EnemyAI : NetworkBehaviour
 {
-    public enum AIState { patrolling, chasing, searching, returning }
+    public enum AIState { patrolling, chasing, fleeing, searching, returning }
+    public enum AITemperament { Aggressive, Passive, Skittish }
 
     // --- MODULAR AI EVENTS ---
     public event Action OnIdle;
@@ -21,6 +22,7 @@ public class EnemyAI : NetworkBehaviour
     [SerializeField] float spiderAttackCooldown = 1.3f;
 
     [Header("State Machine")]
+    [SerializeField] private AITemperament temperament = AITemperament.Aggressive;
     [SerializeField] private AIState currentState = AIState.patrolling;
 
     [Header("Random Wander Settings (Fallback if no WaypointMover)")]
@@ -47,14 +49,15 @@ public class EnemyAI : NetworkBehaviour
     [Header("FOV Settings")]
     [SerializeField] private float viewRadius = 13f;
     [SerializeField] private float viewAngle = 90f;
-    [SerializeField] private LayerMask targetMask;      // What the AI targets/responds to
-    [SerializeField] private LayerMask obstacleMask;    // Set to environment/obstacle layer
+    [SerializeField] private float fleeSafeDistance = 14f;  // How far Skittish AI runs before calming down
+    [SerializeField] private LayerMask targetMask;          // What the AI targets/responds to
+    [SerializeField] private LayerMask obstacleMask;        // Set to environment/obstacle layer
 
     [Header("Search & Taunt Settings")]
-    [SerializeField] private float searchDuration = 8f; // How long the AI searches
-    [SerializeField] private float stopDistance = 0.7f;    // How far away from the target it stops moving
-    [SerializeField] private float tauntDuration = 1.5f;
-    [SerializeField] private bool hasTauntAnimation = true; // Toggle off for future assets without taunts!
+    [SerializeField] private float searchDuration = 8f;     // How long the AI searches
+    [SerializeField] private float stopDistance = 0.7f;     // How far away from the target it stops moving
+    [SerializeField] private float tauntDuration = 1.5f;    // How long the AI taunt state lasts regardless of animation
+    [SerializeField] private bool hasTauntAnimation = true; // Toggle off for assets without taunts
 
     private Vector3 lastPlayerPosition;
     private float searchTimer;
@@ -62,6 +65,7 @@ public class EnemyAI : NetworkBehaviour
     [Header("AI Movement")]
     [SerializeField] private float patrolSpeed = 3f;
     [SerializeField] private float chaseSpeed = 5.5f;
+    [SerializeField] private float fleeSpeed = 6.5f;
     [SerializeField] private float returnSpeed = 2.8f;
     [SerializeField] private float rotationSpeed = 5f;
     [SerializeField] private float pauseTime = 2f;
@@ -114,6 +118,13 @@ public class EnemyAI : NetworkBehaviour
         if (stateLockTimer > 0f) { stateLockTimer -= Time.deltaTime; }
         if (ignorePlayerTimer > 0f) { ignorePlayerTimer -= Time.deltaTime; }
 
+        // PASSIVE CREATURES: Skip player detection completely and only patrol/wander
+        if (temperament == AITemperament.Passive)
+        {
+            PerformPatrol();
+            return;
+        }
+
         LookForPlayer();
         CheckIfStuck(false);
 
@@ -124,6 +135,9 @@ public class EnemyAI : NetworkBehaviour
                 break;
             case AIState.chasing:
                 PerformChase();
+                break;
+            case AIState.fleeing:
+                PerformFlee();
                 break;
             case AIState.searching:
                 PerformSearch();
@@ -138,6 +152,7 @@ public class EnemyAI : NetworkBehaviour
     void LookForPlayer()
     {
         if (ignorePlayerTimer > 0f) return;
+        bool isAlerted = (currentState == AIState.chasing || currentState == AIState.fleeing);
 
         // Collection of all targets within enemy FOV
         Collider[] targetsInRadius = Physics.OverlapSphere(transform.position, viewRadius, targetMask);
@@ -156,10 +171,12 @@ public class EnemyAI : NetworkBehaviour
             float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
             // STICKY TARGETING: if we are already chasing, don't lose player immediately upon exiting FOV
-            bool isCloseEnoughToTrack = (currentState == AIState.chasing && distanceToTarget <= stopDistance + 3f);
-            bool isInFOVCone = Vector3.Angle(transform.forward, directionToTarget) < viewAngle / 2;
+            bool isCloseEnoughToTrack = (isAlerted && distanceToTarget <= stopDistance + 1f);
+            // Skittish creatures have 360-degree awareness so they bolt if you sneak up behind them
+            bool isInFOVCone = (temperament == AITemperament.Skittish) || isAlerted || (Vector3.Angle(transform.forward, directionToTarget) < (viewAngle / 2f));
 
             if (currentState == AIState.chasing) isInFOVCone = true;
+
             // Check if player is within our FOV
             if (isInFOVCone || isCloseEnoughToTrack)
             {
@@ -180,7 +197,7 @@ public class EnemyAI : NetworkBehaviour
                 }
             }
         }
-        // If the player was being chased and was lost, start search
+        // Lost sight of player while chasing -> Search
         if (currentState == AIState.chasing && stateLockTimer <= 0)
         {
             player = null;
@@ -189,6 +206,13 @@ public class EnemyAI : NetworkBehaviour
             stateLockTimer = 0.5f;          // Prevent immediately switching back to chase state
             isTaunting = false;
             hasTauntedThisChase = false;    // Player escaped FOV, can taunt again if it finds the player
+        }
+        // Lost sight of player while fleeing -> Return to patrol
+        else if (currentState == AIState.fleeing && stateLockTimer <= 0f)
+        {
+            player = null;
+            currentState = AIState.returning;
+            stateLockTimer = 0.5f;
         }
     }
 
@@ -327,6 +351,34 @@ public class EnemyAI : NetworkBehaviour
         }
     }
 
+    // SKITTISH FLEE LOGIC: Sprint directly away from the player until safe
+    void PerformFlee()
+    {
+        if (player == null)
+        {
+            currentState = AIState.returning;
+            return;
+        }
+        Vector3 flatSelf = new Vector3(transform.position.x, 0, transform.position.z);
+        Vector3 flatPlayer = new Vector3(player.position.x, 0, player.position.z);
+        float distanceToPlayer = Vector3.Distance(flatSelf, flatPlayer);
+
+        // Once far enough away, calm down and return to patrol
+        if (distanceToPlayer >= fleeSafeDistance)
+        {
+            player = null;
+            ignorePlayerTimer = 3.0f;
+            currentState = AIState.returning;
+            return;
+        }
+
+        // Calculate a destination point directly opposite the player
+        Vector3 awayDirection = (flatSelf - flatPlayer).normalized;
+        if (awayDirection == Vector3.zero) awayDirection = transform.forward;
+        Vector3 fleeTarget = transform.position + (awayDirection * 4f);
+        MoveTowards(fleeTarget, fleeSpeed, 0f, isRunning: true);
+    }
+
     void PerformSearch()
     {
         // Calculate distance ignoring height (avoid locked state from jittering physics)
@@ -417,9 +469,10 @@ public class EnemyAI : NetworkBehaviour
                 lastPlayerPosition = transform.position;
             }
             // RETURNING: If a ledge blocks the return path, pick a new wander point or resume patrol
-            else if (currentState == AIState.returning)
+            else if (currentState == AIState.fleeing || currentState == AIState.returning)
             {
-                RecoverFromStuck();
+                // If cornered against a cliff while fleeing, stop and cower in idle
+                if (currentState == AIState.returning) RecoverFromStuck();
             }
             return;
         }

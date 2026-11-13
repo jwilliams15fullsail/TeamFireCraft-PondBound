@@ -47,6 +47,7 @@ public class FrogMotor : NetworkBehaviour
     public readonly SyncVar<HopSync> Hop = new(new SyncTypeSettings(0.001f));
 
     public FrogTuning Tuning => tuning;
+    public Vector3 ExternalSupportVelocity { get; set; }
 
     public float SlimeJumpMultiplier =>
     Mode.Value == FrogMode.Grounded && currentSlime != null
@@ -528,7 +529,7 @@ public class FrogMotor : NetworkBehaviour
         {
             // Bounded acceleration toward the wanted velocity, measured relative to the support
             // (moving platforms) so tongue pulls and collisions are not wiped out instantly.
-            Vector3 supportVelocity = support != null ? support.GetPointVelocity(rb.position) : Vector3.zero;
+            Vector3 supportVelocity = (support != null ? support.GetPointVelocity(rb.position) : Vector3.zero) + ExternalSupportVelocity;
             Vector3 planar = Vector3.ProjectOnPlane(rb.linearVelocity - supportVelocity, up);
             Vector3 target;
             if (swimming)

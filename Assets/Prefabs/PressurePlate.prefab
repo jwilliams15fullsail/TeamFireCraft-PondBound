@@ -75,6 +75,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5b6f5abff21f1044ea0adda3e21fb078, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3882340524724647741}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 5b6f5abff21f1044ea0adda3e21fb078, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4868730395344782998}
     - targetCorrespondingSourceObject: {fileID: 6787779238307266774, guid: 5b6f5abff21f1044ea0adda3e21fb078, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9200217610490585448}
@@ -118,7 +121,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PressurePlate
   _componentIndexCache: 0
-  _addedNetworkObject: {fileID: 0}
+  _addedNetworkObject: {fileID: -4868730395344782998}
   _networkObjectCache: {fileID: 0}
   door: {fileID: 0}
   hazards: {fileID: 0}
@@ -131,6 +134,63 @@ MonoBehaviour:
   lockedColor: {r: 0.9, g: 0.15, b: 0.1, a: 1}
   readyColor: {r: 1, g: 0.75, b: 0.1, a: 1}
   pressedColor: {r: 0.2, g: 0.9, b: 0.25, a: 1}
+--- !u!114 &-4868730395344782998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61726336767895605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Object.NetworkObject
+  _localLevelOfDetailCalculationType: 0
+  _useLevelOfDetail: 0
+  _useRootLevelOfDetail: 1
+  NetworkObserver: {fileID: 0}
+  _enablePrediction: 0
+  _predictionType: 0
+  _localReconcileCorrectionType: 2
+  _graphicalObject: {fileID: 0}
+  _detachGraphicalObject: 0
+  _enableStateForwarding: 1
+  _networkTransform: {fileID: 0}
+  _ownerInterpolation: 1
+  _ownerSmoothedProperties: 255
+  _adaptiveInterpolation: 3
+  _spectatorSmoothedProperties: 255
+  _spectatorInterpolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  <PrefabId>k__BackingField: 65535
+  <SpawnableCollectionId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 13104409554878664871
+  SceneId: 0
+  SerializedTransformProperties:
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 0}
+    Scale: {x: 0, y: 0, z: 0}
+    IsValid: 0
+  <IsNested>k__BackingField: 0
+  WasActiveDuringEdit: 0
+  WasActiveDuringEdit_Set1: 1
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 0}
+  NetworkBehaviours: []
+  InitializedParentNetworkBehaviour: {fileID: 0}
+  InitializedNestedNetworkObjects: []
+  RuntimeParentNetworkBehaviour: {fileID: 0}
+  RuntimeChildNetworkBehaviours: []
+  _isNetworked: 1
+  _isSpawnable: 1
+  _isGlobal: 0
+  _initializeOrder: 0
+  _preventDespawnOnDisconnect: 0
+  _defaultDespawnType: 0
+  _initializedTimestamp: 0
 --- !u!1 &5920310834953229746 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6787779238307266774, guid: 5b6f5abff21f1044ea0adda3e21fb078, type: 3}
