@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class FrogElectricAura : MonoBehaviour
@@ -8,6 +9,7 @@ public class FrogElectricAura : MonoBehaviour
 
     private ParticleSystem[] electricParticles;
     private bool previousChargeState;
+    private bool hasInitializedState;
 
     private void Awake()
     {
@@ -16,20 +18,24 @@ public class FrogElectricAura : MonoBehaviour
 
         if (electricAura == null)
         {
-            Debug.LogError("FrogElectricAura: Electric Aura is not assigned!");
+            Debug.LogError(
+                "FrogElectricAura: Electric Aura is not assigned!"
+            );
             return;
         }
 
-        // Keep the GameObject active so its particles can run.
         electricAura.SetActive(true);
 
         electricParticles =
             electricAura.GetComponentsInChildren<ParticleSystem>(true);
 
-        // Start with no electricity.
         StopElectricParticles();
+    }
 
-        previousChargeState = false;
+    private void OnEnable()
+    {
+        // Refresh the visual state after this component is enabled.
+        hasInitializedState = false;
     }
 
     private void Update()
@@ -39,54 +45,28 @@ public class FrogElectricAura : MonoBehaviour
 
         bool isCharged = electricCharge.HasCharge.Value;
 
-        // Only react when the charge changes.
-        if (isCharged == previousChargeState)
+        if (hasInitializedState &&
+            isCharged == previousChargeState)
             return;
 
+        hasInitializedState = true;
         previousChargeState = isCharged;
 
         if (isCharged)
-        {
             PlayElectricParticles();
-        }
         else
-        {
             StopElectricParticles();
-        }
-
-        Debug.Log($"Electric Aura active: {isCharged}");
     }
 
     private void PlayElectricParticles()
     {
-
-        Debug.Log(
-    $"AURA REFERENCE: {electricAura.name}, " +
-    $"Parent={electricAura.transform.parent?.name ?? "NONE"}, " +
-    $"Scene={electricAura.scene.name}, " +
-    $"EntityID={electricAura.GetEntityId()}"
-);
-        Debug.Log(
-    $"Frog ROOT: activeSelf={gameObject.activeSelf}, " +
-    $"activeInHierarchy={gameObject.activeInHierarchy}"
-);
-
         foreach (ParticleSystem particles in electricParticles)
         {
-            Debug.Log(
-    $"{particles.name}: " +
-    $"activeSelf={particles.gameObject.activeSelf}, " +
-    $"activeInHierarchy={particles.gameObject.activeInHierarchy}"
-);
+            if (!particles.gameObject.activeInHierarchy)
+                continue;
 
             particles.Clear(true);
-            particles.Play();
-            particles.Clear(true);
-            particles.Play();
-
-            Debug.Log(
-                $"{particles.name}: IsPlaying={particles.isPlaying}"
-            );
+            particles.Play(true);
         }
     }
 

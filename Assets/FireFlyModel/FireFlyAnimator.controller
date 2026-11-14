@@ -10,8 +10,8 @@ AnimatorStateMachine:
   m_Name: Base Layer
   m_ChildStates:
   - serializedVersion: 1
-    m_State: {fileID: 4584249071529665456}
-    m_Position: {x: 385.7517, y: 95.59816, z: 0}
+    m_State: {fileID: 3671261505388391389}
+    m_Position: {x: 400, y: 120, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -21,7 +21,7 @@ AnimatorStateMachine:
   m_EntryPosition: {x: 50, y: 120, z: 0}
   m_ExitPosition: {x: 800, y: 120, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
-  m_DefaultState: {fileID: 4584249071529665456}
+  m_DefaultState: {fileID: 3671261505388391389}
 --- !u!91 &9100000
 AnimatorController:
   m_ObjectHideFlags: 0
@@ -45,14 +45,14 @@ AnimatorController:
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
   m_EvaluateTransitionsOnStart: 1
---- !u!1102 &4584249071529665456
+--- !u!1102 &3671261505388391389
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Fly
+  m_Name: Fly fast
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -65,7 +65,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 4100824462711553299, guid: 7683aa4f3f5d0f243a464f6bfa478e62, type: 3}
+  m_Motion: {fileID: -5251994595921451683, guid: 7683aa4f3f5d0f243a464f6bfa478e62, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
