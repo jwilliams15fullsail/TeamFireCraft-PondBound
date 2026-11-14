@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cd563ee67731e44a9fc32f830a55c08, type: 3}
+  m_Name: Waves Settings 2
+  m_EditorClassIdentifier: 
+  g: 24
+  depth: 500
+  lambda: 0.953
+  local:
+    scale: 0.629
+    windSpeed: 8
+    windDirection: 1
+    fetch: 200000
+    spreadBlend: 0.822
+    swell: 0.43
+    peakEnhancement: 25
+    shortWavesFade: 0.15
+  swell:
+    scale: 0.472
+    windSpeed: 1
+    windDirection: 116.52
+    fetch: 3100000
+    spreadBlend: 0.253
+    swell: 0.749
+    peakEnhancement: 113.3
+    shortWavesFade: 0.05

@@ -1,0 +1,163 @@
+﻿#define MAX_FLOAT 3.402823466e+38
+#define THREADSX 256
+
+// Avoid overflow: maximum int (2.146.483.647) / maximum (expected) boids per cell / maximum world position of a boid in x y or z
+// for 100k boids per cell and 150 of abs value its about 140 (tunned down a bit for extra safety)
+// we want it to be as close as possible to the limit
+#define FLOAT_INT_POSK 130
+#define FLOAT_INT_FWDK 4200 // 4292: Similar to pos but aimed to forwards
+
+#define LARGE_PRIME1 73856093
+#define LARGE_PRIME2 19349663
+#define LARGE_PRIME3 83492791
+
+#define CELL_RADIUS 8
+
+// RenderDoc needs this, otherwise it wouldn't capture anything. Praise RenderDoc for its awesomeness ! \|/
+//#pragma enable_d3d11_debug_symbols
+
+#pragma kernel ComputeCells
+#pragma kernel ComputeBoids
+
+struct Boid
+{
+    float3 pos;
+    float3 fwd;
+};
+
+struct Cell
+{
+    uint boidsInside;
+    int3 pos;
+    int3 fwd;
+};
+
+float dt;
+
+uint totalBoids;
+uint totalTargets;
+uint totalObstacles;
+
+float separationWeight;
+float alignmentWeight;
+float targetWeight;
+float obstacleAversionDistance;
+float moveSpeed;
+
+RWStructuredBuffer<Boid> boidBuffer;
+RWStructuredBuffer<Cell> cellsBuffer;
+
+StructuredBuffer<float3> targetsBuffer;
+StructuredBuffer<float3> obstaclesBuffer;
+
+float FindDistToNearestFromPos(StructuredBuffer<float3> interestPoints, uint totalInterestPoints, float3 fromPos, out float3 interestPointPos)
+{
+    float dist = MAX_FLOAT;
+
+    for (uint i = 0; i < totalInterestPoints; ++i)
+    {
+        float3 interestPoint = interestPoints[i];
+        float newDist = distance(fromPos, interestPoint);
+
+        if (newDist < dist)
+        {
+            interestPointPos = interestPoint;
+            dist = newDist;
+        }
+    }
+
+    return dist;
+}
+
+uint HashPosToCell(float3 pos)
+{
+    int3 floored = (int3) (floor(pos / (float) CELL_RADIUS));
+
+    // this is straight from: https://wickedengine.net/2018/05/21/scalabe-gpu-fluid-simulation/
+    // which at the same time I found in: http://www.beosil.com/download/CollisionDetectionHashing_VMV03.pdf
+    uint hash = (uint) ((LARGE_PRIME1 * floored.x) ^ (LARGE_PRIME2 * floored.y) ^ (LARGE_PRIME3 * floored.z));
+    hash %= totalBoids;
+
+    return hash;
+}
+
+[numthreads(THREADSX, 1, 1)]
+void ComputeCells (uint3 id : SV_DispatchThreadID)
+{
+    // too many threads running for the number of boids
+    if (id.x >= totalBoids)
+        return;
+
+    Boid boid = boidBuffer[id.x];
+    uint cellHash = HashPosToCell(boid.pos);
+
+    int posX = round(boid.pos.x * (float) FLOAT_INT_POSK);
+    int posY = round(boid.pos.y * (float) FLOAT_INT_POSK);
+    int posZ = round(boid.pos.z * (float) FLOAT_INT_POSK);
+
+    int fwdX = round(boid.fwd.x * (float) FLOAT_INT_FWDK);
+    int fwdY = round(boid.fwd.y * (float) FLOAT_INT_FWDK);
+    int fwdZ = round(boid.fwd.z * (float) FLOAT_INT_FWDK);
+
+    // store accumulated pos, fwds and boids for each given cell
+    // InterlockedAdd only supports uint or int, which is why we convert floats to ints
+    // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/interlockedadd
+    InterlockedAdd(cellsBuffer[cellHash].boidsInside, 1);
+
+    InterlockedAdd(cellsBuffer[cellHash].pos.x, posX);
+    InterlockedAdd(cellsBuffer[cellHash].pos.y, posY);
+    InterlockedAdd(cellsBuffer[cellHash].pos.z, posZ);
+
+    InterlockedAdd(cellsBuffer[cellHash].fwd.x, fwdX);
+    InterlockedAdd(cellsBuffer[cellHash].fwd.y, fwdY);
+    InterlockedAdd(cellsBuffer[cellHash].fwd.z, fwdZ);
+}
+
+[numthreads(THREADSX, 1, 1)]
+void ComputeBoids (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= totalBoids)
+        return;
+
+    Boid boid = boidBuffer[id.x];
+
+    // could actually store it on first kernel but does not look like a heavy operation
+    uint cellHash = HashPosToCell(boid.pos);
+
+    // convert back to float
+    float posX = (float) cellsBuffer[cellHash].pos.x / (float) FLOAT_INT_POSK;
+    float posY = (float) cellsBuffer[cellHash].pos.y / (float) FLOAT_INT_POSK;
+    float posZ = (float) cellsBuffer[cellHash].pos.z / (float) FLOAT_INT_POSK;
+
+    float fwdX = (float) cellsBuffer[cellHash].fwd.x / (float) FLOAT_INT_FWDK;
+    float fwdY = (float) cellsBuffer[cellHash].fwd.y / (float) FLOAT_INT_FWDK;
+    float fwdZ = (float) cellsBuffer[cellHash].fwd.z / (float) FLOAT_INT_FWDK;
+
+    float3 pos = float3(posX, posY, posZ);
+    float3 fwd = float3(fwdX, fwdY, fwdZ);
+    uint boidsInRange = cellsBuffer[cellHash].boidsInside;
+
+    // translated code from C# and Unity's implementation
+    float3 posNorm = pos / (float) boidsInRange;
+
+    float3 nearestObstaclePos = float3(0.0, 0.0, 0.0);
+    float nearestObstacleDist = FindDistToNearestFromPos(obstaclesBuffer, totalObstacles, posNorm, nearestObstaclePos);
+
+    float3 nearestTargetPos = float3(0.0, 0.0, 0.0);
+    FindDistToNearestFromPos(targetsBuffer, totalTargets, posNorm, nearestTargetPos);
+
+    float3 obstacleSteering = boid.pos - nearestObstaclePos;
+    float3 avoidObstacleHeading = (nearestObstaclePos + normalize(obstacleSteering) * obstacleAversionDistance) - boid.pos;
+    float3 targetHeading = targetWeight * normalize(nearestTargetPos - boid.pos);
+    float nearestObstacleDistanceFromRadius = nearestObstacleDist - obstacleAversionDistance;
+
+    float3 alignmentResult = alignmentWeight * normalize((fwd / boidsInRange) - boid.fwd);
+    float3 separationResult = separationWeight * normalize((boid.pos * boidsInRange) - pos);
+
+    float3 normalHeading = normalize(alignmentResult + separationResult + targetHeading);
+    float3 targetForward = nearestObstacleDistanceFromRadius < 0.0 ? avoidObstacleHeading : normalHeading;
+    float3 nextHeading = normalize(boid.fwd + dt * (targetForward - boid.fwd));
+
+    boidBuffer[id.x].pos = float3(boid.pos + (nextHeading * moveSpeed * dt));
+    boidBuffer[id.x].fwd = nextHeading;
+}

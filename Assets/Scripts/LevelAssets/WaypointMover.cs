@@ -1,6 +1,7 @@
 using FishNet;
 using System;
 using System.Collections;
+
 using UnityEngine;
 
 public class WaypointMover : MonoBehaviour

@@ -58,7 +58,7 @@ public class FloatInWater : MonoBehaviour
 
         // Water drag, stronger the deeper it sits
         float soak = wet / sinkDepth;
-        body.AddForce(-body.linearVelocity * (waterDrag * soak), ForceMode.Acceleration);
+        body.AddForce((WaterCurrent.At(body.position) - body.linearVelocity) * (waterDrag * soak), ForceMode.Acceleration); // drifts with any current
         body.AddTorque(-body.angularVelocity * (waterDrag * soak), ForceMode.Acceleration);
         if (stayPut > 0f)
         {

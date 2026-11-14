@@ -1,0 +1,192 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: WaterInfiniRIVER_FAST_FLOW 5 URP 5
+  m_Shader: {fileID: 4800000, guid: 1d90799c956dae641ac5b9f9be6b5c13, type: 3}
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Anim:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Bump:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CubeMap:
+        m_Texture: {fileID: 8900000, guid: 19a9bb3d7df0ca3448d95ddfdb767932, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Height:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HeightMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Lux_RainRipples:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PlanarReflectionTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StateTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterFlowADVECT:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterFlowFOAM:
+        m_Texture: {fileID: 2800000, guid: e26d75c65dcd32d458bc4b8d8802c163, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterFlowRT:
+        m_Texture: {fileID: 8400000, guid: 8209b2d23be74a3479f27e150c95e424, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterFlowRTA:
+        m_Texture: {fileID: 8400000, guid: 8ffb42fd0e9e79d449f8147bfab13548, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _White:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _foamTexture:
+        m_Texture: {fileID: 2800000, guid: e26d75c65dcd32d458bc4b8d8802c163, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - FlowOffsetA: 0.19
+    - FlowOffsetB: 0.74
+    - _BumpScale: 1
+    - _Cutoff: 0.5
+    - _DepthAmount: 5.25
+    - _DepthDecay: 0.03
+    - _DepthFade: 0.65
+    - _DetailNormalMapScale: 1
+    - _Distortion: 2.74
+    - _DstBlend: 0
+    - _FlowHeightA: 1
+    - _FresnelAngle: 2.7
+    - _FresnelScale: -0.17
+    - _GlossMapScale: 1
+    - _Glossiness: 1201
+    - _GlossyReflections: 1
+    - _LightWrap: 1
+    - _Lux_RainIntensity: 1
+    - _Lux_RippleAnimSpeed: 0.75
+    - _Lux_RippleTiling: 0.75
+    - _Lux_WaterBumpDistance: 0.75
+    - _Metallic: 0.008
+    - _Mode: 0
+    - _NormalStrength: 3
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _ReflectionStrength: -0.2
+    - _SampleSize: 0.0078125
+    - _Smoothness: 0.701
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _TerrainScale: 0.08
+    - _UVSec: 0
+    - _WaterFlowBUMP: 1
+    - _ZWrite: 1
+    - _clearColorDepth: 0.64
+    - _clearColorPower: 5.65
+    - _clearTextureOffset: 0.01
+    - _refractA: 1
+    - foamBrightness: 0.04
+    - foamExponent: 0.17
+    - maxWaterHeight: 35
+    - shallowPower: 0.35
+    - sssEmit: 5111
+    - sssPower: 6.41
+    - usePlanarReflections: 1
+    - wavesHeight: 1
+    m_Colors:
+    - DistortParams: {r: 3.93, g: 0.66, b: 0.93, a: -0.21}
+    - _Color: {r: 0.25164652, g: 0.50371426, b: 0.6132076, a: 0.5529412}
+    - _CubeTint: {r: 1, g: 0.9250459, b: 0.87358487, a: 1}
+    - _DeepColor: {r: 0.117273025, g: 0.57452977, b: 0.6830188, a: 0.7529412}
+    - _DepthCameraPos: {r: 0, g: 200, b: 0, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FlowHeight: {r: 1, g: 1, b: 0, a: 0}
+    - _LocalWavesTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _Lux_RippleWindSpeed: {r: 1, g: 1, b: 1, a: 1}
+    - _Lux_WaterFloodlevel: {r: 1, g: 1, b: 1, a: 1}
+    - _MeshFlowDisplacement: {r: 1, g: 1, b: 1, a: 1}
+    - _ReflectionColor: {r: 3.9533494, g: 3.9533494, b: 3.9533494, a: 0.21176471}
+    - _RimColor: {r: 0.5698112, g: 0.5698112, b: 0.5698112, a: 1}
+    - _ShallowColor: {r: 0.13725491, g: 0.7294118, b: 0.7049935, a: 0.54509807}
+    - _SpecColor: {r: 0.6528301, g: 0.6528301, b: 0.6528301, a: 1}
+    - _Tint: {r: 0.7509433, g: 0.7509433, b: 0.7509433, a: 1}
+    - _clearColor: {r: 1, g: 1, b: 1, a: 1}
+    - controlReflect: {r: 1, g: 1, b: 1, a: 1}
+    - fluidSize: {r: 1, g: 1, b: 1, a: 1}
+    - foamControlsA: {r: 1, g: 4.2, b: 1.83, a: 2.41}
+    - foamDirection: {r: 0.01, g: 0.01, b: 0.01, a: 0.01}
+    - foamPower: {r: 0.01, g: 0.01, b: 0.01, a: 0.01}
+    - normalDistort: {r: 4, g: 9, b: 11, a: 0}
+    - refractPower: {r: 0.21, g: 6.15, b: 1, a: 16.67}
+    - sssScatter: {r: 0.20188677, g: 0.9697222, b: 1, a: 1}
+    - tileOffsetTWF: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []

@@ -282,7 +282,13 @@ namespace FishNet.Managing.Client
                     {
                         if (cnob.IsSceneObject)
                         {
-                            cnob.NetworkObject = _clientObjects.GetSceneNetworkObject(cnob.SceneId, cnob.SceneName, cnob.ObjectName);
+                            /* As clientHost use the server's instance, as instantiated spawns do. A SceneId is shared by every
+                             * copy of a scene loaded more than once, so the scene lookup could return another copy's object. */
+                            if (_networkManager.IsServerStarted && _networkManager.ServerManager.Objects.Spawned.TryGetValueIL2CPP(cnob.ObjectId, out NetworkObject serverNob))
+                                cnob.NetworkObject = serverNob;
+                            else
+                                cnob.NetworkObject = _clientObjects.GetSceneNetworkObject(cnob.SceneId, cnob.SceneName, cnob.ObjectName);
+
                             if (cnob.NetworkObject != null)
                                 SetParentAndTransformProperties(cnob);
                         }
@@ -472,6 +478,11 @@ namespace FishNet.Managing.Client
                     }
 
                     //cnob.NetworkObject.transform.SetLocalPositionRotationAndScale(cnob.Position, cnob.Rotation, cnob.Scale);
+                }
+                //Parent was removed at runtime on the server.
+                else if (cnob.SpawnType.FastContains(SpawnType.SceneRoot) && cnob.NetworkObject.transform.parent != null)
+                {
+                    cnob.NetworkObject.UnsetParent();
                 }
 
                 // else
