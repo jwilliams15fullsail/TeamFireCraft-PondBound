@@ -38,15 +38,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -553860988396757955, guid: 7683aa4f3f5d0f243a464f6bfa478e62, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -133.05493
+      value: -40
       objectReference: {fileID: 0}
     - target: {fileID: -553860988396757955, guid: 7683aa4f3f5d0f243a464f6bfa478e62, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -25.336
+      value: 0.356
       objectReference: {fileID: 0}
     - target: {fileID: -553860988396757955, guid: 7683aa4f3f5d0f243a464f6bfa478e62, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 29.944
+      value: -18.99
       objectReference: {fileID: 0}
     - target: {fileID: -553860988396757955, guid: 7683aa4f3f5d0f243a464f6bfa478e62, type: 3}
       propertyPath: m_LocalRotation.w
@@ -162,9 +162,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FireflyGlow
   fireflyLight: {fileID: 5078326843427150642}
-  minimumIntensity: 0.5
-  maximumIntensity: 1.5
-  pulseSpeed: 2
+  minimumIntensity: 0
+  maximumIntensity: 5
+  pulseSpeed: 4
 --- !u!114 &6306577222602788060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,22 +195,23 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 65535
+  <PrefabId>k__BackingField: 7
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 5786973555941991612
   SceneId: 0
   SerializedTransformProperties:
-    Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    Scale: {x: 0, y: 0, z: 0}
-    IsValid: 0
+    Position: {x: -133.05493, y: -25.336, z: 29.944}
+    Rotation: {x: 0, y: 0, z: 0, w: 1}
+    Scale: {x: 0.1, y: 0.1, z: 0.1}
+    IsValid: 1
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
   WasActiveDuringEdit_Set1: 1
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours: []
+  NetworkBehaviours:
+  - {fileID: 8428722050978280393}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -221,7 +222,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: 0
+  _initializedTimestamp: -8584069729470728171
 --- !u!114 &6665659927476865643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,14 +289,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f4650bc9163ad146b8e163932100f5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FireflyWander
-  _componentIndexCache: 255
+  _componentIndexCache: 0
   _addedNetworkObject: {fileID: 6306577222602788060}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6306577222602788060}
   moveSpeed: 1.5
-  wanderRadius: 3
+  wanderRadius: 1.5
   changeDirectionTime: 2
-  minHeight: 0.5
-  maxHeight: 2.5
+  acceleration: 3
+  minHeight: 0.2
+  maxHeight: 0.8
 --- !u!135 &2280419671508077234
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -315,5 +317,5 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1
+  m_Radius: 1.5
   m_Center: {x: 0, y: 0.5, z: -0.3}
