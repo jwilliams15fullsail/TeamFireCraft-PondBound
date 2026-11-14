@@ -456,7 +456,7 @@ namespace FishNet.Serializing
         /// Writes a int64.
         /// </summary>
         /// <param name = "value"></param>
-        public void WriteInt64Unpacked(long value) => WriteUInt64((ulong)value);
+        public void WriteInt64Unpacked(long value) => WriteUInt64Unpacked((ulong)value);
 
         /// <summary>
         /// Writes an int64.
@@ -962,6 +962,16 @@ namespace FishNet.Serializing
                  * be a prefab, it's being written as a child
                  * in this case. */
                 if (nob.IsInitializedNested)
+                {
+                    WriteNullReferenceId();
+                    return;
+                }
+
+                /* NetworkManager is set when a NetworkObject first initializes and is never cleared, so an
+                 * object which has it but is not spawned is a despawned or pooled instance. Writing its PrefabId
+                 * would make the reader resolve the prefab rather than null. A prefab reference has no
+                 * NetworkManager and is still written by PrefabId. */
+                if (nob.NetworkManager != null)
                 {
                     WriteNullReferenceId();
                     return;
