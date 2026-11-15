@@ -226,6 +226,7 @@ public class EnemyAI : NetworkBehaviour
             pathing.rotationSpeed = rotationSpeed;
             pathing.pauseTime = pauseTime;
             pathing.canMove = true;     // Hand patrol movement back to WaypointMover script
+            return;
         }
         // Wander in a sphereical radius randomly
         if (isWaitingAtWanderPoint)

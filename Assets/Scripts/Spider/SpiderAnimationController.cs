@@ -14,6 +14,8 @@ public class SpiderAnimationController : NetworkBehaviour
     [SerializeField] private float walkSpeed = 1.0f;
     [SerializeField] private float runSpeed = 1.4f;
 
+    [SerializeField] private SpiderAudio spiderAudio;
+    private float stepTimer;
     private Animation animation;
     private string lastBroadcastedClip = "";
 
@@ -25,6 +27,7 @@ public class SpiderAnimationController : NetworkBehaviour
 
     private void Awake()
     {
+        spiderAudio = GetComponent<SpiderAudio>();
         animation = GetComponent<Animation>();
         enemyAI = GetComponent<EnemyAI>();
         waypointMover = GetComponent<WaypointMover>();
@@ -72,24 +75,29 @@ public class SpiderAnimationController : NetworkBehaviour
     {
         ResumeIKIfPaused();
         RequestPlayClip(idleClip, 0.2f, 1.0f, forceReplay: false);
+        spiderAudio.StopMovementLoop();
     }
 
     private void HandleWalk()
     {
         ResumeIKIfPaused();
         RequestPlayClip(walkClip, 0.2f, walkSpeed, forceReplay: false);
+        spiderAudio.StartMovementLoop(isRunning: false);
     }
 
     private void HandleRun()
     {
         ResumeIKIfPaused();
         RequestPlayClip(runClip, 0.2f, runSpeed, forceReplay: false);
+        spiderAudio.StartMovementLoop(isRunning: true);
     }
 
     private void HandleTaunt()
     {
         PauseIKForAction(tauntClip);
         RequestPlayClip(tauntClip, 0.15f, 1.0f, forceReplay: true);
+        spiderAudio.StopMovementLoop();
+        spiderAudio.PlayScreech();
     }
 
     private void HandleAttack()
@@ -99,6 +107,8 @@ public class SpiderAnimationController : NetworkBehaviour
         string chosenAttack = attackClips[Random.Range(0, attackClips.Length)];
         PauseIKForAction(chosenAttack);
         RequestPlayClip(chosenAttack, 0.1f, 1.0f, forceReplay: true);
+        spiderAudio.StopMovementLoop();
+        spiderAudio.PlayBite();
     }
 
     // --- NETWORK BROADCAST LOGIC ---
