@@ -26,11 +26,13 @@ public class CheckpointManager : NetworkBehaviour
     public int Number => number;
 
     private Color originalColor;
-    private Renderer flagRenderer;
+    [Tooltip("Optional: what turns green when this checkpoint is reached, such as its water puddle. Empty: the renderer on this object.")]
+    [SerializeField] Renderer flagRenderer;
 
     private void Awake()
     {
-        flagRenderer = GetComponent<Renderer>();
+        if (flagRenderer == null)
+            flagRenderer = GetComponent<Renderer>();
         if (flagRenderer != null)
         {
             originalColor = flagRenderer.material.color;

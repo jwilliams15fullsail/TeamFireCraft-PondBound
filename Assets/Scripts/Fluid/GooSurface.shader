@@ -1,6 +1,8 @@
 // Thick, sticky goo for a flat floor (a Plane) in URP. The goo creeps along slowly in glossy
 // lumps, bubbles swell up and sink back, and thin goo glows a little where light shines through.
 // GooTrails (on the same object) presses trails into it where frogs walk, and they slowly close up.
+// The goo is a rounded, wobbly puddle inside the plane, with a bead-like rim and a dark wet stain
+// around it, so the plane's square edges never show.
 // Lit by every URP light, with shadows, like the rest of the level.
 Shader "PondBound/GooSurface"
 {
@@ -17,18 +19,29 @@ Shader "PondBound/GooSurface"
         _BubbleSize ("Bubble Size (m)", Range(0.02, 0.5)) = 0.12
         _Bubbles ("Bubbles", Range(0, 1)) = 0.35
         _TrailDepth ("Trail Depth", Range(0, 3)) = 1
+        _EdgeInset ("Edge Inset (m)", Range(0, 5)) = 0.8
+        _CornerRadius ("Corner Roundness (m)", Range(0, 20)) = 4
+        _EdgeWobble ("Edge Wobble (m)", Range(0, 2)) = 0.5
+        _WobbleSize ("Wobble Size (m)", Range(0.2, 10)) = 2.5
+        _RimWidth ("Rim Width (m)", Range(0.01, 1)) = 0.2
+        _RimRoundness ("Rim Roundness", Range(0, 3)) = 0.8
+        _EdgeSoftness ("Edge Softness (m)", Range(0.001, 0.2)) = 0.015
+        _WetStain ("Wet Stain", Range(0, 1)) = 0.35
+        _WetWidth ("Wet Stain Width (m)", Range(0, 1)) = 0.2
         [HideInInspector] _TrailTex ("Trails", 2D) = "black" {}
         [HideInInspector] _TrailRect ("Trail Area", Vector) = (-5, -5, 10, 10)
     }
 
     SubShader
     {
-        Tags { "RenderPipeline" = "UniversalPipeline" "RenderType" = "Opaque" "Queue" = "Geometry" }
+        Tags { "RenderPipeline" = "UniversalPipeline" "RenderType" = "Transparent" "Queue" = "Transparent-50" }
 
         Pass
         {
             Name "GooForward"
             Tags { "LightMode" = "UniversalForward" }
+            Blend SrcAlpha OneMinusSrcAlpha
+            ZWrite On
 
             HLSLPROGRAM
             #pragma target 3.5
@@ -64,6 +77,15 @@ Shader "PondBound/GooSurface"
                 float _BubbleSize;
                 float _Bubbles;
                 float _TrailDepth;
+                float _EdgeInset;
+                float _CornerRadius;
+                float _EdgeWobble;
+                float _WobbleSize;
+                float _RimWidth;
+                float _RimRoundness;
+                float _EdgeSoftness;
+                float _WetStain;
+                float _WetWidth;
             CBUFFER_END
 
             struct Attributes
@@ -155,11 +177,38 @@ Shader "PondBound/GooSurface"
                 return float3(dome * grow, slope * grow * 0.25);
             }
 
+            // Metres from this point to the goo's edge: below 0 inside, above 0 outside. The goo is a
+            // rounded rectangle set in from the plane's sides, with a slowly creeping wobble.
+            float EdgeDistance(float3 positionWS)
+            {
+                float3 positionOS = TransformWorldToObject(positionWS);
+                float2 scale = float2(length(GetObjectToWorldMatrix()._m00_m10_m20), length(GetObjectToWorldMatrix()._m02_m12_m22));
+                float2 centre = _TrailRect.xy + _TrailRect.zw * 0.5;
+                float2 p = (positionOS.xz - centre) * scale;
+                float2 halfSize = max(_TrailRect.zw * 0.5 * scale - _EdgeInset, 0.05);
+                float r = min(_CornerRadius, min(halfSize.x, halfSize.y));
+                float2 q = abs(p) - halfSize + r;
+                float box = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+                float t = _Time.y * _OozeSpeed * 0.5;
+                float2 w = positionWS.xz / _WobbleSize;
+                float wobble = (Noise(w + t).x - 0.5) * 1.4 + (Noise(w * 2.7 - t).x - 0.5) * 0.6;
+                return box + wobble * _EdgeWobble;
+            }
+
             half4 Frag(Varyings i) : SV_Target
             {
                 float2 xz = i.positionWS.xz;
+
+                // Where the goo ends: a rounded, wobbly blob inside the plane, with a bead-like rim
+                float edge = EdgeDistance(i.positionWS);
+                float2 edgeDir = float2(EdgeDistance(i.positionWS + float3(0.05, 0, 0)) - edge,
+                                        EdgeDistance(i.positionWS + float3(0, 0, 0.05)) - edge) / 0.05; // points outward
+                float goo = 1.0 - smoothstep(-_EdgeSoftness, _EdgeSoftness, edge); // 1 inside, 0 outside
+                float rim = saturate(-edge / _RimWidth); // 0 at the edge, 1 past the rim
+                float2 rimSlope = rim < 1.0 ? -edgeDir * _RimRoundness * 0.5 / sqrt(max(rim, 0.04)) : 0;
+
                 float3 lumps = Lumps(xz);
-                float3 bubble = Bubbles(xz);
+                float3 bubble = Bubbles(xz) * rim;
 
                 // Trails: pressed-in grooves where frogs went (1 = just pushed through)
                 float2 texel = _TrailTex_TexelSize.xy;
@@ -168,7 +217,8 @@ Shader "PondBound/GooSurface"
                 float trailZ = SAMPLE_TEXTURE2D(_TrailTex, sampler_TrailTex, i.trailUV + float2(0, texel.y)).r;
                 float2 trailSlope = float2(trailX - trail, trailZ - trail) * 10.0 * _TrailDepth;
 
-                float2 slope = lumps.yz * _Bumpiness * (1.0 - 0.7 * trail) + bubble.yz - trailSlope;
+                float2 slope = lumps.yz * _Bumpiness * (1.0 - 0.7 * trail) * rim + bubble.yz - trailSlope + rimSlope;
+                slope *= goo; // the wet stain outside the goo is flat
                 float3 n = normalize(float3(-slope.x, 1.0, -slope.y));
                 float3 up = normalize(i.normalWS);
                 if (up.y < 0.999) // the floor isn't flat on the ground: tilt the bumps with it
@@ -178,10 +228,11 @@ Shader "PondBound/GooSurface"
                     n = normalize(side * -n.x + up * n.y + fwd * n.z);
                 }
 
-                float height = saturate(lumps.x * (1.0 - 0.6 * trail) + bubble.x * 0.5);
+                float height = saturate(lerp(0.55, lumps.x, rim) * (1.0 - 0.6 * trail) + bubble.x * 0.5);
                 half3 albedo = lerp(_DeepColor.rgb, _TopColor.rgb, height);
                 albedo = lerp(albedo, _DeepColor.rgb * 0.45, saturate(trail * _TrailDepth) * 0.8); // pushed-aside goo is thinner and darker
                 albedo = lerp(albedo, _TopColor.rgb * 1.15, bubble.x * 0.4); // bubble tops catch the light
+                albedo = lerp(_DeepColor.rgb * 0.25, albedo, goo); // outside: a dark wet stain on the floor
 
                 InputData inputData = (InputData)0;
                 inputData.positionWS = i.positionWS;
@@ -195,26 +246,24 @@ Shader "PondBound/GooSurface"
                 inputData.shadowMask = half4(1, 1, 1, 1);
 
                 float facing = saturate(dot(n, inputData.viewDirectionWS));
+                float stain = _WetStain * (1.0 - saturate(edge / max(_WetWidth, 0.001))); // fades out away from the goo
                 SurfaceData surface = (SurfaceData)0;
                 surface.albedo = albedo;
                 surface.metallic = 0;
                 surface.specular = 0;
                 surface.smoothness = saturate(_Smoothness + trail * 0.1);
-                surface.occlusion = lerp(1.0, 0.75, 1.0 - height); // valleys between lumps are a little darker
-                surface.alpha = 1;
+                surface.occlusion = lerp(1.0, 0.75, (1.0 - height) * goo); // valleys between lumps are a little darker
+                surface.alpha = saturate(goo + (1.0 - goo) * stain);
                 surface.normalTS = float3(0, 0, 1);
-                // Light glows through thin goo: valleys and grazing views glow most
-                surface.emission = _GlowColor.rgb * _Glow * (0.1 + 0.3 * (1.0 - height) + 0.6 * pow(1.0 - facing, 3.0));
+                // Light glows through thin goo: valleys, the thin rim and grazing views glow most
+                surface.emission = goo * _GlowColor.rgb * _Glow * (0.1 + 0.3 * (1.0 - height) + 0.6 * pow(1.0 - facing, 3.0) + 0.4 * (1.0 - rim));
 
                 half4 color = UniversalFragmentPBR(inputData, surface);
                 color.rgb = MixFog(color.rgb, inputData.fogCoord);
-                color.a = 1;
+                color.a = surface.alpha;
                 return color;
             }
             ENDHLSL
         }
-
-        UsePass "Universal Render Pipeline/Lit/DEPTHONLY"
-        UsePass "Universal Render Pipeline/Lit/DEPTHNORMALS"
     }
 }

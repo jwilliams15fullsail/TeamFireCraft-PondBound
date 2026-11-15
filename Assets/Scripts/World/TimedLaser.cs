@@ -62,6 +62,10 @@ public class TimedLaser : MonoBehaviour
     float CycleTime => (float)(Clock % (offTime + warningTime + onTime));
     bool SwitchedOff => power != null && power.IsOff;
 
+    // For HazardSound: the beam is showing (warning or full), or it is the full beam that hurts.
+    public bool BeamShowing => line != null && line.enabled;
+    public bool BeamDangerous => BeamShowing && !SwitchedOff && CycleTime >= offTime + warningTime;
+
     void Awake()
     {
         line = GetComponent<LineRenderer>();

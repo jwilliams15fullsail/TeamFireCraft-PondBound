@@ -86,9 +86,14 @@ public class AlarmLight : MonoBehaviour
         {
             if (on)
             {
-                audioSource.clip = alarmLoop;
-                audioSource.loop = true;
-                audioSource.Play();
+                // Already playing this siren (Play On Awake, or another alarm sharing this source):
+                // leave it alone, so it never restarts or doubles up.
+                if (audioSource.clip != alarmLoop || !audioSource.isPlaying)
+                {
+                    audioSource.clip = alarmLoop;
+                    audioSource.loop = true;
+                    audioSource.Play();
+                }
             }
             else
             {
