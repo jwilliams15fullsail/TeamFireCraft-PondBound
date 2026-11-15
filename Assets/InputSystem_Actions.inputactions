@@ -155,6 +155,16 @@
                     "interactions": "",
                     "initialStateCheck": true,
                     "priority": 0
+                },
+                {
+                    "name": "FreeLook",
+                    "type": "Button",
+                    "id": "32785e0c-01e6-4c60-a708-2b1ef664d869",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -650,6 +660,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "ReelWheel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8c5fb6f7-cb70-4a80-818a-01eb0d93a263",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "FreeLook",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

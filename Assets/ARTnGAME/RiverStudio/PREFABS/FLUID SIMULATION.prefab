@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7755379857617052387
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7755379857617052386}
+  - component: {fileID: 7755379857617052393}
+  m_Layer: 0
+  m_Name: FLUID SIMULATION
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7755379857617052386
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7755379857617052387}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7755379857617052393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7755379857617052387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c92750c9d16225047ba06824c8c4f2e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useColor: 0
+  brushColor: {r: 1, g: 1, b: 1, a: 1}
+  brightness: 1
+  m_guiTex: {fileID: 8400000, guid: 62018307480ac3a48b0e5814bc6a4e50, type: 2}
+  m_guiTexA: {fileID: 8400000, guid: d5b4de57fe8aac045bae237a80336ac6, type: 2}
+  m_guiTexB: {fileID: 8400000, guid: 61735d08362137a4587cd53164d85326, type: 2}
+  m_windDirection: {x: 1.18, y: 0.32, z: -0.015, w: 0}
+  m_fluidColor: {r: 0.6555471, g: 0.6989127, b: 0.71323526, a: 1}
+  m_obstacleColor: {r: 0, g: 0, b: 0, a: 1}
+  m_guiMat: {fileID: 2100000, guid: 229dd8ae0f4c09b42b2e04d481aa5be2, type: 2}
+  m_advectMat: {fileID: 2100000, guid: 3f34f12aff931564887e9c22cb6b76c4, type: 2}
+  m_buoyancyMat: {fileID: 2100000, guid: 579b27956d9f9934980c3a53e430a66c, type: 2}
+  m_divergenceMat: {fileID: 2100000, guid: 11101c012000f484c8e44255f87e5359, type: 2}
+  m_jacobiMat: {fileID: 2100000, guid: 08995df0a70a7dd4daf3998e4e10a5d2, type: 2}
+  m_impluseMat: {fileID: 2100000, guid: d216087604fee704d99189eb141fbfad, type: 2}
+  m_gradientMat: {fileID: 2100000, guid: d69b271c118913946aafd0000354e0e3, type: 2}
+  m_obstaclesMat: {fileID: 2100000, guid: 968205584689d694280072d33255c7fb, type: 2}
+  m_timeStep: 0.65
+  m_impulseTemperature: 2.2
+  m_impulseDensity: 9
+  m_temperatureDissipation: 0.9999
+  m_velocityDissipation: 0.875
+  m_densityDissipation: 0.999
+  m_ambientTemperature: 0.07
+  m_smokeBuoyancy: 6
+  m_smokeWeight: -0.3
+  m_cellSize: 1
+  m_gradientScale: 1.1
+  m_numJacobiIterations: 25
+  m_implusePos: {x: 0.5, y: -1.4}
+  m_impluseRadius: 1.91
+  m_mouseImpluseRadius: 0
+  m_obstaclePos: {x: 0.85, y: 0.23}
+  m_obstacleRadius: 0
+  m_width: 1045
+  m_height: 573
+  m_offset: {x: 0, y: 0}
+  updateEvery: 4
+  currentUpdate: 0
+  prewarm: 1
+  prewarmFrames: 600

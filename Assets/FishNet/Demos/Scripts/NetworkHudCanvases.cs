@@ -85,60 +85,79 @@ namespace FishNet.Example
         private void OnGUI()
         {
 #if ENABLE_INPUT_SYSTEM
-            string GetNextStateText(LocalConnectionState state)
-            {
-                if (state == LocalConnectionState.Stopped)
-                    return "Start";
-                else if (state == LocalConnectionState.Starting)
-                    return "Starting";
-                else if (state == LocalConnectionState.Stopping)
-                    return "Stopping";
-                else if (state == LocalConnectionState.Started)
-                    return "Stop";
-                else
-                    return "Invalid";
-            }
-
-            GUILayout.BeginArea(new(4, 110, 256, 9000));
-            Vector2 defaultResolution = new(1920f, 1080f);
-            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new(Screen.width / defaultResolution.x, Screen.height / defaultResolution.y, 1));
-
-            GUIStyle style = GUI.skin.GetStyle("button");
-            int originalFontSize = style.fontSize;
-
-            Vector2 buttonSize = new(165f, 42f);
-            style.fontSize = 26;
-            // Server button.
-            if (Application.platform != RuntimePlatform.WebGLPlayer)
-            {
-                if (GUILayout.Button($"{GetNextStateText(_serverState)} Server", GUILayout.Width(buttonSize.x), GUILayout.Height(buttonSize.y)))
-                    OnClick_Server();
-                GUILayout.Space(10f);
-            }
-
-            // Client button.
-            if (GUILayout.Button($"{GetNextStateText(_clientState)} Client", GUILayout.Width(buttonSize.x), GUILayout.Height(buttonSize.y)))
+            // Canvas buttons can't receive clicks without an input module, so draw invisible IMGUI buttons over them.
+            if (_serverIndicator.gameObject.activeInHierarchy && InvisibleButton(_serverIndicator))
+                OnClick_Server();
+            if (InvisibleButton(_clientIndicator))
                 OnClick_Client();
-
-            style.fontSize = originalFontSize;
-
-            GUILayout.EndArea();
 #endif
         }
+
+#if ENABLE_INPUT_SYSTEM
+        /// <summary>
+        /// World corners of the image being drawn over, reused each call.
+        /// </summary>
+        private readonly Vector3[] _corners = new Vector3[4];
+
+        /// <summary>
+        /// Draws an invisible IMGUI button over img. Returns true when clicked.
+        /// </summary>
+        private bool InvisibleButton(Image img)
+        {
+            img.rectTransform.GetWorldCorners(_corners);
+
+            // An overlay canvas has no camera; Screen Space Camera and World Space canvases render through one.
+            Canvas canvas = img.canvas.rootCanvas;
+            Camera canvasCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
+
+            // Bounding box of the corners in screen space, so any canvas mode, scale or rotation gets the right area.
+            Vector2 min = new(float.MaxValue, float.MaxValue);
+            Vector2 max = new(float.MinValue, float.MinValue);
+            for (int i = 0; i < _corners.Length; i++)
+            {
+                Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(canvasCamera, _corners[i]);
+                min = Vector2.Min(min, screenPoint);
+                max = Vector2.Max(max, screenPoint);
+            }
+
+            // IMGUI's y axis runs top down.
+            Rect r = new(min.x, Screen.height - max.y, max.x - min.x, max.y - min.y);
+
+            // Mimic the canvas Button's color tint, since it gets no pointer events without an input module.
+            Button button = img.GetComponentInChildren<Button>();
+            if (button != null && Event.current.type == EventType.Repaint)
+            {
+                bool hover = r.Contains(Event.current.mousePosition);
+                ColorBlock colors = button.colors;
+                Color tint = !hover ? colors.normalColor : GUIUtility.hotControl != 0 ? colors.pressedColor : colors.highlightedColor;
+                button.targetGraphic.CrossFadeColor(tint * colors.colorMultiplier, colors.fadeDuration, true, true);
+            }
+
+            return GUI.Button(r, GUIContent.none, GUIStyle.none);
+        }
+#endif
 
         private void Start()
         {
 #if !ENABLE_INPUT_SYSTEM
             SetEventSystem();
+            #if UNITY_2022_2_OR_NEWER
+            BaseInputModule inputModule = FindAnyObjectByType<BaseInputModule>();
+            #else
             BaseInputModule inputModule = FindObjectOfType<BaseInputModule>();
+            #endif
             if (inputModule == null)
                 gameObject.AddComponent<StandaloneInputModule>();
 #else
-            _serverIndicator.transform.gameObject.SetActive(false);
-            _clientIndicator.transform.gameObject.SetActive(false);
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+                _serverIndicator.gameObject.SetActive(false);
 #endif
 
+            #if UNITY_2022_2_OR_NEWER
+            _networkManager = FindAnyObjectByType<NetworkManager>();
+            #else
             _networkManager = FindObjectOfType<NetworkManager>();
+            #endif
             if (_networkManager == null)
             {
                 Debug.LogError("NetworkManager not found, HUD will not function.");
@@ -228,7 +247,11 @@ namespace FishNet.Example
 #if !ENABLE_INPUT_SYSTEM
             if (_eventSystem != null)
                 return;
+            #if UNITY_2022_2_OR_NEWER
+            _eventSystem = FindAnyObjectByType<EventSystem>();
+            #else
             _eventSystem = FindObjectOfType<EventSystem>();
+            #endif
             if (_eventSystem == null)
                 _eventSystem = gameObject.AddComponent<EventSystem>();
 #endif

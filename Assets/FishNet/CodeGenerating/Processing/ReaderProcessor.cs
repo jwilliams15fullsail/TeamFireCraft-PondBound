@@ -706,7 +706,8 @@ namespace FishNet.CodeGenerating.Helping
         private MethodReference CreateArrayReaderMethodReference(TypeReference objectTr)
         {
             ReaderImports ri = GetClass<ReaderImports>();
-            TypeReference valueTr = objectTr.GetElementType();
+            // The array's own element type: GetElementType strips every specification, so it returned int for int[][] and Nullable`1 for int?[].
+            TypeReference valueTr = ((ArrayType)objectTr).ElementType;
 
             // Write not found.
             if (GetOrCreateReadMethodReference(valueTr, TypeReferenceTraceText(objectTr)) == null)

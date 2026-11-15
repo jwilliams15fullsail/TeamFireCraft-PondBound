@@ -1,0 +1,103 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Sky 3 RED SKY 2use 3
+  m_Shader: {fileID: 4800000, guid: 516fcc53ef335864fb0e34ae3de1b01c, type: 3}
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 2450
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _GalaxyTexture:
+        m_Texture: {fileID: 2800000, guid: be5f7a59db8a89b42a0a35f64ccd426e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _InteractTexture:
+        m_Texture: {fileID: 2800000, guid: 8034f877ef030f349ab31957981eb9ca, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _JitterTexture:
+        m_Texture: {fileID: 2800000, guid: 4c421d3225c9fca45a0cdc8330c353af, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MoonBumpTexture:
+        m_Texture: {fileID: 2800000, guid: 080bd5d098d817944a2bfc63a7c4eda3, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MoonTexture:
+        m_Texture: {fileID: 2800000, guid: 46488ad6ab82c4740b21a3992af7ae02, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseTex1:
+        m_Texture: {fileID: 11760204, guid: b6d6f79c2d3ef3241a9948dd089967d1, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseTex2:
+        m_Texture: {fileID: 11728776, guid: 4676a0d39df38b84cad914e1e3eadeda, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SunTexture:
+        m_Texture: {fileID: 2800000, guid: dd4568d7907ea064ea100c46d7f3440b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Altitude0: 1800
+    - _Altitude1: 5300
+    - _Angle: 0
+    - _AtmosphereThickness: 1.95
+    - _BackShade: 0.53
+    - _Exposure: 2.58
+    - _Extinct: 0.03
+    - _FarDist: 12182
+    - _HGCoeff: 0.45
+    - _HorizonYAdjust: 18
+    - _NoiseAmp1: 4.19
+    - _NoiseAmp2: -0.61
+    - _NoiseBias: -1.94
+    - _NoiseFreq1: 9.86
+    - _NoiseFreq2: 39
+    - _SampleCount0: 0
+    - _SampleCount1: 0
+    - _SampleCountL: 0
+    - _Scatter: 3
+    - _SunSize: 0.511
+    - _UndersideCurveFactor: 0.72
+    - _fastest: 0
+    - _invertRay: 2
+    - _invertX: 0
+    - rayShadowing: 0.02
+    - raysResolution: 2
+    m_Colors:
+    - _CloudBaseColor: {r: 0.9056604, g: 0.9056604, b: 0.9056604, a: 1}
+    - _CloudTopColor: {r: 1, g: 0.50000006, b: 0, a: 1}
+    - _GroundColor: {r: 0.5283019, g: 0.42105016, b: 0.36133856, a: 1}
+    - _InteractTextureAtr: {r: 1, g: 1, b: 0, a: 0}
+    - _InteractTextureOffset: {r: 1111, g: 111, b: 0, a: 0}
+    - _InteractTexturePos: {r: 111, g: 111, b: 0, a: 0}
+    - _LocalLightColor: {r: 0, g: 0, b: 0, a: 2}
+    - _LocalLightPos: {r: 0, g: 0, b: 0, a: 0}
+    - _Scroll1: {r: 0.002, g: -0.0015, b: 0.08, a: 0}
+    - _Scroll2: {r: -0.5, g: 0.1, b: 1, a: 0}
+    - _SkyTint: {r: 0.5660378, g: 0.5660378, b: 0.5660378, a: 1}
+    - _galaxyPos: {r: 270, g: -409.43, b: 0.21, a: 4.4}
+    - _galaxyShading: {r: 1.81, g: 0.15, b: 0, a: 10.22}
+    - _moonPos: {r: -16.7, g: 385.1, b: 1, a: 3}
+    - _rayColor: {r: 0.4565682, g: 0.7059778, b: 0.7169812, a: 1}
+    - _sunShading: {r: 35.2, g: 1, b: 1, a: 0.16}
+    - _underDomeColor: {r: 0.34509805, g: 0.49803925, b: 0.6156863, a: 1}
+    - rayShadowing: {r: 0.02, g: -1.61, b: 1, a: 1}
+    - raysResolution: {r: 0, g: 0.15, b: -0.11, a: 0}
+  m_BuildTextureStacks: []

@@ -1,0 +1,101 @@
+River Studio
+
+InfiniRIVER is the new Fluid based water simulator for Unity by ARTnGAME. 
+The system can emulate the interaction of water with scene objects in 
+real time using a fluid solver and do so in a global or local way for 
+versatility and cover of all use cases.
+
+InfiniRIVER is in its first release and will be in Beta for some time 
+until all features are fully realized. The base fluid system is production 
+ready and more work on usability and control of the effect will be added 
+in the various Beta stages for more options. 
+
+InfiniRIVER can be upgraded to the Sky Master ULTIMATE weather and volumetric
+clouds and lighting suit for a discount price versus the current $69. 
+ARTnGAME assets link:
+(https://assetstore.unity.com/lists/world-design-sky-volume-clouds-lighting-ocean-fo-237063?aid=1101l8zwm)
+
+For any feedback and questions please use my Discord channel for direct contact.
+https://discord.gg/X6fX6J5
+
+or ARTnGAME email: artengames@gmail.com
+
+Video Tutorials:
+https://www.youtube.com/watch?v=_AhRpE36gzY&list=PLJQvoQM6t9GddDxIVi0jNHbKuLcuWSjH1&index=1
+
+
+
+----------------------- BASIC PIPELINES SETUP -----------------------
+
+InfiniRIVER has been build around support for all pipelines, the development was carried out
+while having all 3 pipelines installed (SRP, URP and HDRP) at the same time, thus a number
+of actions is required if need to use only one of the URP or HDRP pipelines.
+
+The store download defaults to Standard Pipeline. For use with HDRP or URP do the following:
+
+The files mentioned below have some defines (#define HDRP and #define URP)
+In the case all pipelines is installed then all defines should be active (as is the default)
+
+InfiniRIVER_Water_SETUP
+DepthRendererCT_HDRP_VOLUME
+DepthRendererCT_HDRP
+DepthRendererCT_URP
+
+For convinience a number of direct installer packages with the various file variations of the defines
+is included in the "0 INSTALL PIPELINES" folder.
+
+To setup for only Standard Pipeline please comment out both the #define HDRP and #define URP
+lines at the top of the above scripts OR install the "Install if only STANDARD PIPELINE is used" package
+
+To setup for only URP Pipeline please comment out the #define HDRP
+lines at the top of the above scripts OR install the "Install if only HDRP PIPELINE is used" package
+
+To setup for only HDRP Pipeline please comment out the #define URP
+lines at the top of the above scripts OR install the "Install if only URP PIPELINE is used" package
+
+If all pipelines are installed at the same time, uncomment all defines 
+OR install the "Install if all Pipelines installed same time" package
+
+
+----------------------- QUICK START WITH PREFAB -----------------------
+
+Drag the "COMPLETE RIVER PREFAB" prefab inside the RiverStudio -> PREFABS folder to
+the scene. Configure the system for the various modes and pipelines using the 
+"RIVER WATER CREATE and CONFIG" script.
+
+
+----------------------- QUICK START WITH PREFAB MAKER -----------------------
+
+Open "AUTO CONFIGURE PREFAB DEMO" demo scene. Enable the relevant SAMPLE SCENE object
+and disable the rest based on used pipeline.
+
+In "RIVER WATER CREATE and CONFIG" script (InfiniRIVER_Water_SETUP), press the "Insert Prefabs"
+checkbox to create the water.
+
+Then choose the pipeline mode and other options (e.g. world space mode) and press the 
+"Setup Water" checkbox. This checkbox can be pressed again if other options are chose to
+reconfigure the system as needed.
+
+At this point a prefab with all the required items can be created and dragged to any other scene. 
+
+
+
+NOTE 1: If get warnings on missing scripts and HDRP is not installed - used, please erase the
+CAUSTICS PROJECTOR HDRP item under the ripple generator object and remove the missing script
+in the "DEPTH RENDERERS(Clone)" object.
+
+NOTE 2: For URP caustics, please enable the Depth and 
+
+
+Roadmap (Some of the features are TBD):
+- Adapt HDRP Decal shader to have better control of the projected caustic texture
+- Control and create water ripples - caustics based on scene objects position - speed, besides mouse motion
+- Convert bonus parallax sample shader and parallax with fluid shader to URP-HDRP (TBD)
+- Add Delauney based tessellation to the river mesh generator
+- Add river branching and Terrain river curving
+- Add more options in the river mesh maker
+- Make easier to adapt the fluid simulation water flow direction
+- Add underwater rendering (TBD)
+- Add slope based component for automatic waterfall creation
+- Add flow component using flow maps, finalize the flow map creator module & adapt to water shader
+- Add real time reflections to water shader

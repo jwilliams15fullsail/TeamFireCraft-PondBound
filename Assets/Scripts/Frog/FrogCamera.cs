@@ -1,3 +1,4 @@
+using Artngame.RiverStudio.PBDFluid;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -63,6 +64,12 @@ public class FrogCamera : MonoBehaviour
     [Tooltip("While aiming a jump the camera tilts down to at least this (degrees), a view from above that follows the landing marker.")]
     [SerializeField, Range(0f, 89f)] float aimPitch = 45f;
     [Tooltip("While you place the landing marker the camera slides toward it (by Aim Look At Marker), but never more than this (m), so the frog stays on screen.")]
+
+    [Header("Free look (Third Person Follow)")]
+    //[Tooltip("Hold Free Look (Right Mouse / right stick click) to look round the frog without changing which way it walks.")]
+    [SerializeField] bool freeLookEnabled = true;
+    [Tooltip("Seconds the camera takes to swing back behind the frog when you let go. 0 = it stays where you looked.")]
+    [SerializeField, Min(0f)] float freeLookReturnTime = 0.3f;
     [SerializeField] float aimMaxSlide = 1.5f;
    
 
@@ -149,6 +156,10 @@ public class FrogCamera : MonoBehaviour
     float zoomBlend, markerBlend; // 0 = normal, 1 = fully into aiming
     Vector3 markerFocus, markerFocusVelocity; // where the camera looks while (and just after) aiming
     Vector3 lastTargetPosition;
+    InputAction freeLookAction;
+    bool freeLookHeld;           // Free Look is held: the mouse turns the camera, not the frog's heading
+    float freeYaw, freePitch;    // how far free look has turned the camera away from lookYaw / lookPitch
+    float freeYawVelocity, freePitchVelocity;
     float smoothSpeed;
 
     void Start()
@@ -156,6 +167,7 @@ public class FrogCamera : MonoBehaviour
         lens = GetComponent<Camera>();
         lookAction = InputSystem.actions.FindAction("Player/Look", true);
         FindFollowCamera();
+        freeLookAction = InputSystem.actions.FindAction("Player/FreeLook", false); // optional: no free look without it
     }
 
     public void SetTarget(Transform newTarget)
@@ -173,6 +185,7 @@ public class FrogCamera : MonoBehaviour
         lastTargetPosition = target.position;
         zoomBlend = markerBlend = 0f;
         lookYaw = target.eulerAngles.y; // Third Person Follow starts right behind the frog
+        freeYaw = freePitch = 0f;
         lookPitch = startPitch;
         SnapFollowPoint();
 
@@ -256,6 +269,8 @@ public class FrogCamera : MonoBehaviour
         if (orbit == null && thirdPerson == null)
             return;
         float dt = Time.deltaTime;
+        freeLookHeld = freeLookEnabled && thirdPerson != null && !AimingMarker && freeLookAction != null
+    && freeLookAction.IsPressed() && Cursor.lockState == CursorLockMode.Locked && Application.isFocused;
 
         if (Cursor.lockState == CursorLockMode.Locked && Application.isFocused)
         {
@@ -263,7 +278,15 @@ public class FrogCamera : MonoBehaviour
             bool fromStick = lookAction.activeControl != null && lookAction.activeControl.device is Gamepad;
             look *= (fromStick ? stickSensitivity * dt : mouseSensitivity) * sensitivityScale;
 
-            if (AimingMarker)
+            if (freeLookHeld)
+            {
+                // Free look: the mouse swings the camera round the frog, and which way the frog
+                // walks (Yaw) stays the same.
+                freeYaw = Mathf.DeltaAngle(0f, freeYaw + look.x);
+                freePitch = Mathf.Clamp(freePitch + (invertY ? look.y : -look.y), pitchLimits.x - lookPitch, pitchLimits.y - lookPitch);
+                freeYawVelocity = freePitchVelocity = 0f;
+            }
+            else if (AimingMarker)
             {
                 // Aiming a jump: the mouse steers the aim (where the landing marker goes), not the
                 // camera. Third Person Follow turns with it, so the marker stays ahead of you.
@@ -287,6 +310,25 @@ public class FrogCamera : MonoBehaviour
                 {
                     Vector2 pitchRange = orbit.VerticalAxis.Range;
                     orbit.VerticalAxis.Value = Mathf.Clamp(orbit.VerticalAxis.Value + (invertY ? look.y : -look.y), pitchRange.x, pitchRange.y);
+                }
+            }
+
+            // Let go of free look: the camera swings back behind where the frog is heading (or, with
+            // Free Look Return Time 0, stays where you looked and that becomes the new heading).
+            if (!freeLookHeld && (freeYaw != 0f || freePitch != 0f))
+            {
+                if (freeLookReturnTime <= 0f)
+                {
+                    lookYaw = Mathf.Repeat(lookYaw + freeYaw, 360f);
+                    lookPitch = Mathf.Clamp(lookPitch + freePitch, pitchLimits.x, pitchLimits.y);
+                    freeYaw = freePitch = 0f;
+                }
+                else
+                {
+                    freeYaw = Mathf.SmoothDamp(freeYaw, 0f, ref freeYawVelocity, freeLookReturnTime);
+                    freePitch = Mathf.SmoothDamp(freePitch, 0f, ref freePitchVelocity, freeLookReturnTime);
+                    if (Mathf.Abs(freeYaw) < 0.01f && Mathf.Abs(freePitch) < 0.01f)
+                        freeYaw = freePitch = 0f;
                 }
             }
 
@@ -396,9 +438,11 @@ public class FrogCamera : MonoBehaviour
     {
         if (thirdPerson != null)
         {
+            // Free look turns it further, on top of where the frog is heading.
             // Aiming a jump: tilt down toward Aim Pitch, a view from above that follows the marker.
             float overhead = Mathf.SmoothStep(0f, 1f, zoomBlend);
-            return Quaternion.Euler(Mathf.Lerp(lookPitch, Mathf.Max(lookPitch, aimPitch), overhead), lookYaw, 0f);
+            float pitch = Mathf.Lerp(lookPitch, Mathf.Max(lookPitch, aimPitch), overhead) + freePitch;
+            return Quaternion.Euler(Mathf.Clamp(pitch, pitchLimits.x, Mathf.Max(pitchLimits.y, aimPitch)), lookYaw + freeYaw, 0f);
         }
         Vector3 heading = Vector3.ProjectOnPlane(target.forward, Vector3.up);
         return heading.sqrMagnitude > 0.01f ? Quaternion.LookRotation(heading) : followPoint.rotation; // keep the last heading while it faces straight up or down a wall
@@ -412,7 +456,7 @@ public class FrogCamera : MonoBehaviour
         // Room behind the frog: how far back the camera could go from the frog's own pivot. Measured
         // from there, not from the slid pivot, or sliding would change the room it's based on and
         // the camera would bounce against things on the desk.
-        Vector3 pivot = followPoint.position + Quaternion.Euler(0f, lookYaw, 0f) * shoulderOffset;
+        Vector3 pivot = followPoint.position + Quaternion.Euler(0f, lookYaw + freeYaw, 0f) * shoulderOffset;
         float distance = Mathf.Max(0.01f, thirdPerson.CameraDistance);
         float room = 1f;
         if (Physics.SphereCast(pivot, thirdPerson.AvoidObstacles.CameraRadius, -followPoint.forward, out RaycastHit hit, distance, solidLayers, QueryTriggerInteraction.Ignore))
@@ -421,7 +465,7 @@ public class FrogCamera : MonoBehaviour
 
         Vector3 slide = Vector3.ClampMagnitude((markerFocus - followPoint.position) * aimLookAtMarker, aimMaxSlide * aimRoom);
         slide *= Mathf.SmoothStep(0f, 1f, markerBlend);
-        thirdPerson.ShoulderOffset = shoulderOffset + Quaternion.Inverse(Quaternion.Euler(0f, lookYaw, 0f)) * slide;
+        thirdPerson.ShoulderOffset = shoulderOffset + Quaternion.Inverse(Quaternion.Euler(0f, lookYaw + freeYaw, 0f)) * slide;
     }
 
     void OnDestroy()
