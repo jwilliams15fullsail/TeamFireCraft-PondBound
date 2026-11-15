@@ -919,55 +919,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7530496191542153289, guid: b2b7b5dc93e892a4c8833a0d24947b79, type: 3}
   m_PrefabInstance: {fileID: 35637837}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &47542835
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 47542836}
-  - component: {fileID: 47542837}
-  m_Layer: 0
-  m_Name: Objective Marker
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &47542836
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 47542835}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0.15536651, y: -0.6277245, z: 0.13092181, w: 0.7514537}
-  m_LocalPosition: {x: 0.9759574, y: -18.363192, z: -21.94612}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 598718127}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &47542837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 47542835}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 765c8942d8f546e42b8a382b4d960a6f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ObjectiveMarkers
-  markerImage: {fileID: 2101620348}
-  sequence: {fileID: 1453650690}
-  meter: {fileID: 1348392975}
-  offset: {x: 0, y: 0.5, z: 0}
-  distanceAdjustment: 3
 --- !u!1001 &48203112
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5243,6 +5194,63 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClimbableSurface
   gripMultiplier: 1
+--- !u!1001 &341913969
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 761.6207
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.00003
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -594.7067
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7514537
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.15536651
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.6277245
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.13092181
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 956630440393868090, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5664030649742168256, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
+      propertyPath: m_Name
+      value: Frog Third Person Camera
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 1d62bc65927bb024ba7049c92cc3b8d9, type: 3}
 --- !u!1001 &342853234
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9279,90 +9287,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 3839424333073963725, guid: ad453b0535fbe7a43bbaf86a1bfdbf0b, type: 3}
   m_PrefabInstance: {fileID: 587394811}
-  m_PrefabAsset: {fileID: 0}
---- !u!1001 &598718125
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -47.23119
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 8.48346
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 28.32
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7514537
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.15536651
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0.6277245
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0.13092181
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5664030649742168256, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: m_Name
-      value: Frog Third Person Camera
-      objectReference: {fileID: 0}
-    - target: {fileID: 8687658653419075685, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: CameraDistance
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8687658653419075685, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      propertyPath: AvoidObstacles.DampingFromCollision
-      value: 0.5
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 47542836}
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
---- !u!114 &598718126 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3922414282604149151, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-  m_PrefabInstance: {fileID: 598718125}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
---- !u!4 &598718127 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 956630440393868090, guid: 1e8c8dd0d2a82ac47911ebb150f99e32, type: 3}
-  m_PrefabInstance: {fileID: 598718125}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &601827304
 PrefabInstance:
@@ -17307,6 +17231,7 @@ MonoBehaviour:
   hazards: {fileID: 0}
   minMass: 1
   frogsCount: 1
+  pressOnce: 0
   completesObjective: {fileID: 0}
   startsLocked: 0
   tinted: []
@@ -18373,15 +18298,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7653750248183775957, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -47.23119
+      value: 761.6207
       objectReference: {fileID: 0}
     - target: {fileID: 7653750248183775957, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8.48346
+      value: 0.00003
       objectReference: {fileID: 0}
     - target: {fileID: 7653750248183775957, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 28.32
+      value: -594.7067
       objectReference: {fileID: 0}
     - target: {fileID: 7653750248183775957, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: m_LocalRotation.w
@@ -18413,19 +18338,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8304560860558642942, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: field of view
-      value: 40
+      value: 60.000004
       objectReference: {fileID: 0}
     - target: {fileID: 8304560860558642942, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: far clip plane
-      value: 5000
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 8304560860558642942, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: near clip plane
-      value: 0.1
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 8304560860558642942, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: orthographic size
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8405582596823297974, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: deadZone
@@ -18438,7 +18363,7 @@ PrefabInstance:
     - target: {fileID: 8405582596823297974, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: followCamera
       value: 
-      objectReference: {fileID: 598718126}
+      objectReference: {fileID: 0}
     - target: {fileID: 8405582596823297974, guid: bc345dc109bded942b23c2c9922b1668, type: 3}
       propertyPath: aimLookAtMarker
       value: 1
@@ -30150,6 +30075,7 @@ MonoBehaviour:
   hazards: {fileID: 0}
   minMass: 1
   frogsCount: 1
+  pressOnce: 0
   completesObjective: {fileID: 0}
   startsLocked: 0
   tinted: []
@@ -38411,7 +38337,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 1862569842}
   - {fileID: 1644826520}
-  - {fileID: 598718125}
+  - {fileID: 341913969}
   - {fileID: 992953523}
   - {fileID: 1096350132}
   - {fileID: 2329875385795312551}
