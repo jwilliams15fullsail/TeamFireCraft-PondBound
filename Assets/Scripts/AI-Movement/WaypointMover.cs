@@ -28,35 +28,44 @@ public class WaypointMover : MonoBehaviour
     public bool IsWaiting => isWaiting;
     public Transform CurrentWaypoint => currentWaypoint;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void OnEnable()
     {
-        // If we are connected to a network and are NOT the Host/Server, disable local patrol math
-        if (InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted)
+        if (InstanceFinder.NetworkManager != null && InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted)
         {
-            this.enabled = false;
+            enabled = false;
             return;
         }
 
-        // Get rigidBody component
-        rigidBody = GetComponent<Rigidbody>();
-        enemyStun = GetComponent<EnemyStun>();
-        
-        // Set initial position to the first waypoint
-        currentWaypoint = waypoint.GetNextWaypoint(currentWaypoint);
-        transform.position = currentWaypoint.position;
+        if (rigidBody == null) rigidBody = GetComponent<Rigidbody>();
+        if (enemyStun == null) enemyStun = GetComponent<EnemyStun>();
 
-        // Set the next waypoint target
-        currentWaypoint = waypoint.GetNextWaypoint(currentWaypoint);
+        // Ensure no duplicate coroutines can ever stack up
+        StopAllCoroutines();
+        isWaiting = false;
 
-        // Face first target on start
-        Vector3 moveDirection = currentWaypoint.position - transform.position;
-        if (moveDirection != Vector3.zero)
+        if (waypoint != null && waypoint.transform.childCount > 0)
         {
-            transform.rotation = Quaternion.LookRotation(moveDirection);
+            if (currentWaypoint == null)
+            {
+                currentWaypoint = waypoint.GetNextWaypoint(null);
+            }
+
+            Vector3 moveDirection = currentWaypoint.position - transform.position;
+            moveDirection.y = 0f;
+            if (moveDirection != Vector3.zero)
+            {
+                transform.rotation = Quaternion.LookRotation(moveDirection);
+            }
         }
 
         patrolRoutine = StartCoroutine(PatrolLoop());
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        patrolRoutine = null;
+        isWaiting = false;
     }
 
     IEnumerator PatrolLoop()
@@ -64,7 +73,7 @@ public class WaypointMover : MonoBehaviour
         while (true)
         {
             // If EnemyAI is taking over or the enemy is stunned, stop this loop
-            if (!canMove || isWaiting || (enemyStun != null && enemyStun.IsStunned))
+            if (!canMove || isWaiting || waypoint == null || currentWaypoint == null || (enemyStun != null && enemyStun.IsStunned))
             {
                 yield return null;
                 continue;
@@ -90,6 +99,14 @@ public class WaypointMover : MonoBehaviour
                     transform.position = nextPosition;
                 }
 
+                // Keep the spider facing the waypoint as it walks so it never walks sideways/backwards
+                Vector3 lookDir = (flatTarget - flatSelf).normalized;
+                if (lookDir != Vector3.zero)
+                {
+                    Quaternion desiredRot = Quaternion.LookRotation(lookDir);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, desiredRot, rotationSpeed * Time.deltaTime);
+                }
+
                 // Recalculate flat coordinates every frame for accurate tracking
                 flatSelf = new Vector3(transform.position.x, 0, transform.position.z);
                 flatTarget = new Vector3(currentWaypoint.position.x, 0, currentWaypoint.position.z);
@@ -100,7 +117,6 @@ public class WaypointMover : MonoBehaviour
             // If we reach the next waypoint
             if (canMove && !isWaiting)
             {
-                // transform.position = currentWaypoint.position;
                 if (isBoomerang) { currentWaypoint = waypoint.GetNextWaypointBoomerang(currentWaypoint); }
                 else { currentWaypoint = waypoint.GetNextWaypoint(currentWaypoint); }
 
@@ -138,6 +154,8 @@ public class WaypointMover : MonoBehaviour
         // Perform a searching sweep at waypoint
         while (elapsedTime < pauseTime)
         {
+            if (!canMove) { isWaiting = false; yield break; }
+
             // Pause the waypoint timer and rotation while stunned.
             if (enemyStun != null && enemyStun.IsStunned)
             {
