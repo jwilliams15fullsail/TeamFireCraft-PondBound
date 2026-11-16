@@ -126,7 +126,6 @@ public class EnemyAI : NetworkBehaviour
         }
 
         LookForPlayer();
-        CheckIfStuck(false);
 
         switch (currentState)
         {

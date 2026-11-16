@@ -154,6 +154,8 @@ public class WaypointMover : MonoBehaviour
         // Perform a searching sweep at waypoint
         while (elapsedTime < pauseTime)
         {
+            if (!canMove) { isWaiting = false; yield break; }
+
             // Pause the waypoint timer and rotation while stunned.
             if (enemyStun != null && enemyStun.IsStunned)
             {
