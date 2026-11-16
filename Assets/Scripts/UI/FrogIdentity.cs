@@ -49,7 +49,20 @@ public class FrogIdentity : NetworkBehaviour
     // The name to show: what the player typed, or "Player 2" if they left it empty.
     public string DisplayName => string.IsNullOrEmpty(PlayerName.Value) ? $"Player {Slot.Value + 1}" : PlayerName.Value;
 
+    // This frog's colour: its look's tint (white until the host gives it a slot). PlayerRoster tints its picture with it.
+    public Color Tint
+    {
+        get
+        {
+            if (looks == null || looks.Length == 0 || Slot.Value < 0)
+                return Color.white;
+            Color tint = looks[Slot.Value % looks.Length].tint;
+            return tint.a > 0f ? tint : Color.white;
+        }
+    }
+
     static readonly List<FrogIdentity> spawned = new(); // host: every frog, for free slots
+    public static readonly List<FrogIdentity> Active = new(); // every machine: the frogs it can see (PlayerRoster reads it)
     MaterialPropertyBlock block;
     int shownSlot = -2;
 
@@ -81,11 +94,19 @@ public class FrogIdentity : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
+        if (!Active.Contains(this))
+            Active.Add(this);
         if (!IsOwner)
             return;
         SubmitName(PlayerPrefs.GetString(NameKey, ""));
         if (hideOwnName && nameLabel != null)
             nameLabel.gameObject.SetActive(false);
+    }
+
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
+        Active.Remove(this);
     }
 
     [ServerRpc]

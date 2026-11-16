@@ -21,18 +21,16 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PlasticBlue
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Shader: {fileID: 4800000, guid: 135bb944fc0bcac48b8df416ab56a785, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _METALLICSPECGLOSSMAP
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
-  stringTagMap:
-    RenderType: Opaque
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
   m_LockedProperties: 
@@ -103,6 +101,7 @@ Material:
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 0.05
+    - _CavityGrime: 0.8
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -111,25 +110,41 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
+    - _EmissionGrime: 0.4
     - _EnvironmentReflections: 1
+    - _FloorDust: 0.3
+    - _FloorY: 0
     - _GlossMapScale: 0.75
     - _Glossiness: 0.75
     - _GlossyReflections: 1
+    - _GrimeAmount: 0.4
+    - _GrimeContrast: 6
+    - _GrimeScale: 3
+    - _GrimeSmoothness: 0.12
     - _Metallic: 0
     - _Mode: 0
+    - _OcclusionFromRed: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _PuddleScale: 4
+    - _Puddles: 0.5
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _RiseHeight: 1.4
+    - _RiseStrength: 0.85
     - _ScreenSpaceReflections: 1
     - _ScreenSpaceReflectionsContributeTransparent: 1
     - _Smoothness: 1
+    - _SmoothnessBreakup: 0.6
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
+    - _StreakAmount: 0.6
+    - _StreakDensity: 1.6
     - _Surface: 0
     - _UVSec: 0
+    - _UseGlossMap: 0
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
@@ -137,6 +152,8 @@ Material:
     - _BaseColor: {r: 0.22988605, g: 0.41366264, b: 0.5943396, a: 1}
     - _Color: {r: 0.22988603, g: 0.4136626, b: 0.5943396, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GrimeColor: {r: 0.29999998, g: 0.24999997, b: 0.16999996, a: 0.85}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _StreakColor: {r: 0.41999996, g: 0.32999998, b: 0.21999997, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -107,9 +107,15 @@ public class GooTrails : MonoBehaviour
         trailTexture.Apply(false);
         changed = false;
     }
+    // A single splash, such as a drop from a pipe landing here: a ring ringWidth metres across.
+    public void Splash(Vector3 point, float ringWidth)
+    {
+        if (trail != null)
+            Push(point, 0f, ringWidth);
+    }
 
     // Presses a round dent into the goo under something whose bottom is depthBelow under centre.
-    void Push(Vector3 centre, float depthBelow)
+    void Push(Vector3 centre, float depthBelow, float ringWidth = -1f)
     {
         Vector3 local = transform.InverseTransformPoint(centre);
         float surfaceY = transform.TransformPoint(new Vector3(local.x, 0f, local.z)).y;
@@ -123,7 +129,7 @@ public class GooTrails : MonoBehaviour
 
         float strength = gap <= 0f ? 1f : 1f - gap / Mathf.Max(touchHeight, 0.001f);
         float metresPerTexel = area.width * Mathf.Abs(transform.lossyScale.x) / width;
-        float radius = Mathf.Max(1f, trailWidth * 0.5f / metresPerTexel);
+        float radius = Mathf.Max(1f, (ringWidth > 0f ? ringWidth : trailWidth) * 0.5f / metresPerTexel);
         int cx = Mathf.FloorToInt(u * width);
         int cy = Mathf.FloorToInt(v * height);
         int reach = Mathf.CeilToInt(radius);

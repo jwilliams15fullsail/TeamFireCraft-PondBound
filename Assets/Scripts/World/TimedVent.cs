@@ -31,6 +31,10 @@ public class TimedVent : MonoBehaviour
     static bool IsHost => InstanceFinder.IsServerStarted;
     bool SwitchedOff => power != null && power.IsOff;
 
+    // For HazardSound: smoke is out (the warning or the blast), or it is the blast that hurts.
+    public bool IsSmoking => !SwitchedOff && CycleTime >= offTime;
+    public bool IsBlasting => !SwitchedOff && CycleTime >= offTime + warningTime;
+
     // Seconds into the current cycle, the same on every machine.
     float CycleTime
     {
