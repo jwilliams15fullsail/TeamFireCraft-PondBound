@@ -9,5 +9,5 @@ Assets/Scenes/**/*.bytes                   filter=lfs diff=lfs merge=lfs -text
 Assets/Level[[:space:]]Assets/IvyAsset/*.asset   filter=lfs diff=lfs merge=lfs -text
 
 # Keep scenes and prefabs as text so Unity can merge them
-*.unity  -filter -diff -merge text
-*.prefab -filter -diff -merge text
+*.unity  -filter text
+*.prefab -filter text
