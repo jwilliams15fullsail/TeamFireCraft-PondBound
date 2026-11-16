@@ -25,6 +25,16 @@ public class PlayMenu : MonoBehaviour
     [SerializeField] SessionRow sessionRowPrefab;
     [SerializeField] TMP_Text statusText;
 
+    [Header("List box looks (optional)")]
+    [Tooltip("Shown while Refresh is searching: a spinner and \"Looking for ponds...\".")]
+    [SerializeField] GameObject loadingState;
+    [Tooltip("Shown when a search finds no games.")]
+    [SerializeField] GameObject emptyState;
+    [Tooltip("The chip in the list's header, e.g. \"3 GAMES\".")]
+    [SerializeField] TMP_Text sessionCountText;
+    [Tooltip("The Join Code field's FieldHighlight, so a code that fails turns it red.")]
+    [SerializeField] FieldHighlight joinCodeField;
+
     bool busy;
 
     void Start()
@@ -45,6 +55,12 @@ public class PlayMenu : MonoBehaviour
             playerNameInput.text = PlayerPrefs.GetString(FrogIdentity.NameKey, "");
             playerNameInput.onValueChanged.AddListener(typed => PlayerPrefs.SetString(FrogIdentity.NameKey, typed.Trim()));
         }
+
+        // Join codes are letters and digits: type them in capitals, skip spaces and dashes.
+        if (joinCodeInput != null)
+            joinCodeInput.onValidateInput = (text, index, c) => char.IsLetterOrDigit(c) ? char.ToUpperInvariant(c) : '\0';
+
+        SetListState(false, false, null);
     }
 
     public void PlayOffline()
@@ -105,7 +121,23 @@ public class PlayMenu : MonoBehaviour
             SetStatus("Type a join code first.");
             return;
         }
-        await Run("Joining...", () => GameSession.JoinByCodeAsync(code));
+        if (!await Run("Joining...", () => GameSession.JoinByCodeAsync(code)) && joinCodeField != null)
+            joinCodeField.SetError(true);
+    }
+
+    // The PASTE button next to the join code.
+    public void PasteJoinCode()
+    {
+        if (joinCodeInput == null)
+            return;
+        string pasted = GUIUtility.systemCopyBuffer ?? "";
+        var code = new System.Text.StringBuilder();
+        foreach (char c in pasted)
+        {
+            if (char.IsLetterOrDigit(c))
+                code.Append(char.ToUpperInvariant(c));
+        }
+        joinCodeInput.text = code.ToString();
     }
 
     public async void RefreshSessions()
@@ -113,21 +145,35 @@ public class PlayMenu : MonoBehaviour
         if (busy)
             return;
         SetBusy(true, "Searching...");
+        SetListState(true, false, null);
         try
         {
             IList<ISessionInfo> sessions = await GameSession.BrowseAsync();
             if (this == null)
                 return; // the menu closed while we waited
             ShowSessions(sessions);
+            SetListState(false, sessions.Count == 0, sessions.Count == 1 ? "1 GAME" : $"{sessions.Count} GAMES");
             SetStatus(sessions.Count == 0 ? "No open games. Host one or try Quick Match." : "");
         }
         catch (Exception e)
         {
-            if (this != null)
-                SetStatus(Friendly(e));
+            if (this == null)
+                return;
+            SetListState(false, false, null);
+            SetStatus(Friendly(e));
         }
-        if (this != null)
-            SetBusy(false, null);
+        SetBusy(false, null);
+    }
+
+    // The list box's Loading and Empty looks, and the "3 GAMES" chip in its header.
+    void SetListState(bool loading, bool empty, string count)
+    {
+        if (loadingState != null)
+            loadingState.SetActive(loading);
+        if (emptyState != null)
+            emptyState.SetActive(empty);
+        if (sessionCountText != null && count != null)
+            sessionCountText.text = count;
     }
 
     void ShowSessions(IList<ISessionInfo> sessions)
@@ -144,21 +190,24 @@ public class PlayMenu : MonoBehaviour
     }
 
     // Runs one online request. On success the scene changes, so the panel stays greyed out.
-    async Task Run(string message, Func<Task> request)
+    // Returns false when it failed (or another request was already running).
+    async Task<bool> Run(string message, Func<Task> request)
     {
         if (busy)
-            return;
+            return false;
         SetBusy(true, message);
         try
         {
             await request();
+            return true;
         }
         catch (Exception e)
         {
             if (this == null)
-                return;
+                return false;
             SetStatus(Friendly(e));
             SetBusy(false, null);
+            return false;
         }
     }
 
