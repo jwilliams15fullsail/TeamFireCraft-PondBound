@@ -9,6 +9,9 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
 public class HazardPower : NetworkBehaviour
 {
+    [Tooltip("How many switches must be on at the same time to turn these hazards off (2 = both valves).")]
+    public int switchesNeeded = 1;
+
     readonly SyncVar<bool> isOff = new();
     readonly HashSet<Object> holders = new(); // host only: the switches holding the hazards off
 
@@ -24,6 +27,6 @@ public class HazardPower : NetworkBehaviour
             holders.Add(holder);
         else
             holders.Remove(holder);
-        isOff.Value = holders.Count > 0;
+        isOff.Value = holders.Count >= Mathf.Max(1, switchesNeeded);
     }
 }

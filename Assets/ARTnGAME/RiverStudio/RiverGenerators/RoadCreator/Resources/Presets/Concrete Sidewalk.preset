@@ -1,0 +1,309 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!181963792 &2655988077585873504
+Preset:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Concrete Sidewalk
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: b4866ad5cf586dd459d140dcdf0a22aa,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: baseRoadMaterial
+    value: 
+    objectReference: {fileID: 2100000, guid: 618acdd608a50b84f82c2e391e275b56, type: 2}
+  - target: {fileID: 0}
+    propertyPath: overlayRoadMaterial
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: roadPhysicsMaterial
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startRoadWidth
+    value: 0.7
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endRoadWidth
+    value: 0.7
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: flipped
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: textureTilingY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: curved
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: terrainOption
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: generateSimpleBridge
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: generateCustomBridge
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.bridgeMaterials.Array.size
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.bridgeMaterials.Array.data[0]
+    value: 
+    objectReference: {fileID: 2100000, guid: f5283313330996048b65df8f1f4eebb5, type: 2}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.yOffsetFirstStep
+    value: 0.25
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.yOffsetSecondStep
+    value: 0.5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.widthPercentageFirstStep
+    value: 0.6
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.widthPercentageSecondStep
+    value: 0.6
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.extraWidth
+    value: 0.2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.bridgeMesh
+    value: 
+    objectReference: {fileID: 8091025567400778987, guid: 9912cf481344c9b4f84b42a00fe051b9,
+      type: 3}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.sections
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.yScale
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.xOffset
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: bridgeSettings.adaptToTerrain
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: placePillars
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: pillarPrefab
+    value: 
+    objectReference: {fileID: 1859314489255034, guid: d7a59ad7e87e75c4282875642c005993,
+      type: 3}
+  - target: {fileID: 0}
+    propertyPath: adaptGapToCustomBridge
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: pillarGap
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: pillarPlacementOffset
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraPillarHeight
+    value: 0.2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: xPillarScale
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: xPillarScaleMultiplier
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: zPillarScale
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: pillarRotationDirection
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.size
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].open
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].index
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].left
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].baseMaterial
+    value: 
+    objectReference: {fileID: 2100000, guid: dbb68210e0450c144b465d92d987d333, type: 2}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].overlayMaterial
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].physicMaterial
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].startWidth
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].endWidth
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: extraMeshes.Array.data[0].yOffset
+    value: -0.2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.startPoint.x
+    value: 57.674942
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.startPoint.y
+    value: 1.0496438e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.startPoint.z
+    value: -257.7148
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.centerPoint.x
+    value: 62.108696
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.centerPoint.y
+    value: 1.0496438e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.centerPoint.z
+    value: -255.40358
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.endPoint.x
+    value: 66.54245
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.endPoint.y
+    value: 1.0496438e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: startGuidelinePoints.endPoint.z
+    value: -253.09233
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.startPoint.x
+    value: 55.712784
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.startPoint.y
+    value: 1.0421055e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.startPoint.z
+    value: -249.62148
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.centerPoint.x
+    value: 60.106133
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.centerPoint.y
+    value: 1.0421055e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.centerPoint.z
+    value: -252.00862
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.endPoint.x
+    value: 64.49948
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.endPoint.y
+    value: 1.0421055e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: centerGuidelinePoints.endPoint.z
+    value: -254.39577
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.startPoint.x
+    value: 60.585724
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.startPoint.y
+    value: 1.03714776e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.startPoint.z
+    value: -245.84622
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.centerPoint.x
+    value: 63.677315
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.centerPoint.y
+    value: 1.03714776e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.centerPoint.z
+    value: -249.77586
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.endPoint.x
+    value: 66.768906
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.endPoint.y
+    value: 1.03714776e-17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: endGuidelinePoints.endPoint.z
+    value: -253.7055
+    objectReference: {fileID: 0}

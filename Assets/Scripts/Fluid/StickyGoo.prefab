@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6123327014629990304
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7234434647408391788}
+  - component: {fileID: 7644885771706411558}
+  m_Layer: 0
+  m_Name: StickyGoo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7234434647408391788
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6123327014629990304}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -69.20721, y: 0.5, z: 59.45035}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7644885771706411558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6123327014629990304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eab31dbedc80af342977e596b5a40278, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StickyFluid
+  simulation: {fileID: 7200000, guid: 4cbff6cd52fc1f9428e68fd8db73d170, type: 3}
+  material: {fileID: 2100000, guid: fe65d477c919f594389fb197d7e800fe, type: 2}
+  boxSize: {x: 1.5, y: 1, z: 1.5}
+  particleSpacing: 0.04
+  maxParticles: 16384
+  spawnBlock: 1
+  spawnCenter: {x: 0, y: -0.25, z: 0}
+  spawnSize: {x: 0.6, y: 0.3, z: 0.6}
+  emitter: {fileID: 0}
+  emitting: 1
+  emitSpeed: 1
+  emitRadius: 0.06
+  restDensity: 1000
+  stiffness: 80
+  thickness: 0.9
+  surfaceTension: 3
+  maxSpeed: 5
+  containerAdhesion: 5
+  containerFriction: 0.95
+  colliderAdhesion: 5
+  colliderFriction: 0.95
+  colliderLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maxStepsPerFrame: 12
+  renderRadius: 1.1
+  castShadows: 1

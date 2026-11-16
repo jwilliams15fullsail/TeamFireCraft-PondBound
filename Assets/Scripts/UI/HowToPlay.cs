@@ -75,8 +75,7 @@ public class HowToPlay : MonoBehaviour
         {
             title = "Moving",
             body = "<b>WASD</b> / <b>Left Stick</b>: hop around\n"
-                 + "<b>Mouse</b> / <b>Right Stick</b>: look around\n"
-                 + "<b>Mouse Wheel</b>: zoom the camera in and out\n\n"
+                 + "<b>Mouse</b> / <b>Right Stick</b>: look around\n\n"
                  + "Your frog hops the way you push. Small pushes make small, slow hops.",
         },
         new Page

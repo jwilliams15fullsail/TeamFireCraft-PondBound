@@ -1,0 +1,155 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5537447721534848563
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 688fcf2a7e979054e9a86239702ecbcb, type: 3}
+  m_Name: LightShaftOCEANIS
+  m_EditorClassIdentifier: 
+  active: 1
+  maxIterations:
+    m_OverrideState: 1
+    m_Value: 158
+  maxDistance:
+    m_OverrideState: 1
+    m_Value: 100
+  minDistance:
+    m_OverrideState: 1
+    m_Value: 1
+  maskTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 2800000, guid: 4c421d3225c9fca45a0cdc8330c353af, type: 3}
+    dimension: 1
+  cutoffHeigth:
+    m_OverrideState: 1
+    m_Value: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.066
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Name: OCEANIS Volume Unity2021
+  m_EditorClassIdentifier: 
+  components:
+  - {fileID: -5537447721534848563}
+  - {fileID: 2146393777283472364}
+  - {fileID: 7060693214900453015}
+--- !u!114 &2146393777283472364
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f392b6cdd97b084ca4ad1b8360658a1, type: 3}
+  m_Name: GradientFogOCEANIS
+  m_EditorClassIdentifier: 
+  active: 1
+  gradientTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 2800000, guid: 36698108b4a9af34785514b294107b17, type: 3}
+    dimension: 1
+  maskTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 2800000, guid: 4c421d3225c9fca45a0cdc8330c353af, type: 3}
+    dimension: 1
+  cutoffHeigth:
+    m_OverrideState: 1
+    m_Value: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.008
+--- !u!114 &7060693214900453015
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b2db86121404754db890f4c8dfe81b2, type: 3}
+  m_Name: Bloom
+  m_EditorClassIdentifier: 
+  active: 1
+  skipIterations:
+    m_OverrideState: 0
+    m_Value: 1
+  threshold:
+    m_OverrideState: 1
+    m_Value: 1.08
+  intensity:
+    m_OverrideState: 1
+    m_Value: 1.86
+  scatter:
+    m_OverrideState: 1
+    m_Value: 0.7
+  clamp:
+    m_OverrideState: 1
+    m_Value: 10
+  tint:
+    m_OverrideState: 1
+    m_Value: {r: 0.71132076, g: 0.9637901, b: 1, a: 1}
+  highQualityFiltering:
+    m_OverrideState: 1
+    m_Value: 0
+  downscale:
+    m_OverrideState: 0
+    m_Value: 0
+  maxIterations:
+    m_OverrideState: 0
+    m_Value: 6
+  dirtTexture:
+    m_OverrideState: 1
+    m_Value: {fileID: 0}
+    dimension: 1
+  dirtIntensity:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &7466674041223615091
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c592f8609bbaa404b8c91d85a7293970, type: 3}
+  m_Name: Flare
+  m_EditorClassIdentifier: 
+  active: 1
+  flareColor:
+    m_OverrideState: 0
+    m_Value: {r: 0, g: 0, b: 0, a: 1}
+  flarePosition:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0}
+  flareSize:
+    m_OverrideState: 0
+    m_Value: 0
+  paraColor:
+    m_OverrideState: 0
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  paraPosition:
+    m_OverrideState: 0
+    m_Value: {x: 0, y: 0}
+  paraSize:
+    m_OverrideState: 0
+    m_Value: 0

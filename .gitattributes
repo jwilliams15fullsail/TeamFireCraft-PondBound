@@ -1,0 +1,13 @@
+# Unity bake outputs -> Git LFS
+Assets/Scenes/**/Lightmap-*.exr            filter=lfs diff=lfs merge=lfs -text
+Assets/Scenes/**/Lightmap-*.png            filter=lfs diff=lfs merge=lfs -text
+Assets/Scenes/**/ReflectionProbe-*.exr     filter=lfs diff=lfs merge=lfs -text
+Assets/Scenes/**/LightingData.asset        filter=lfs diff=lfs merge=lfs -text lockable
+Assets/Scenes/**/*.bytes                   filter=lfs diff=lfs merge=lfs -text
+
+# Real Ivy saved data
+Assets/Level[[:space:]]Assets/IvyAsset/*.asset   filter=lfs diff=lfs merge=lfs -text
+
+# Keep scenes and prefabs as text so Unity can merge them
+*.unity  -filter text
+*.prefab -filter text

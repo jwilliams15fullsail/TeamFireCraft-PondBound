@@ -15,6 +15,13 @@ public class JumpPreview : MonoBehaviour
     [SerializeField] LayerMask hitMask = ~0;
     [Tooltip("Seconds of flight the arc follows before giving up (long falls).")]
     [SerializeField] float maxFlightTime = 3f;
+    [Tooltip("Seconds the landing marker takes to glide to a new spot (0 = jump straight there).")]
+    [SerializeField] float markerSmoothTime = 0.05f;
+    [Tooltip("How quickly the marker turns to lie flat on a new surface (a wall, a slope).")]
+    [SerializeField] float markerTurnSpeed = 20f;
+    [Tooltip("Marker colour on the ground, and on a wall the frog will cling to.")]
+    [SerializeField] Color floorColor = new Color(0.03f, 1f, 0f);
+    [SerializeField] Color wallColor = new Color(0.1f, 0.6f, 1f);
 
     // Where the jump being aimed will touch down (valid while HasLanding).
     public bool HasLanding { get; private set; }
@@ -24,11 +31,17 @@ public class JumpPreview : MonoBehaviour
     FrogNetworkDriver driver;
     readonly List<Vector3> points = new();
     readonly RaycastHit[] hits = new RaycastHit[8];
+    static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    Renderer markerRenderer;
+    MaterialPropertyBlock markerColors;
+    Vector3 markerPosition, markerVelocity; // the marker's own world pose (it rides on the frog)
+    Quaternion markerRotation;
 
     void Awake()
     {
         motor = GetComponent<FrogMotor>();
         driver = GetComponent<FrogNetworkDriver>();
+        markerRenderer = landingMarker != null ? landingMarker.GetComponent<Renderer>() : null;
         Show(false);
     }
 
@@ -71,19 +84,35 @@ public class JumpPreview : MonoBehaviour
             for (int i = 0; i < points.Count; i++)
                 arc.SetPosition(i, points[i]);
         }
-        // The marker: the spot you placed with the mouse, which stays put while the charge
-        // swings (the arc shows whether it reaches). Without one, where the arc comes down.
+        // The marker: the spot you aim at with the crosshair (the arc shows whether this charge
+        // reaches it), or without one, where the arc comes down. It glides between spots and
+        // turns smoothly to lie flat on walls and slopes, and changes colour on a wall the frog
+        // will cling to.
         if (landingMarker != null)
         {
             bool placed = driver.HasMarker;
-            bool show = placed || HasLanding;
-            landingMarker.gameObject.SetActive(show);
-            if (show)
+            if (!placed && !HasLanding)
             {
-                Vector3 point = placed ? driver.MarkerPoint : landing.point;
-                Vector3 normal = placed ? driver.MarkerNormal : landing.normal;
-                landingMarker.SetPositionAndRotation(point + normal * 0.01f, Quaternion.FromToRotation(Vector3.up, normal));
+                landingMarker.gameObject.SetActive(false);
+                return;
             }
+            Vector3 normal = placed ? driver.MarkerNormal : landing.normal;
+            Vector3 point = (placed ? driver.MarkerPoint : landing.point) + normal * 0.01f;
+            Quaternion rotation = Quaternion.FromToRotation(Vector3.up, normal);
+            if (!landingMarker.gameObject.activeSelf)
+            {
+                landingMarker.gameObject.SetActive(true); // just appeared: start right there
+                markerPosition = point;
+                markerRotation = rotation;
+                markerVelocity = Vector3.zero;
+            }
+            else
+            {
+                markerPosition = Vector3.SmoothDamp(markerPosition, point, ref markerVelocity, markerSmoothTime);
+                markerRotation = Quaternion.Slerp(markerRotation, rotation, 1f - Mathf.Exp(-markerTurnSpeed * Time.deltaTime));
+            }
+            landingMarker.SetPositionAndRotation(markerPosition, markerRotation);
+            TintMarker(placed && driver.MarkerOnWall ? wallColor : floorColor);
         }
     }
 
@@ -117,5 +146,19 @@ public class JumpPreview : MonoBehaviour
             arc.enabled = show;
         if (!show && landingMarker != null && landingMarker.gameObject.activeSelf)
             landingMarker.gameObject.SetActive(false);
+    }
+
+    // The arc and the landing marker: the camera leaves these showing when it hides your frog.
+    public bool IsPreviewRenderer(Renderer r) =>
+        (arc != null && r == arc) || (landingMarker != null && r.transform.IsChildOf(landingMarker));
+
+    void TintMarker(Color color)
+    {
+        if (markerRenderer == null)
+            return;
+        markerColors ??= new MaterialPropertyBlock();
+        markerRenderer.GetPropertyBlock(markerColors);
+        markerColors.SetColor(BaseColorId, color);
+        markerRenderer.SetPropertyBlock(markerColors);
     }
 }

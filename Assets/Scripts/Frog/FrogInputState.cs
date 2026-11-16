@@ -9,7 +9,7 @@ public struct FrogInputState : IEquatable<FrogInputState>
 {
     public Vector2 Move;   // WASD / left stick, each axis -1..1
     public float ViewYaw;  // camera yaw in degrees, so "forward" means "where my camera looks"
-    public bool Reel;      // right mouse / left trigger held
+    public bool Reel;      // left trigger held (the mouse wheel reels through FrogTongue.ReelBy)
     public bool Hop;       // hop mode on (Sprint switches it, or holds it, see FrogTuning)
     public Vector2 JumpTarget; // landing marker while charging: world x/z offset from the frog, metres
 

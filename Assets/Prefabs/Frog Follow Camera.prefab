@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 956630440393868090}
   - component: {fileID: 3922414282604149151}
-  - component: {fileID: 2334418171967429264}
+  - component: {fileID: -7745712964941237901}
   - component: {fileID: 5065770710238984136}
   - component: {fileID: 2130514037769229122}
   m_Layer: 0
@@ -78,7 +78,7 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
---- !u!114 &2334418171967429264
+--- !u!114 &-7745712964941237901
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -90,15 +90,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d7c088409d9a40b7b09aa707777f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineOrbitalFollow
-  TargetOffset: {x: 0, y: 0.3, z: 0}
+  TargetOffset: {x: 0, y: 0, z: 0}
   TrackerSettings:
     BindingMode: 4
-    PositionDamping: {x: 0.15, y: 0.4, z: 0.15}
+    PositionDamping: {x: 1, y: 1, z: 1}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
   OrbitStyle: 0
-  Radius: 4.5
+  Radius: 5
   Orbits:
     Top:
       Radius: 2
@@ -117,19 +117,19 @@ MonoBehaviour:
     Range: {x: -180, y: 180}
     Wrap: 1
     Recentering:
-      Enabled: 1
-      Wait: 0.4
-      Time: 0.8
+      Enabled: 0
+      Wait: 1
+      Time: 2
     Restrictions: 0
   VerticalAxis:
-    Value: 18
-    Center: 18
-    Range: {x: -15, y: 60}
+    Value: 17.5
+    Center: 17.5
+    Range: {x: -10, y: 45}
     Wrap: 0
     Recentering:
-      Enabled: 1
-      Wait: 2
-      Time: 1.5
+      Enabled: 0
+      Wait: 1
+      Time: 2
     Restrictions: 0
   RadialAxis:
     Value: 1
@@ -166,7 +166,7 @@ MonoBehaviour:
   TargetOffset: {x: 0, y: 0.45, z: 0}
   Damping: {x: 0.3, y: 0.3}
   Lookahead:
-    Enabled: 1
+    Enabled: 0
     Time: 0.15
     Smoothing: 6
     IgnoreY: 1
@@ -184,7 +184,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineDeoccluder
   CollideAgainst:
     serializedVersion: 2
-    m_Bits: 257
+    m_Bits: 1
   IgnoreTag: 
   TransparentLayers:
     serializedVersion: 2
@@ -201,7 +201,7 @@ MonoBehaviour:
     Strategy: 0
     MaximumEffort: 4
     SmoothingTime: 0.3
-    Damping: 0.3
+    Damping: 1
     DampingWhenOccluded: 0
   ShotQualityEvaluation:
     Enabled: 0

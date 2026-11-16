@@ -6,12 +6,15 @@ public class FireflyWander : NetworkBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 1.5f;
-    public float wanderRadius = 3f;
+    public float wanderRadius = 1.5f;
     public float changeDirectionTime = 2f;
 
+    [Header("Flight Smoothing")]
+    public float acceleration = 3f;
+
     [Header("Flying Height")]
-    public float minHeight = 0.5f;
-    public float maxHeight = 2.5f;
+    public float minHeight = 0.2f;
+    public float maxHeight = 0.8f;
 
     private Rigidbody rb;
     private Vector3 startPosition;
@@ -51,7 +54,35 @@ public class FireflyWander : NetworkBehaviour
         Vector3 direction =
             (targetPosition - rb.position).normalized;
 
-        rb.linearVelocity = direction * moveSpeed;
+        // Gradually adjust velocity for smoother flying.
+        Vector3 desiredVelocity = direction * moveSpeed;
+
+        rb.linearVelocity = Vector3.MoveTowards(
+            rb.linearVelocity,
+            desiredVelocity,
+            acceleration * Time.fixedDeltaTime
+        );
+
+        // Smoothly rotate toward the flight direction.
+        Vector3 flatDirection = new Vector3(
+            direction.x,
+            0f,
+            direction.z
+        );
+
+        if (flatDirection.sqrMagnitude > 0.001f)
+        {
+            Quaternion targetRotation =
+                Quaternion.LookRotation(flatDirection);
+
+            Quaternion newRotation = Quaternion.Slerp(
+                rb.rotation,
+                targetRotation,
+                5f * Time.fixedDeltaTime
+            );
+
+            rb.MoveRotation(newRotation);
+        }
     }
 
     private void PickNewTarget()

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: BLOBY_water_spray 1
+  m_Shader: {fileID: 4800000, guid: a77ab0b770793f442aa50dc8a0928ba5, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BorderTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 952ed4e20239af642b84af817eaa66ee, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex2:
+        m_Texture: {fileID: 2800000, guid: 36de9e73741c16141967290cda9ce904, type: 3}
+        m_Scale: {x: 4, y: 5}
+        m_Offset: {x: 0.54, y: 0}
+    m_Floats:
+    - _InvFade: 0.8275
+    - _bodyDist: 8.999999
+    - _bodyDist2: 8.598279
+    - _bodyDist3: 9.251299
+    - _effectPower: 33589.39
+    - _fadeFalloff: 9.51
+    - _fadePower: 9.111111e+9
+    - _falloffPower: 6
+    - _worldBase: 1
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _TintColor: {r: 0.97794116, g: 0.84850776, b: 0.6543577, a: 0.941}
+    - _bodyA: {r: 0, g: 0, b: 0, a: 1}
+    - _bodyB: {r: 1, g: 1, b: 1, a: 1}
+    - _bodyPos: {r: 0.6712494, g: -4.7307878, b: 23.718204, a: 1}
+    - _bodyPos2: {r: -6.4306736, g: -0.9656277, b: 29.593292, a: 1}
+    - _bodyPos3: {r: -17.302765, g: -3.4350462, b: 22.833702, a: 1}
+--- !u!1002 &2100001
+EditorExtensionImpl:
+  serializedVersion: 6

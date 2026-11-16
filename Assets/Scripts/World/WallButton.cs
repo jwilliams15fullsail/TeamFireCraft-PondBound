@@ -13,6 +13,8 @@ public class WallButton : NetworkBehaviour
     public HazardPower hazards;
     [Tooltip("Optional: a locked button that this one unlocks for good on its first press.")]
     public WallButton unlocks;
+    [Tooltip("Optional: locked pressure plates that work while this button is on (with Press Once, for good).")]
+    public PressurePlate[] unlocksPlates = new PressurePlate[0];
     [Tooltip("Stays on after the first press, instead of a second press switching it back off.")]
     [SerializeField] bool pressOnce;
     [Tooltip("Ignores the tongue until another button unlocks it.")]
@@ -23,6 +25,9 @@ public class WallButton : NetworkBehaviour
     [SerializeField] Material lockedMaterial;
     //public float resetDelay; //optional for automatic reset
 
+    //For Objective Marker (line below)
+    public ObjectiveSequence completesObjective;
+
     readonly SyncVar<bool> isActive = new();
     readonly SyncVar<bool> isUnlocked = new();
 
@@ -30,6 +35,7 @@ public class WallButton : NetworkBehaviour
     Material unpressedMaterial;
 
     bool IsLocked => startsLocked && !isUnlocked.Value;
+    public bool IsActive => isActive.Value;
 
     void Awake()
     {
@@ -42,12 +48,19 @@ public class WallButton : NetworkBehaviour
         if (IsLocked || (pressOnce && isActive.Value))
             return;
         isActive.Value = !isActive.Value;
+        //================================================
+        //For Objective Marker
+        ObjectiveSequence.Report(this);
+        //================================================
         if (door != null)
             door.HoldOpen(this, isActive.Value);
         if (hazards != null)
             hazards.HoldOff(this, isActive.Value);
         if (unlocks != null)
             unlocks.isUnlocked.Value = true;
+        foreach (PressurePlate plate in unlocksPlates)
+            if (plate != null)
+                plate.SetUnlocked(isActive.Value);
     }
     //void ResetButton()
     //{
