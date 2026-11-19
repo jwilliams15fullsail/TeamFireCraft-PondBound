@@ -1021,6 +1021,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: abda90b0e307a5e47bfb0aec7e8163c2, type: 3}
   movementVolume: 0.6
   minimumSoundInterval: 0.15
+  pitchRange: {x: 0.95, y: 1.05}
+  surfaceProbe: 0.6
+  surfaceLayers:
+    serializedVersion: 2
+    m_Bits: 8127
 --- !u!114 &5607508857603526025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2071,46 +2076,6 @@ PrefabInstance:
     - target: {fileID: 1059305998781514672, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
       propertyPath: m_Name
       value: Aura Lightning
-      objectReference: {fileID: 0}
-    - target: {fileID: 1059305998781514672, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 1059305998781514672, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2267315231019451117, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: cullingMode
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 2267315231019451117, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: playOnAwake
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5347986494076176096, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 7924497530843425693, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: cullingMode
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7924497530843425693, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: playOnAwake
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8473838645451163043, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8473838645451163043, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8473838645451163043, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8473838645451163043, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
       propertyPath: m_LocalPosition.x
