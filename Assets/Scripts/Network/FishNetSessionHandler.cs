@@ -17,7 +17,8 @@ public class FishNetSessionHandler : INetworkHandler
         if (configuration.Type != NetworkType.Relay)
             throw new SessionException($"Only Relay games are set up for FishNet, not {configuration.Type}.", SessionError.NetworkSetupFailed, null);
 
-        NetworkManager manager = InstanceFinder.NetworkManager;
+        NetworkManager manager = InstanceFinder.NetworkManager 
+            ?? Object.FindAnyObjectByType<NetworkManager>(FindObjectsInactive.Include);
         UnityTransport transport = GameSession.TransportOf(manager);
         if (transport == null)
             throw new SessionException("No FishNet NetworkManager in this scene.", SessionError.NetworkManagerNotInitialized, null);

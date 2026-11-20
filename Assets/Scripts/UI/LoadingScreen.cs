@@ -1,3 +1,4 @@
+using FishNet;
 using FishNet.Managing;
 using FishNet.Managing.Scened;
 using UnityEngine;
@@ -39,10 +40,16 @@ public class LoadingScreen : MonoBehaviour
     {
         pads = padRow.GetComponentsInChildren<Image>(true);
         picture.SetActive(false);
-        manager = GetComponentInParent<NetworkManager>();
-        manager.SceneManager.OnLoadStart += OnLoadStart;
-        manager.SceneManager.OnLoadPercentChange += OnLoadPercentChange;
-        manager.SceneManager.OnLoadEnd += OnLoadEnd;
+        manager = InstanceFinder.NetworkManager;
+        if (manager == null)
+            manager = GetComponentInParent<NetworkManager>();
+
+        if (manager != null && manager.SceneManager != null)
+        {
+            manager.SceneManager.OnLoadStart += OnLoadStart;
+            manager.SceneManager.OnLoadPercentChange += OnLoadPercentChange;
+            manager.SceneManager.OnLoadEnd += OnLoadEnd;
+        }
     }
 
     void OnDestroy()
