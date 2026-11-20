@@ -175,6 +175,20 @@ public class FrogMotor : NetworkBehaviour
         return Mathf.Min(Mathf.Max(charged, target.y + tuning.jumpClearance), highest);
     }
 
+    // How far (m, flat) a jump can reach to land targetY metres above the frog (negative =
+    // below). Flat or higher: Max Jump Distance. Lower: further, because the arc keeps falling
+    // at the same sideways speed. Measured on the lowest arc, so the reach doesn't pulse with
+    // the charge, and the sideways speed never goes over MaxJumpSpeed's.
+    public float JumpReach(float targetY)
+    {
+        float flat = tuning.maxJumpDistance;
+        if (targetY >= 0f)
+            return flat;
+        float low = Mathf.Max(0.05f, tuning.minJumpHeight);
+        float bonus = 0.5f * (1f + Mathf.Sqrt(1f - targetY / low)); // fall time vs a flat landing
+        return flat * Mathf.Min(bonus, tuning.maxDropReach);
+    }
+
     // The launch velocity of a jump with this much charge (0..1) toward target: an offset
     // from the frog to where its centre should come down, at any height (zero = straight
     // up). It always comes down exactly on the target; the charge only sets how high the
@@ -719,7 +733,7 @@ public class FrogMotor : NetworkBehaviour
         tongue.LetGo();
     }
 
-  
+
     // to a stop there (it's frictionless, so otherwise it would slide away).
     void SettleBody(float dt)
     {

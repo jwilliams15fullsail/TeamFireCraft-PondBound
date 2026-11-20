@@ -23,6 +23,16 @@ public class JumpPreview : MonoBehaviour
     [SerializeField] Color floorColor = new Color(0.03f, 1f, 0f);
     [SerializeField] Color wallColor = new Color(0.1f, 0.6f, 1f);
 
+    [Header("Arc look")]
+    [Tooltip("How thick the arc is (m) with the camera close by. It gets thicker as the camera pulls back, so big jumps stay easy to read.")]
+    [SerializeField, Min(0.005f)] float arcWidth = 0.05f;
+    [Tooltip("The arc is drawn at Arc Width up to this camera distance (m), and thicker beyond it.")]
+    [SerializeField, Min(0.5f)] float arcWidthDistance = 4f;
+    [Tooltip("How see-through the arc is (1 = solid). It takes the marker's colour.")]
+    [SerializeField, Range(0.1f, 1f)] float arcOpacity = 0.85f;
+    [Tooltip("How far (m) the marker floats above the surface, so the floor never covers it.")]
+    [SerializeField, Min(0.001f)] float markerLift = 0.03f;
+
     // Where the jump being aimed will touch down (valid while HasLanding).
     public bool HasLanding { get; private set; }
     public Vector3 LandingPoint { get; private set; }
@@ -42,7 +52,27 @@ public class JumpPreview : MonoBehaviour
         motor = GetComponent<FrogMotor>();
         driver = GetComponent<FrogNetworkDriver>();
         markerRenderer = landingMarker != null ? landingMarker.GetComponent<Renderer>() : null;
+        // The marker draws after other see-through things (goo, water, smoke), so they can't hide it.
+        if (markerRenderer != null)
+            markerRenderer.material.renderQueue = 3100;
+        if (arc != null)
+        {
+            arc.widthCurve = new AnimationCurve(new Keyframe(0f, 0.6f), new Keyframe(0.15f, 1f), new Keyframe(1f, 1f));
+            arc.numCapVertices = 4; // rounded ends
+        }
         Show(false);
+    }
+
+    // The arc's thickness and colour: thicker when the camera is further away, and the colour
+    // of the marker (on the ground, or on a wall the frog will cling to).
+    void StyleArc(Color color)
+    {
+        Camera view = Camera.main;
+        float distance = view != null ? Vector3.Distance(view.transform.position, transform.position) : arcWidthDistance;
+        arc.widthMultiplier = arcWidth * Mathf.Max(1f, distance / arcWidthDistance);
+        color.a = arcOpacity;
+        arc.startColor = color;
+        arc.endColor = color;
     }
 
     void LateUpdate()
@@ -83,6 +113,7 @@ public class JumpPreview : MonoBehaviour
             arc.positionCount = points.Count;
             for (int i = 0; i < points.Count; i++)
                 arc.SetPosition(i, points[i]);
+            StyleArc(driver.HasMarker && driver.MarkerOnWall ? wallColor : floorColor);
         }
         // The marker: the spot you aim at with the crosshair (the arc shows whether this charge
         // reaches it), or without one, where the arc comes down. It glides between spots and
@@ -97,7 +128,7 @@ public class JumpPreview : MonoBehaviour
                 return;
             }
             Vector3 normal = placed ? driver.MarkerNormal : landing.normal;
-            Vector3 point = (placed ? driver.MarkerPoint : landing.point) + normal * 0.01f;
+            Vector3 point = (placed ? driver.MarkerPoint : landing.point) + normal * markerLift;
             Quaternion rotation = Quaternion.FromToRotation(Vector3.up, normal);
             if (!landingMarker.gameObject.activeSelf)
             {

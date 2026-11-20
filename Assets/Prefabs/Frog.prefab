@@ -906,6 +906,10 @@ MonoBehaviour:
   markerTurnSpeed: 20
   floorColor: {r: 0.03, g: 1, b: 0, a: 1}
   wallColor: {r: 0.1, g: 0.6, b: 1, a: 1}
+  arcWidth: 0.05
+  arcWidthDistance: 4
+  arcOpacity: 0.85
+  markerLift: 0.03
 --- !u!82 &-1191942892440876961
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1021,6 +1025,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: abda90b0e307a5e47bfb0aec7e8163c2, type: 3}
   movementVolume: 0.6
   minimumSoundInterval: 0.15
+  pitchRange: {x: 0.95, y: 1.05}
+  surfaceProbe: 0.6
+  surfaceLayers:
+    serializedVersion: 2
+    m_Bits: 4294967231
 --- !u!114 &5607508857603526025
 MonoBehaviour:
   m_ObjectHideFlags: 0
