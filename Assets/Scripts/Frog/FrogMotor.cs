@@ -124,6 +124,7 @@ public class FrogMotor : NetworkBehaviour
     bool followingPath;                  // flying a path right now
     Vector3 path0, path1, path2, path3, pathNormal;
     float pathDuration, pathTime;
+    Vector3 pathSteer;                   // how far (flat) the player has steered off the planned path in the air
 
     bool hopping;                           // host only: the hop being simulated
     float hopPhase, hopDuration, hopStride;
@@ -573,7 +574,7 @@ public class FrogMotor : NetworkBehaviour
         }
 
         airSpeedLimit = FlatSpeed();
-        followingArc = tuning.followJumpArc;
+        followingArc = tuning.followJumpArc && !tuning.airControl; // with Air Control, WASD can steer every jump
         aimedWallNormal = releaseWallNormal;
         aimedWallTarget = releaseWallTarget;
         Mode.Value = FrogMode.Airborne;
@@ -602,6 +603,7 @@ public class FrogMotor : NetworkBehaviour
         pathNormal = releasePathNormal;
         pathDuration = releasePathDuration;
         pathTime = 0f;
+        pathSteer = Vector3.zero;
         followingPath = true;
         followingArc = false;
         aimedWallNormal = Vector3.zero;
@@ -614,7 +616,15 @@ public class FrogMotor : NetworkBehaviour
     {
         pathTime += dt;
         float u = Mathf.Clamp01(pathTime / pathDuration);
-        Vector3 wanted = PathPoint(path0, path1, path2, path3, u);
+
+        // Air control: WASD / the stick nudges the whole jump sideways while it flies, up to
+        // Jump Steer Max from the planned path, so a jump can be corrected on the way.
+        if (tuning.airControl)
+        {
+            Vector3 wish = Vector3.ProjectOnPlane(input.WorldMove, Vector3.up);
+            pathSteer = Vector3.ClampMagnitude(pathSteer + wish * (tuning.jumpSteerSpeed * dt), tuning.jumpSteerMax);
+        }
+        Vector3 wanted = PathPoint(path0, path1, path2, path3, u) + pathSteer;
         Vector3 position = rb.position;
         if ((wanted - position).sqrMagnitude > PathLostDistance * PathLostDistance)
         {
@@ -624,7 +634,7 @@ public class FrogMotor : NetworkBehaviour
         // Exactly onto the next point of the curve. The physics step adds gravity before it
         // moves the body, so take that back out.
         rb.linearVelocity = (wanted - position) / dt - Physics.gravity * dt;
-        Vector3 ahead = PathPoint(path0, path1, path2, path3, Mathf.Min(1f, u + 0.05f)) - wanted;
+        Vector3 ahead = PathPoint(path0, path1, path2, path3, Mathf.Min(1f, u + 0.05f)) + pathSteer - wanted;
         FaceTowards(ahead, Vector3.up, dt, Vector3.zero);
         if (u >= 1f)
             EndPath(input, arrived: true);
@@ -643,7 +653,7 @@ public class FrogMotor : NetworkBehaviour
         airSpeedLimit = 0f;
         ignoreGroundUntil = 0f;
         bool floor = Vector3.Angle(pathNormal, Vector3.up) <= tuning.maxSlopeAngle;
-        if (!floor && climb.TryAutoAttach(input, pathNormal, path3))
+        if (!floor && climb.TryAutoAttach(input, pathNormal, path3 + pathSteer))
             StartClimbing();
     }
 

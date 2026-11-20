@@ -58,6 +58,13 @@ public class FrogNetworkDriver : NetworkBehaviour
     // How high (m) the path rises above where the frog starts, for the HUD.
     public float PathHeight { get; private set; }
 
+    // Owner only, while aiming: the aim cursor (screen pixels, from the bottom left). It moves with
+    // the mouse; the marker follows it onto every surface it passes over that the frog can land
+    // on. CursorOnMarker is false while it crosses something it can't (a gap, an overhang), and
+    // the camera then draws it so the player can see where it is.
+    public Vector2 AimCursor { get; private set; }
+    public bool CursorOnMarker { get; private set; }
+
     // Owner only: the launch the next jump will have when it has no path (straight up, or
     // jumps with mouse aiming off). The preview draws this arc, and it is sent to the host.
     public Vector3 LocalJumpVelocity
@@ -247,15 +254,19 @@ public class FrogNetworkDriver : NetworkBehaviour
         if (!aimStarted)
         {
             aimStarted = true;
-            HasMarker = PlaceAtCrosshair(lens);
+            StartCursor(lens);
         }
-        else if (HasMarker && delta.sqrMagnitude > 0f)
+        else
         {
-            MoveMarker(lens, delta);
-        }
-        else if (!HasMarker && delta.sqrMagnitude > 0f)
-        {
-            HasMarker = PlaceAtCrosshair(lens);
+            // While the cursor sits on the marker it stays glued to it as the camera moves.
+            if (HasMarker && CursorOnMarker)
+            {
+                Vector3 onScreen = lens.WorldToScreenPoint(MarkerPoint);
+                if (onScreen.z > 0f)
+                    AimCursor = onScreen;
+            }
+            if (delta.sqrMagnitude > 0f)
+                MoveCursor(lens, delta);
         }
 
         // Out of reach now (the frog slid, or a hungry frog's reach shrank): no jump to it.
@@ -272,66 +283,83 @@ public class FrogNetworkDriver : NetworkBehaviour
         }
     }
 
-    // The first marker of a charge: where the crosshair points, or else just in front of the frog.
-    bool PlaceAtCrosshair(Camera lens)
+    // The cursor starts where the crosshair points, or else just in front of the frog.
+    void StartCursor(Camera lens)
     {
-        if (TryPick(lens.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)), out RaycastHit hit))
+        HasMarker = CursorOnMarker = false;
+        AimCursor = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+        if (TryPick(lens.ScreenPointToRay(AimCursor), out RaycastHit hit) == Pick.Ok)
         {
             SetMarker(hit);
-            return true;
-        }
-        Vector3 frogOnScreen = lens.WorldToScreenPoint(transform.position);
-        if (frogOnScreen.z > 0f && TryPick(lens.ScreenPointToRay(frogOnScreen + new Vector3(0f, Screen.height * 0.08f, 0f)), out hit))
-        {
-            SetMarker(hit);
-            return true;
-        }
-        return false;
-    }
-
-    // Slides the marker across the screen by delta (pixels) onto whatever surface is there. Past
-    // Max Aim Range, or onto a ceiling, it only goes part of the way, so it stops at the edge.
-    void MoveMarker(Camera lens, Vector2 delta)
-    {
-        Vector3 onScreen = lens.WorldToScreenPoint(MarkerPoint);
-        if (onScreen.z <= 0f)
-        {
-            HasMarker = PlaceAtCrosshair(lens); // the marker went behind the camera: start again
             return;
         }
+        Vector3 frogOnScreen = lens.WorldToScreenPoint(transform.position);
+        if (frogOnScreen.z <= 0f)
+            return;
+        Vector2 inFront = (Vector2)frogOnScreen + new Vector2(0f, Screen.height * 0.08f);
+        if (TryPick(lens.ScreenPointToRay(inFront), out hit) == Pick.Ok)
+        {
+            AimCursor = inFront;
+            SetMarker(hit);
+        }
+    }
+
+    // Moves the cursor by delta (pixels). Onto a surface the frog can reach: the marker goes
+    // there. Over nothing it can land on (the gap between a desk and a cabinet, the floor under
+    // an overhang, the underside of a shelf): the cursor carries on across, and the marker waits
+    // at the last good spot until the cursor reaches the next surface. Past Max Aim Range: the
+    // cursor stops at the edge of the reach, so it never runs off where the marker can't follow.
+    void MoveCursor(Camera lens, Vector2 delta)
+    {
+        Rect screen = new Rect(0f, 0f, Screen.width, Screen.height);
         for (float part = 1f; part >= 0.12f; part *= 0.5f)
         {
-            Vector2 screenPoint = (Vector2)onScreen + delta * part;
-            if (TryPick(lens.ScreenPointToRay(screenPoint), out RaycastHit hit))
+            Vector2 next = AimCursor + delta * part;
+            next.x = Mathf.Clamp(next.x, screen.xMin, screen.xMax - 1f);
+            next.y = Mathf.Clamp(next.y, screen.yMin, screen.yMax - 1f);
+            switch (TryPick(lens.ScreenPointToRay(next), out RaycastHit hit))
             {
-                SetMarker(hit);
-                return;
+                case Pick.Ok:
+                    AimCursor = next;
+                    SetMarker(hit);
+                    return;
+                case Pick.Unusable:
+                    AimCursor = next;
+                    CursorOnMarker = false;
+                    return;
+                case Pick.OutOfReach:
+                    continue; // try a shorter step toward the edge of the reach
             }
         }
     }
 
     void SetMarker(RaycastHit hit)
     {
+        HasMarker = true;
+        CursorOnMarker = true;
         MarkerPoint = hit.point;
         MarkerNormal = hit.normal;
         MarkerOnWall = Vector3.Angle(hit.normal, Vector3.up) > motor.Tuning.maxSlopeAngle;
     }
 
+    enum Pick { Ok, Unusable, OutOfReach }
+
     // A surface the frog can land on or cling to, within reach. Ceilings don't count, and on
     // something to stand on the frog's centre must be over solid ground (not hanging off an
     // edge, where it would slide off).
-    bool TryPick(Ray ray, out RaycastHit hit)
+    // Other frogs don't count: the cursor looks past them to what they're standing on.
+    Pick TryPick(Ray ray, out RaycastHit hit)
     {
-        if (!Cast(ray, MaxPickDistance, out hit))
-            return false;
+        if (!Cast(ray, MaxPickDistance, out hit, skipFrogs: true))
+            return Pick.Unusable;
         FrogTuning tuning = motor.Tuning;
         if (Vector3.Dot(hit.normal, Vector3.up) < tuning.minWallUpDot)
-            return false; // a ceiling
+            return Pick.Unusable; // a ceiling
         Vector3 centre = hit.point + hit.normal * motor.Radius;
         if (!InReach(centre))
-            return false;
+            return Pick.OutOfReach;
         bool floor = Vector3.Angle(hit.normal, Vector3.up) <= tuning.maxSlopeAngle;
-        return !floor || HasFooting(centre);
+        return !floor || HasFooting(centre) ? Pick.Ok : Pick.Unusable;
     }
 
     bool InReach(Vector3 centre) =>
@@ -426,14 +454,16 @@ public class FrogNetworkDriver : NetworkBehaviour
 
 
     // Nearest hit along a ray, ignoring this frog's own collider.
-    bool Cast(Ray ray, float distance, out RaycastHit best)
+    // skipFrogs: other players' frogs don't count either.
+    bool Cast(Ray ray, float distance, out RaycastHit best, bool skipFrogs = false)
     {
         int count = Physics.RaycastNonAlloc(ray, aimHits, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
         bool found = false;
         best = default;
         for (int i = 0; i < count; i++)
         {
-            if (aimHits[i].rigidbody == frogRigidbody)
+            Rigidbody body = aimHits[i].rigidbody;
+            if (body == frogRigidbody || (skipFrogs && body != null && body.GetComponent<FrogMotor>() != null))
                 continue;
             if (!found || aimHits[i].distance < best.distance)
             {

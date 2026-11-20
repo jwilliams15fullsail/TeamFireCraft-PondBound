@@ -527,8 +527,20 @@ public class FrogCamera : MonoBehaviour
 
     void OnGUI()
     {
-        if (target != null && Cursor.lockState == CursorLockMode.Locked && !AimingMarker) // the landing marker is the cursor while aiming
+        if (target == null || Cursor.lockState != CursorLockMode.Locked)
+            return;
+        if (!AimingMarker)
+        {
             GUI.Label(new Rect(Screen.width * 0.5f - 4f, Screen.height * 0.5f - 10f, 20f, 20f), "+");
+            return;
+        }
+        // Aiming: the landing marker is the cursor. While the cursor crosses something the frog
+        // can't land on (a gap between two desks), show where it is until it reaches a surface.
+        if (frogDriver != null && !frogDriver.CursorOnMarker)
+        {
+            Vector2 at = frogDriver.AimCursor;
+            GUI.Label(new Rect(at.x - 4f, Screen.height - at.y - 10f, 20f, 20f), "+");
+        }
     }
 
     static void LockCursor(bool locked)
