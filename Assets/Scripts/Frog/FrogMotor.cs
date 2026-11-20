@@ -114,6 +114,16 @@ public class FrogMotor : NetworkBehaviour
     Vector3 aimedWallNormal;   // a jump aimed at a wall is in flight: cling to that wall on arrival
     Vector3 releaseWallTarget, aimedWallTarget; // where the frog's centre comes to rest on that wall
 
+    // A jump to a landing marker flies a planned path (FrogNetworkDriver.PlanPath): a curve from
+    // the frog to the marker, the same one the player's preview showed.
+    const float PathLostDistance = 0.6f; // knocked this far off the path (bumped, yanked): it falls instead
+    bool releasePath;                    // the jump being let go of has a path
+    Vector3 releasePathStart, releasePath1, releasePath2, releasePathEnd, releasePathNormal;
+    float releasePathDuration;
+    bool followingPath;                  // flying a path right now
+    Vector3 path0, path1, path2, path3, pathNormal;
+    float pathDuration, pathTime;
+
     bool hopping;                           // host only: the hop being simulated
     float hopPhase, hopDuration, hopStride;
 
@@ -276,10 +286,38 @@ public class FrogMotor : NetworkBehaviour
     // crosshair and wall), so the frog flies exactly the arc that player saw. wallNormal: the
     // landing marker was on this wall (zero when it wasn't), so the frog clings to it on arrival,
     // with its centre at wallTarget.
+    // A point on a jump path: a cubic Bezier curve through start, the two control points and
+    // end, at u (0 = start, 1 = end). The owner's preview and the host use the same curve.
+    public static Vector3 PathPoint(Vector3 start, Vector3 control1, Vector3 control2, Vector3 end, float u)
+    {
+        float v = 1f - u;
+        return v * v * v * start + 3f * v * v * u * control1 + 3f * v * u * u * control2 + u * u * u * end;
+    }
+
+    // A jump to a landing marker: fly the owner's planned path (from start, curving through the
+    // two control points, onto end on a surface facing endNormal) in duration seconds.
+    public void ReleasePathJump(Vector3 start, Vector3 control1, Vector3 control2, Vector3 end, Vector3 endNormal, float duration)
+    {
+        jumpHeld = false;
+        jumpReleaseQueued = true;
+        // Only paths a frog could really aim: ending within reach, taking a sensible time.
+        float slack = tuning.maxAimRange + 1f;
+        releasePath = (end - rb.position).sqrMagnitude <= slack * slack && endNormal.sqrMagnitude > 0.5f;
+        releasePathStart = start;
+        releasePath1 = control1;
+        releasePath2 = control2;
+        releasePathEnd = end;
+        releasePathNormal = endNormal.normalized;
+        releasePathDuration = Mathf.Clamp(duration, 0.2f, 3f);
+        releaseVelocity = Vector3.zero; // a rejected path: the frog stays where it is
+        releaseWallNormal = Vector3.zero;
+    }
+
     public void ReleaseJump(Vector3 velocity, Vector3 wallNormal, Vector3 wallTarget)
     {
         jumpHeld = false;
         jumpReleaseQueued = true;
+        releasePath = false;
         releaseVelocity = Vector3.ClampMagnitude(velocity, MaxJumpSpeed());
         releaseWallNormal = wallNormal.sqrMagnitude > 0.5f ? wallNormal.normalized : Vector3.zero;
         releaseWallTarget = wallTarget;
@@ -304,6 +342,11 @@ public class FrogMotor : NetworkBehaviour
         if (rb.position.y < respawnHeight)
         {
             Respawn();
+            return;
+        }
+        if (followingPath)
+        {
+            FollowPath(input, dt);
             return;
         }
         HandleStick(input);
@@ -511,6 +554,11 @@ public class FrogMotor : NetworkBehaviour
     void Launch()
     {
         IsCharging.Value = false;
+        if (releasePath)
+        {
+            StartPath();
+            return;
+        }
         if (Mode.Value == FrogMode.Climbing)
         {
             climb.Detach(); // let go of the wall first
@@ -531,6 +579,71 @@ public class FrogMotor : NetworkBehaviour
         ignoreGroundUntil = Time.time + 0.15f;
         ignoreWaterUntil = Time.time + 0.3f; // clear of the water before it can catch the frog again
         support = null;
+    }
+
+    // ---- Path jumps (host only) ----
+    // The frog flies the planned curve exactly, step by step, from the floor or straight off a
+    // wall, over whatever is in the way, onto the marker's surface. It still collides with
+    // things on the way: knocked off the path, it just falls from there.
+
+    void StartPath()
+    {
+        releasePath = false;
+        if (Mode.Value == FrogMode.Climbing)
+            climb.Detach(); // let go of the wall first
+        EndHop();
+        // The owner planned from where it saw the frog; start the curve from where it really is.
+        Vector3 shift = rb.position - releasePathStart;
+        path0 = rb.position;
+        path1 = releasePath1 + shift;
+        path2 = releasePath2;
+        path3 = releasePathEnd;
+        pathNormal = releasePathNormal;
+        pathDuration = releasePathDuration;
+        pathTime = 0f;
+        followingPath = true;
+        followingArc = false;
+        aimedWallNormal = Vector3.zero;
+        Mode.Value = FrogMode.Airborne;
+        ignoreWaterUntil = Time.time + 0.3f;
+        support = null;
+    }
+
+    void FollowPath(FrogInputState input, float dt)
+    {
+        pathTime += dt;
+        float u = Mathf.Clamp01(pathTime / pathDuration);
+        Vector3 wanted = PathPoint(path0, path1, path2, path3, u);
+        Vector3 position = rb.position;
+        if ((wanted - position).sqrMagnitude > PathLostDistance * PathLostDistance)
+        {
+            EndPath(input, arrived: false); // bumped into something: fall from here
+            return;
+        }
+        // Exactly onto the next point of the curve. The physics step adds gravity before it
+        // moves the body, so take that back out.
+        rb.linearVelocity = (wanted - position) / dt - Physics.gravity * dt;
+        Vector3 ahead = PathPoint(path0, path1, path2, path3, Mathf.Min(1f, u + 0.05f)) - wanted;
+        FaceTowards(ahead, Vector3.up, dt, Vector3.zero);
+        if (u >= 1f)
+            EndPath(input, arrived: true);
+    }
+
+    // At the marker: cling to it if it's a wall, otherwise settle onto the floor or top it's on.
+    void EndPath(FrogInputState input, bool arrived)
+    {
+        followingPath = false;
+        if (!arrived)
+        {
+            airSpeedLimit = FlatSpeed();
+            return;
+        }
+        rb.linearVelocity = -pathNormal * 0.5f; // pressed gently onto the surface
+        airSpeedLimit = 0f;
+        ignoreGroundUntil = 0f;
+        bool floor = Vector3.Angle(pathNormal, Vector3.up) <= tuning.maxSlopeAngle;
+        if (!floor && climb.TryAutoAttach(input, pathNormal, path3))
+            StartClimbing();
     }
 
     float FlatSpeed() => Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up).magnitude;
@@ -729,6 +842,7 @@ public class FrogMotor : NetworkBehaviour
         EndHop();
         IsCharging.Value = false;
         followingArc = false;
+        followingPath = false;
         Mode.Value = FrogMode.Disabled;
         tongue.LetGo();
     }
@@ -765,6 +879,7 @@ public class FrogMotor : NetworkBehaviour
         airSpeedLimit = 0f;
         followingArc = false;
         aimedWallNormal = Vector3.zero;
+        followingPath = releasePath = false;
         jumpPressQueued = jumpReleaseQueued = stickQueued = false; // anything pressed while dead
         rb.linearVelocity = Vector3.zero;
         rb.position = spawnPosition;

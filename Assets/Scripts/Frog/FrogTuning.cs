@@ -115,6 +115,12 @@ public class FrogTuning : ScriptableObject
     public float maxJumpDistance = 2.5f;
     [Tooltip("Jumping down from a height reaches further, like a real arc that keeps falling. This caps that bonus as a multiple of Max Jump Distance (1 = no bonus).")]
     [Min(1f)] public float maxDropReach = 2f;
+    [Tooltip("With mouse aiming: how far (m) from the frog the landing marker can go, in any direction (up a desk, along a wall, down off a ledge). A hungry frog's reach shrinks with its jump height.")]
+    [Min(0.5f)] public float maxAimRange = 4f;
+    [Tooltip("With mouse aiming: how fast (m/s) a frog flies its path to the marker. Bigger = snappier jumps.")]
+    [Min(0.5f)] public float pathJumpSpeed = 5f;
+    [Tooltip("With mouse aiming: the shortest time (s) any jump takes, so little hops still read as hops.")]
+    [Min(0.1f)] public float minPathJumpTime = 0.35f;
     [Tooltip("On: while charging, the landing marker goes wherever the crosshair points (a floor, a box top, a slope, a wall), as far as a jump can reach. The jump always comes down on the marker, and clings to it on a wall; the charge only sets how high the arc goes. Off: jumps go the way the frog faces, as far as the charge allows.")]
     public bool aimJumpsWithMouse = true;
 

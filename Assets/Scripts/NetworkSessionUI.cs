@@ -22,9 +22,19 @@ public class NetworkSessionUI : MonoBehaviour
     bool wasConnected;
 
     // Start, not Awake: the NetworkManager creates its ClientManager in its own Awake.
+    // Coming back to a scene that has its own NetworkManager while the one from the last game
+    // still exists, FishNet keeps the old one and throws the scene's copy away without setting
+    // it up (no ServerManager, no ClientManager). That copy, and this script on it, lives one
+    // more frame, so it does nothing: the surviving manager's own NetworkSessionUI does the work.
     void Start()
     {
-        manager = GetComponent<NetworkManager>();
+        NetworkManager own = GetComponent<NetworkManager>();
+        if (own == null || !own.Initialized)
+        {
+            enabled = false;
+            return;
+        }
+        manager = own;
         manager.ClientManager.OnClientConnectionState += OnClientConnectionState;
     }
 
@@ -65,7 +75,7 @@ public class NetworkSessionUI : MonoBehaviour
 
     void OnGUI()
     {
-        if (manager == null)
+        if (manager == null || manager.ServerManager == null || manager.ClientManager == null)
             return;
         bool running = manager.ServerManager.Started || manager.ClientManager.Started;
         if (!running && SceneManager.GetActiveScene().name == GameSession.MenuScene)

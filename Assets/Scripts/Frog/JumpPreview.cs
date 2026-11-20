@@ -22,6 +22,10 @@ public class JumpPreview : MonoBehaviour
     [Tooltip("Marker colour on the ground, and on a wall the frog will cling to.")]
     [SerializeField] Color floorColor = new Color(0.03f, 1f, 0f);
     [SerializeField] Color wallColor = new Color(0.1f, 0.6f, 1f);
+    [Tooltip("Colour when the path to the marker would hit something on the way.")]
+    [SerializeField] Color blockedColor = new Color(1f, 0.2f, 0.15f);
+
+    const int PathPoints = 40; // points the arc is drawn with along a planned jump path
 
     [Header("Arc look")]
     [Tooltip("How thick the arc is (m) with the camera close by. It gets thicker as the camera pulls back, so big jumps stay easy to read.")]
@@ -86,34 +90,48 @@ public class JumpPreview : MonoBehaviour
             return;
         }
 
-        // Step the flight the way the physics engine does (gravity first, then move, once per
-        // physics step), sweeping a ball the frog's size, until it touches something.
-        Vector3 velocity = driver.LocalJumpVelocity;
-        float dt = Time.fixedDeltaTime;
-        float radius = motor.Radius * 0.95f;
         points.Clear();
-        Vector3 position = transform.position;
-        points.Add(position);
         HasLanding = false;
         RaycastHit landing = default;
-        for (float t = 0f; t < maxFlightTime && !HasLanding; t += dt)
+        if (driver.HasPath)
         {
-            velocity += Physics.gravity * dt;
-            Vector3 next = position + velocity * dt;
-            HasLanding = Sweep(position, next, radius, out landing);
-            position = HasLanding ? position + (next - position).normalized * landing.distance : next;
-            points.Add(position);
+            // A jump to the marker: the planned path, exactly as the frog will fly it.
+            for (int i = 0; i <= PathPoints; i++)
+                points.Add(FrogMotor.PathPoint(driver.PathStart, driver.PathControl1, driver.PathControl2, driver.PathEnd, i / (float)PathPoints));
+            HasLanding = true;
+            LandingPoint = driver.MarkerPoint;
         }
-        if (HasLanding)
-            LandingPoint = landing.point;
+        else
+        {
+            // Step the flight the way the physics engine does (gravity first, then move, once per
+            // physics step), sweeping a ball the frog's size, until it touches something.
+            Vector3 velocity = driver.LocalJumpVelocity;
+            float dt = Time.fixedDeltaTime;
+            float radius = motor.Radius * 0.95f;
+            Vector3 position = transform.position;
+            points.Add(position);
+            for (float t = 0f; t < maxFlightTime && !HasLanding; t += dt)
+            {
+                velocity += Physics.gravity * dt;
+                Vector3 next = position + velocity * dt;
+                HasLanding = Sweep(position, next, radius, out landing);
+                position = HasLanding ? position + (next - position).normalized * landing.distance : next;
+                points.Add(position);
+            }
+            if (HasLanding)
+                LandingPoint = landing.point;
+        }
 
+        // Red when the path would hit something; blue onto a wall; green onto a floor or top.
+        Color color = driver.HasPath && driver.PathBlocked ? blockedColor
+            : driver.HasMarker && driver.MarkerOnWall ? wallColor : floorColor;
         Show(true);
         if (arc != null)
         {
             arc.positionCount = points.Count;
             for (int i = 0; i < points.Count; i++)
                 arc.SetPosition(i, points[i]);
-            StyleArc(driver.HasMarker && driver.MarkerOnWall ? wallColor : floorColor);
+            StyleArc(color);
         }
         // The marker: the spot you aim at with the crosshair (the arc shows whether this charge
         // reaches it), or without one, where the arc comes down. It glides between spots and
@@ -143,7 +161,7 @@ public class JumpPreview : MonoBehaviour
                 markerRotation = Quaternion.Slerp(markerRotation, rotation, 1f - Mathf.Exp(-markerTurnSpeed * Time.deltaTime));
             }
             landingMarker.SetPositionAndRotation(markerPosition, markerRotation);
-            TintMarker(placed && driver.MarkerOnWall ? wallColor : floorColor);
+            TintMarker(color);
         }
     }
 

@@ -54,8 +54,8 @@ public class FrogCamera : MonoBehaviour
     [SerializeField] float aimFocusSmoothTime = 0.15f;
     [Tooltip("While you place the landing marker, the camera turns toward it only as far as keeps the frog on screen: 1 = the frog may reach the edge, 0.5 = it stays in the middle half.")]
     [SerializeField, Range(0.1f, 1f)] float keepFrogOnScreen = 0.7f;
-    [Tooltip("While placing the landing marker: metres it moves out (or back) per degree of mouse / stick look. Steady all the way out, and it stops at the max ring.")]
-    [SerializeField] float aimDistancePerDegree = 0.025f;
+    [Tooltip("While placing the landing marker: how fast it slides across the screen (pixels per degree of mouse / stick look). Bigger = faster.")]
+    [SerializeField, Min(0.1f)] float aimCursorSpeed = 6f;
 
 
     [Header("Third Person Follow (only if the Frog Follow Camera uses it)")]
@@ -86,50 +86,30 @@ public class FrogCamera : MonoBehaviour
     public bool AimingJump { get; set; }
 
     // Set by our frog while it aims a jump with the landing marker: the camera goes overhead
-    // and follows the marker, and mouse / stick look steers the aim (JumpAimRay) instead of the
-    // camera. The aim starts where the crosshair points.
+    // and follows the marker, and mouse / stick look slides the marker across the screen
+    // (TakeJumpAimDelta) instead of turning the camera. Free Look still swings the camera.
     public bool AimingMarker
     {
         get => aimingMarker;
         set
         {
             if (value && !aimingMarker)
-            {
-                Vector3 forward = transform.forward;
-                jumpAimYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
-                float head = Mathf.Max(0.05f, thirdPerson != null ? shoulderOffset.y : composerOffset.y);
-                float down = -forward.y; // how far the crosshair points below level
-                jumpAimDistance = down > 0.02f
-                    ? Mathf.Min(head * Mathf.Sqrt(1f - down * down) / down, JumpAimMaxDistance)
-                    : JumpAimMaxDistance;
-            }
+                jumpAimDelta = Vector2.zero;
             aimingMarker = value;
         }
     }
 
-    // Aiming a jump: the ray the landing marker sits on. It starts at the frog's head (where the
-    // crosshair line passes over the frog) and points where the mouse steered it, so the camera
-    // can float overhead to follow the marker without moving the aim.
-    public Ray JumpAimRay
+    // The camera's lens, for the landing marker to find the surface under its spot on screen.
+    public Camera Lens => lens;
+
+    // How far (pixels, screen right and up) the mouse has moved the landing marker since the
+    // last call. FrogNetworkDriver calls it once per frame while aiming.
+    public Vector2 TakeJumpAimDelta()
     {
-        get
-        {
-            float head = Mathf.Max(0.05f, thirdPerson != null ? shoulderOffset.y : composerOffset.y);
-            Vector3 from = target != null ? target.position + Vector3.up * head : transform.position;
-            // Points at the spot jumpAimDistance away on the frog's own floor; past a ledge it carries on down.
-            float pitch = Mathf.Atan2(head, jumpAimDistance) * Mathf.Rad2Deg;
-            return new Ray(from, Quaternion.Euler(pitch, jumpAimYaw, 0f) * Vector3.forward);
-        }
+        Vector2 delta = jumpAimDelta;
+        jumpAimDelta = Vector2.zero;
+        return delta;
     }
-
-    // Aiming a jump: how far (m, flat) from the frog, and which way, the mouse has moved the
-    // landing spot. FrogNetworkDriver puts the marker on the highest surface there it can reach.
-    public float JumpAimDistance => jumpAimDistance;
-    public Vector3 JumpAimDirection => Quaternion.Euler(0f, jumpAimYaw, 0f) * Vector3.forward;
-
-    // How far out the aim may go: the frog's reach right now (further over a drop).
-    float JumpAimMaxDistance => frogDriver != null ? frogDriver.AimReach
-        : frogMotor != null ? frogMotor.Tuning.maxJumpDistance : 2.5f;
 
     // The crosshair ray. It starts level with the frog rather than at the lens, so
     // anything between the camera and the frog can't steal the tongue's (or a jump's) aim.
@@ -169,7 +149,7 @@ public class FrogCamera : MonoBehaviour
     Vector3 shoulderOffset;      // Third Person Follow's Shoulder Offset, as set in the Inspector
     float aimRoom = 1f, aimRoomVelocity; // how much room the camera has behind its pivot (1 = all of it), smoothed
     bool aimingMarker;
-    float jumpAimYaw, jumpAimDistance; // where the jump is aimed while AimingMarker (degrees; flat metres from the frog)
+    Vector2 jumpAimDelta;        // mouse movement for the landing marker not yet taken (pixels)
     float zoomBlend, markerBlend; // 0 = normal, 1 = fully into aiming
     Vector3 markerFocus, markerFocusVelocity; // where the camera looks while (and just after) aiming
     Vector3 lastTargetPosition;
@@ -286,7 +266,7 @@ public class FrogCamera : MonoBehaviour
         if (orbit == null && thirdPerson == null)
             return;
         float dt = Time.deltaTime;
-        freeLookHeld = freeLookEnabled && thirdPerson != null && !AimingMarker && freeLookAction != null
+        freeLookHeld = freeLookEnabled && thirdPerson != null && freeLookAction != null
     && freeLookAction.IsPressed() && Cursor.lockState == CursorLockMode.Locked && Application.isFocused;
 
         if (Cursor.lockState == CursorLockMode.Locked && Application.isFocused)
@@ -305,12 +285,9 @@ public class FrogCamera : MonoBehaviour
             }
             else if (AimingMarker)
             {
-                // Aiming a jump: the mouse steers the aim (where the landing marker goes), not the
-                // camera. Third Person Follow turns with it, so the marker stays ahead of you.
-                jumpAimYaw = Mathf.Repeat(jumpAimYaw + look.x, 360f);
-                jumpAimDistance = Mathf.Clamp(jumpAimDistance + (invertY ? -look.y : look.y) * aimDistancePerDegree, 0f, JumpAimMaxDistance);
-                if (thirdPerson != null)
-                    lookYaw = jumpAimYaw;
+                // Aiming a jump: the mouse slides the landing marker across the screen, not the
+                // camera (hold Free Look to swing the camera round instead).
+                jumpAimDelta += new Vector2(look.x, invertY ? -look.y : look.y) * aimCursorSpeed;
             }
             else if (thirdPerson != null)
             {

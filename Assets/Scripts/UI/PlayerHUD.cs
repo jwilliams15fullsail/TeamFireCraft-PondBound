@@ -104,7 +104,9 @@ public class PlayerHUD : MonoBehaviour
             chargeFill.fillAmount = motor.Tuning.chargeCurve.Evaluate(charge01);
         if (chargeText == null)
             return;
-        float height = motor.JumpApex(charge01, driver.LocalJumpTarget, stats.JumpHeightMultiplier);
+        // A jump to a marker: how high its path rises. Otherwise the charge's own height.
+        float height = driver.HasPath ? driver.PathHeight
+            : motor.JumpApex(charge01, driver.LocalJumpTarget, stats.JumpHeightMultiplier);
         // Distance to the marker you placed (it stays put), or else to where the arc lands.
         Vector3? landing = driver.HasMarker ? driver.MarkerPoint
             : jumpPreview != null && jumpPreview.HasLanding ? jumpPreview.LandingPoint
