@@ -1,3 +1,4 @@
+using FishNet;
 using FishNet.Managing;
 using FishNet.Transporting;
 using FishNet.Transporting.UTP;
@@ -24,8 +25,14 @@ public class NetworkSessionUI : MonoBehaviour
     // Start, not Awake: the NetworkManager creates its ClientManager in its own Awake.
     void Start()
     {
-        manager = GetComponent<NetworkManager>();
-        manager.ClientManager.OnClientConnectionState += OnClientConnectionState;
+        manager = InstanceFinder.NetworkManager;
+        if (manager == null)
+            manager = GetComponent<NetworkManager>();
+
+        if (manager != null && manager.ClientManager != null)
+        {
+            manager.ClientManager.OnClientConnectionState += OnClientConnectionState;
+        }
     }
 
     void OnDestroy()
@@ -66,6 +73,8 @@ public class NetworkSessionUI : MonoBehaviour
     void OnGUI()
     {
         if (manager == null)
+            manager = InstanceFinder.NetworkManager;
+        if (manager == null || manager.ServerManager == null || manager.ClientManager == null)
             return;
         bool running = manager.ServerManager.Started || manager.ClientManager.Started;
         if (!running && SceneManager.GetActiveScene().name == GameSession.MenuScene)

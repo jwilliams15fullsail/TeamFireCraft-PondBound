@@ -63,16 +63,15 @@ public class PlayMenu : MonoBehaviour
         SetListState(false, false, null);
     }
 
-    public void PlayOffline()
+    public async void PlayOffline()
     {
         if (busy || !LevelPicked())
             return;
-        if (!GameSession.StartOffline(gameScene.SceneName))
-            SetStatus("Couldn't start the offline game.");
+        await Run("Starting...", () => GameSession.StartOfflineAsync(gameScene.SceneName));
     }
 
     // The Continue button: back to the level and checkpoint of the last save, offline.
-    public void ContinueOffline()
+    public async void ContinueOffline()
     {
         if (busy)
             return;
@@ -83,11 +82,8 @@ public class PlayMenu : MonoBehaviour
             return;
         }
         SaveSystem.Continuing = save; // the level's PlayerSpawner picks it up
-        if (!GameSession.StartOffline(save.sceneName))
-        {
+        if (!await Run("Starting...", () => GameSession.StartOfflineAsync(save.sceneName)))
             SaveSystem.Continuing = null;
-            SetStatus("Couldn't start the offline game.");
-        }
     }
 
     public async void QuickMatch()

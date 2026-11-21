@@ -33,10 +33,43 @@ public static class GameSession
     public static async Task SignInAsync()
     {
         if (UnityServices.State != ServicesInitializationState.Initialized)
-            await UnityServices.InitializeAsync();
+        {
+            var options = new InitializationOptions();
+            string profile = TestPlayerProfile();
+            if (profile != null)
+                options.SetProfile(profile);
+            await UnityServices.InitializeAsync(options);
+        }
 
         if (!AuthenticationService.Instance.IsSignedIn)
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
+    }
+
+    // Multiplayer Play Mode opens extra Editor windows (Player2, Player3, Player4) that share this
+    // project, and with it the saved anonymous sign-in. Every window would sign in as the same
+    // player, and a player can't join a session they're already in, so player 2 could never join
+    // player 1. Each Editor window gets its own sign-in profile instead, named after its player.
+    // Builds return null and keep the normal sign-in.
+    private static string TestPlayerProfile()
+    {
+#if UNITY_EDITOR
+        string[] args = Environment.GetCommandLineArgs();
+        int at = Array.IndexOf(args, "-name");
+        string name = at >= 0 && at + 1 < args.Length ? args[at + 1] : "Player1"; // the main Editor has no -name
+
+        // Profile names allow letters, digits, - and _ only, up to 30 characters.
+        var profile = new System.Text.StringBuilder();
+        foreach (char c in name)
+        {
+            if (char.IsLetterOrDigit(c) || c == '-' || c == '_')
+                profile.Append(c);
+        }
+        if (profile.Length == 0)
+            return "Player1";
+        return profile.Length > 30 ? profile.ToString(0, 30) : profile.ToString();
+#else
+        return null;
+#endif
     }
 
     // Call with the intro/lobby scene name.
@@ -108,13 +141,55 @@ public static class GameSession
             code.Trim().ToUpperInvariant(), JoinOptions());
     }
 
-    // Call with the intro/lobby scene name.
-    public static bool StartOffline(string introScene)
+    // Call with the intro/lobby scene name. Throws if the game couldn't start.
+    // Desktop and the Editor: a local-only server on this machine, no internet needed.
+    // Web builds: a browser can't run a server, so Unity Transport refuses one there. The web
+    // build hosts a private Relay game with room for one player instead (needs internet,
+    // which a web build always has). Nobody can find or join it.
+    public static Task StartOfflineAsync(string introScene)
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        return StartOfflineOnRelayAsync(introScene);
+#else
+        if (!StartOfflineLocal(introScene))
+            throw new Exception("Couldn't start the offline game.");
+        return Task.CompletedTask;
+#endif
+    }
+
+    static async Task StartOfflineOnRelayAsync(string introScene)
+    {
+        await SignInAsync();
+
+        var options = new SessionOptions
+        {
+            Name = $"Offline {UnityEngine.Random.Range(1000, 10000)}",
+            MaxPlayers = 1,
+            IsPrivate = true,
+        }
+        .WithRelayNetwork()
+        .WithNetworkHandler(new FishNetSessionHandler());
+
+        IsOffline = true;
+        try
+        {
+            Current = await MultiplayerService.Instance.CreateSessionAsync(options);
+        }
+        catch
+        {
+            IsOffline = false;
+            throw;
+        }
+
+        LoadLevel(introScene);
+    }
+
+    static bool StartOfflineLocal(string introScene)
     {
         NetworkManager manager = InstanceFinder.NetworkManager;
         UnityTransport transport = TransportOf(manager);
 
-        if (transport == null)
+        if (manager == null || transport == null)
             return false;
 
         // Local-only connection; this also resets any old Relay address.
@@ -182,7 +257,17 @@ public static class GameSession
         IsLeaving = false;
     }
 
-    public static async void QuitGame()
+    public static void QuitGame()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // A web page can't close itself: Quit does nothing in a browser. Go back to the menu.
+        LeaveToMenu();
+#else
+        QuitAppAsync();
+#endif
+    }
+
+    static async void QuitAppAsync()
     {
         if (IsLeaving)
             return;
@@ -208,17 +293,16 @@ public static class GameSession
 
     public static UnityTransport TransportOf(NetworkManager manager)
     {
-        UnityTransport transport = manager != null
-            ? manager.TransportManager.GetTransport<UnityTransport>()
-            : null;
+        if (manager == null)
+            manager = InstanceFinder.NetworkManager;
 
-        if (transport == null)
+        if (manager == null || manager.TransportManager == null)
         {
-            Debug.LogError(
-                "The scene needs a FishNet NetworkManager with FishyUnityTransport's Unity Transport component.");
+            Debug.LogError("TransportOf: NetworkManager or TransportManager is null.");
+            return null;
         }
 
-        return transport;
+        return manager.TransportManager.GetTransport<UnityTransport>();
     }
 
     private static async Task LeaveSessionAsync()

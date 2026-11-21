@@ -83,16 +83,19 @@ public class EnemyAI : NetworkBehaviour
     // -------------------------------
 
     // Helper property to check if we have an active WaypointMover
-    private bool HasValidPathing => pathing != null && pathing.enabled;
+    private bool HasValidPathing => pathing != null && pathing.enabled && pathing.CurrentWaypoint != null;
+
+    private void Awake()
+    {
+        pathing = GetComponent<WaypointMover>();
+        rigidBody = GetComponent<Rigidbody>();
+        enemyStun = GetComponent<EnemyStun>();
+    }
 
     void Start()
     {
         // Only the Host/Server runs AI vision, state switching, and damage checks
         if (InstanceFinder.NetworkManager != null && InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted) return;
-
-        pathing = GetComponent<WaypointMover>();
-        rigidBody = GetComponent<Rigidbody>();
-        enemyStun = GetComponent<EnemyStun>();
 
         if (rigidBody != null)
         {
@@ -112,9 +115,15 @@ public class EnemyAI : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Do not chase, patrol, search, or attack while stunned.
+        if (InstanceFinder.NetworkManager != null && InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted) return;
+
+        // Do not chase, patrol, search, or attack while stunned
         if (enemyStun != null && enemyStun.IsStunned)
+        {
+            CheckIfStuck(false);
             return;
+        }
+
         if (stateLockTimer > 0f) { stateLockTimer -= Time.deltaTime; }
         if (ignorePlayerTimer > 0f) { ignorePlayerTimer -= Time.deltaTime; }
 
