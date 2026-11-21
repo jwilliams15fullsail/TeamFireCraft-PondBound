@@ -8,12 +8,7 @@ using UnityEngine.InputSystem;
 // Only the host simulates frogs. Every other machine only displays them.
 public class FrogNetworkDriver : NetworkBehaviour
 {
-    const float MaxPickDistance = 200f; // how far the aim cursor looks for a surface
-    const int PathChecks = 24;          // sections a planned jump path is checked in for walls in the way
-
-    [Tooltip("While aiming, write on screen what the aim cursor is pointing at and why the marker can or can't go there. For tracking down spots the marker won't move onto.")]
-    [SerializeField] bool debugAim;
-    string lastPick = "";
+    const float MaxAimDistance = 60f; // the crosshair finds landing spots up to this far away
 
     // The host's copy of this player's input, shared with everyone (animation reads it).
     readonly SyncVar<FrogInputState> input = new(new SyncTypeSettings(0.001f));
@@ -40,45 +35,27 @@ public class FrogNetworkDriver : NetworkBehaviour
     // the landing marker you place while charging.
     public Vector3 LocalJumpTarget { get; private set; }
 
-    // Owner only: the landing marker, a spot on any surface: a floor, a desk or cabinet top, a
-    // wall or a side too steep to stand on, at any height. HasMarker is false when there is
-    // none (straight up, or not aiming). MarkerOnWall: the frog will land there and cling.
+    // Owner only: the landing marker you aim with the crosshair, a spot on a surface. It stays
+    // where you aim while the charge swings; the arc shows whether this charge reaches it.
+    // HasMarker is false when there is none (straight up, or not aiming). MarkerOnWall: it's on
+    // a wall or a side too steep to stand on, so the frog will land there and cling to it.
     public bool HasMarker { get; private set; }
     public Vector3 MarkerPoint { get; private set; }
     public Vector3 MarkerNormal { get; private set; }
     public bool MarkerOnWall { get; private set; }
 
-    // Owner only: the path the next jump flies when there is a marker. The frog leaves its
-    // surface (floor or wall) along that surface's normal, arcs over anything in the way and
-    // comes down onto the marker's surface. The preview draws exactly this, and the host moves
-    // the frog along exactly this. PathBlocked: no clear path was found (it would hit something).
-    public bool HasPath { get; private set; }
-    public bool PathBlocked { get; private set; }
-    public Vector3 PathStart { get; private set; }
-    public Vector3 PathControl1 { get; private set; }
-    public Vector3 PathControl2 { get; private set; }
-    public Vector3 PathEnd { get; private set; }
-    public float PathDuration { get; private set; }
-    // How high (m) the path rises above where the frog starts, for the HUD.
-    public float PathHeight { get; private set; }
-
-    // Owner only, while aiming: the aim cursor (screen pixels, from the bottom left). It moves with
-    // the mouse; the marker follows it onto every surface it passes over that the frog can land
-    // on. CursorOnMarker is false while it crosses something it can't (a gap, an overhang), and
-    // the camera then draws it so the player can see where it is.
-    public Vector2 AimCursor { get; private set; }
-    public bool CursorOnMarker { get; private set; }
-
-    // Owner only: the launch the next jump will have when it has no path (straight up, or
-    // jumps with mouse aiming off). The preview draws this arc, and it is sent to the host.
+    // Owner only: the launch the next jump will have. The preview draws exactly this arc,
+    // and it is what gets sent to the host on release.
     public Vector3 LocalJumpVelocity
     {
         get
         {
-            // On a wall the frog lies flat against it, so its up is the wall's normal: a jump
-            // from a wall always pushes away from it.
-            Vector3 wall = motor.Mode.Value == FrogMode.Climbing ? transform.up : Vector3.zero;
-            return motor.JumpVelocity(LocalCharge, LocalJumpTarget, aimHeightScale, wall);
+            float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
+            heightScale *= motor.LocalSlimeJumpMultiplier;
+             // On a wall the frog lies flat against it, so its up is the wall's normal. A jump
+             // aimed at a marker flies exactly to it, so it gets no extra push off the wall.
+             Vector3 wall = motor.Mode.Value == FrogMode.Climbing && !HasMarker ? transform.up : Vector3.zero;
+            return motor.JumpVelocity(LocalCharge, LocalJumpTarget, heightScale, wall);
         }
     }
 
@@ -90,11 +67,9 @@ public class FrogNetworkDriver : NetworkBehaviour
     InputAction moveAction, jumpAction, tongueAction, reelAction, reelWheelAction, stickAction, breakFreeAction, hopAction;
     FrogInputState lastSent;
     uint lastSentTick;
-    readonly RaycastHit[] aimHits = new RaycastHit[16];
-    // This frame's jump height scale (hunger, slime underfoot), worked out once per frame: it
-    // costs a ground probe.
-    float aimHeightScale = 1f;
-    bool aimStarted; // this charge has placed its first marker
+    readonly RaycastHit[] aimHits = new RaycastHit[8];
+    readonly Collider[] aimOverlaps = new Collider[8];
+    
 
     void Awake()
     {
@@ -205,30 +180,24 @@ public class FrogNetworkDriver : NetworkBehaviour
             BreakFreePressed();
     }
 
-    // Where the next jump should come down. Mouse aiming, while charging: the landing marker
-    // you move with the mouse (AimLandingMarker). Without mouse aiming: the way the frog faces
-    // (on a wall, the way the stick points), as far as the charge reaches, or straight up.
+    // Where the next jump should come down. Mouse aiming, while charging: wherever the crosshair
+    // points (AimAtCrosshair). Without mouse aiming: the way the frog faces (on a wall, the way
+    // the stick points), as far as the charge reaches, or straight up with no direction held.
     void UpdateJumpTarget(float viewYaw, bool supported)
     {
         FrogTuning tuning = motor.Tuning;
-        aimHeightScale = (stats != null ? stats.JumpHeightMultiplier : 1f) * motor.LocalSlimeJumpMultiplier;
         if (tuning.aimJumpsWithMouse && frogCamera != null)
         {
             bool aiming = LocalJumpHeld && supported;
             frogCamera.AimingMarker = aiming; // the camera goes overhead and follows the marker
             if (aiming)
-            {
                 AimLandingMarker();
-            }
             else
-            {
-                aimStarted = false;
-                HasMarker = MarkerOnWall = HasPath = false;
-            }
+                HasMarker = MarkerOnWall = false;
             return;
         }
 
-        HasMarker = MarkerOnWall = HasPath = false;
+        HasMarker = MarkerOnWall = false;
         if (LocalMove.sqrMagnitude <= 0.04f)
         {
             LocalJumpTarget = Vector3.zero;
@@ -237,271 +206,111 @@ public class FrogNetworkDriver : NetworkBehaviour
         Vector3 direction = motor.Mode.Value == FrogMode.Climbing
             ? Quaternion.Euler(0f, viewYaw, 0f) * new Vector3(LocalMove.x, 0f, LocalMove.y)
             : transform.forward;
-        float reach = motor.GroundJumpReach(LocalCharge, aimHeightScale).y; // as far as this charge goes
-        LocalJumpTarget = Vector3.ProjectOnPlane(direction, Vector3.up).normalized * reach;
+        float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
+        heightScale *= motor.LocalSlimeJumpMultiplier;
+
+        float reach = motor.GroundJumpReach(LocalCharge, heightScale).y; // as far as this charge goes
+LocalJumpTarget = Vector3.ProjectOnPlane(direction, Vector3.up).normalized * reach;
     }
 
-    // ---- The landing marker ----
-    // It works like a mouse cursor laid on the world: it starts where the crosshair points, and
-    // moving the mouse slides it across the screen onto whatever surface is under it there, a
-    // floor, the front of a desk, the desk's top, the side of a cabinet, at any angle or height,
-    // as long as it's within Max Aim Range of the frog. It stays put in the world while the
-    // camera moves, and hold Free Look (right mouse) to swing the camera round for a better view.
-
+    // The landing marker goes on whatever surface the jump aim points at (a floor, a box top, a
+    // slope, a wall), if a jump can reach it. The aim starts where the crosshair pointed when the
+    // charge began, then the mouse steers it while the camera floats overhead (FrogCamera.JumpAimRay).
+    // A wall, or a side too steep to stand on, is somewhere to cling: the frog lands on it and
+    // sticks there (MarkerOnWall). Out of reach (too far, too high, a ceiling, the sky): as far as
+    // a jump goes toward it, set down on whatever is there, stepping back toward the frog until it fits.
     void AimLandingMarker()
-    {
-        Camera lens = frogCamera.Lens;
-        Vector2 delta = frogCamera.TakeJumpAimDelta();
-        if (lens == null)
-            return;
-
-        if (!aimStarted)
+{
+    FrogTuning tuning = motor.Tuning;
+    Ray aim = frogCamera.JumpAimRay;
+    Vector3 aimed = aim.origin + aim.direction * tuning.maxJumpDistance; // the sky: just that way
+        if (Cast(aim, MaxAimDistance, out RaycastHit hit))
         {
-            aimStarted = true;
-            StartCursor(lens);
-        }
-        else
-        {
-            // While the cursor sits on the marker it stays glued to it as the camera moves.
-            if (HasMarker && CursorOnMarker)
+            aimed = hit.point;
+            float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
+            
+            heightScale *= motor.LocalSlimeJumpMultiplier;
+            float highest = tuning.maxJumpHeight * heightScale - tuning.jumpClearance; // highest landing a jump can clear
+            Vector3 target = hit.point + hit.normal * motor.Radius - transform.position; // the frog's centre, touching the spot
+            bool floor = Vector3.Angle(hit.normal, Vector3.up) <= tuning.maxSlopeAngle;
+            bool wall = !floor && Vector3.Dot(hit.normal, Vector3.up) >= tuning.minWallUpDot;
+            bool inReach = new Vector2(target.x, target.z).magnitude <= tuning.maxJumpDistance && target.y <= highest;
+            if ((floor || wall) && inReach)
             {
-                Vector3 onScreen = lens.WorldToScreenPoint(MarkerPoint);
-                if (onScreen.z > 0f)
-                    AimCursor = onScreen;
+                HasMarker = true;
+                MarkerOnWall = wall;
+                MarkerPoint = hit.point;
+                MarkerNormal = hit.normal;
+                LocalJumpTarget = target;
+                return;
             }
-            if (delta.sqrMagnitude > 0f)
-                MoveCursor(lens, delta);
         }
 
-        // Out of reach now (the frog slid, or a hungry frog's reach shrank): no jump to it.
-        if (HasMarker && !InReach(MarkerPoint + MarkerNormal * motor.Radius))
+        MarkerOnWall = false;
+        Vector3 toward = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(aimed - transform.position, Vector3.up), tuning.maxJumpDistance);
+        for (int i = 10; i >= 0; i--)
+        {
+            if (MarkerTarget(toward * (i / 10f), out Vector3 dropped))
+            {
+                LocalJumpTarget = dropped;
+                return;
+            }
+        }
+    }
+
+    // The landing marker `offset` (flat, metres) from the frog, set down on the highest
+    // surface there that a jump can clear (a platform top, the floor below...): exactly where
+    // a frog-sized ball dropped from the top of the jump would come to rest. target: where the
+    // frog's centre should come down, relative to the frog. False, changing nothing, when the
+    // spot is inside something too high to land on (a wall, the side of a tall box). A tiny
+    // offset = straight up, with no marker.
+    bool MarkerTarget(Vector3 offset, out Vector3 target)
+    {
+        target = Vector3.zero;
+        if (offset.sqrMagnitude < 0.0025f)
+        {
             HasMarker = false;
-
-        if (HasMarker)
-            PlanPath();
-        else
-        {
-            HasPath = false;
-            MarkerOnWall = false;
-            LocalJumpTarget = Vector3.zero; // no marker: straight up
+            return true;
         }
-    }
+        // A slightly smaller ball, so a wall the frog is only touching doesn't count.
+        float radius = motor.Radius * 0.9f;
+        // The highest the frog's centre can get and still clear an edge: its highest jump
+        // less Jump Clearance, or lower under a ceiling.
+        float heightScale = stats != null ? stats.JumpHeightMultiplier : 1f;
+        heightScale *= motor.LocalSlimeJumpMultiplier;
 
-    // The cursor starts where the crosshair points, or else just in front of the frog.
-    void StartCursor(Camera lens)
-    {
-        HasMarker = CursorOnMarker = false;
-        AimCursor = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
-        if (TryPick(CursorRay(lens, AimCursor), out RaycastHit hit) == Pick.Ok)
-        {
-            SetMarker(hit);
-            return;
-        }
-        Vector3 frogOnScreen = lens.WorldToScreenPoint(transform.position);
-        if (frogOnScreen.z <= 0f)
-            return;
-        Vector2 inFront = (Vector2)frogOnScreen + new Vector2(0f, Screen.height * 0.08f);
-        if (TryPick(CursorRay(lens, inFront), out hit) == Pick.Ok)
-        {
-            AimCursor = inFront;
-            SetMarker(hit);
-        }
-    }
-
-    // Moves the cursor by delta (pixels). Onto a surface the frog can reach: the marker goes
-    // there. Over nothing it can land on (the gap between a desk and a cabinet, the floor under
-    // an overhang, the underside of a shelf): the cursor carries on across, and the marker waits
-    // at the last good spot until the cursor reaches the next surface. Past Max Aim Range: the
-    // cursor stops at the edge of the reach, so it never runs off where the marker can't follow.
-    void MoveCursor(Camera lens, Vector2 delta)
-    {
-        Rect screen = new Rect(0f, 0f, Screen.width, Screen.height);
-        for (float part = 1f; part >= 0.12f; part *= 0.5f)
-        {
-            Vector2 next = AimCursor + delta * part;
-            next.x = Mathf.Clamp(next.x, screen.xMin, screen.xMax - 1f);
-            next.y = Mathf.Clamp(next.y, screen.yMin, screen.yMax - 1f);
-            switch (TryPick(CursorRay(lens, next), out RaycastHit hit))
-            {
-                case Pick.Ok:
-                    AimCursor = next;
-                    SetMarker(hit);
-                    return;
-                case Pick.Unusable:
-                    AimCursor = next;
-                    CursorOnMarker = false;
-                    return;
-                case Pick.OutOfReach:
-                    continue; // try a shorter step toward the edge of the reach
-            }
-        }
-    }
-
-    void SetMarker(RaycastHit hit)
-    {
-        HasMarker = true;
-        CursorOnMarker = true;
-        MarkerPoint = hit.point;
-        MarkerNormal = hit.normal;
-        MarkerOnWall = Vector3.Angle(hit.normal, Vector3.up) > motor.Tuning.maxSlopeAngle;
-    }
-
-    enum Pick { Ok, Unusable, OutOfReach }
-
-    // The ray under the cursor, starting near the frog instead of at the lens. The camera sits a
-    // few metres behind the frog and gets pushed up against things (the back of a cabinet, a
-    // glass panel, a lamp, the outside of a wall it can't draw), and a ray from the lens would
-    // stop on those before ever reaching the desk or cabinet the player is pointing at. Anything
-    // nearer the camera than the frog's reach is skipped.
-    Ray CursorRay(Camera lens, Vector2 screenPoint)
-    {
-        Ray ray = lens.ScreenPointToRay(screenPoint);
-        float frogDepth = Vector3.Dot(transform.position - ray.origin, ray.direction);
-        float skip = Mathf.Max(0f, frogDepth - motor.Tuning.maxAimRange - motor.Radius);
-        return new Ray(ray.GetPoint(skip), ray.direction);
-    }
-
-    // A surface the frog can land on or cling to, within reach. Ceilings don't count, and on
-    // something to stand on the frog's centre must be over solid ground (not hanging off an
-    // edge, where it would slide off).
-    // Other frogs don't count: the cursor looks past them to what they're standing on.
-    Pick TryPick(Ray ray, out RaycastHit hit)
-    {
-        if (!Cast(ray, MaxPickDistance, out hit, skipFrogs: true))
-            return Report(Pick.Unusable, "nothing under the cursor", hit);
-        FrogTuning tuning = motor.Tuning;
-        if (Vector3.Dot(hit.normal, Vector3.up) < tuning.minWallUpDot)
-            return Report(Pick.Unusable, "a ceiling or underside", hit);
-        Vector3 centre = hit.point + hit.normal * motor.Radius;
-        if (!InReach(centre))
-            return Report(Pick.OutOfReach, $"out of reach ({Vector3.Distance(centre, transform.position):0.0} m)", hit);
-        bool floor = Vector3.Angle(hit.normal, Vector3.up) <= tuning.maxSlopeAngle;
-        if (floor && !HasFooting(centre))
-            return Report(Pick.Unusable, "the frog would hang off an edge there", hit);
-        return Report(Pick.Ok, floor ? "landing spot" : "wall to cling to", hit);
-    }
-
-    // Debug Aim: remembers what the cursor last found and why, for the on-screen readout.
-    Pick Report(Pick result, string why, RaycastHit hit)
-    {
-        if (debugAim)
-            lastPick = hit.collider != null
-                ? $"Cursor: {hit.collider.name}  {why}  (normal {hit.normal.x:0.0} {hit.normal.y:0.0} {hit.normal.z:0.0})"
-                : $"Cursor: {why}";
-        return result;
-    }
-
-    void OnGUI()
-    {
-        if (!debugAim || !IsOwner || !LocalJumpHeld)
-            return;
-        GUI.Label(new Rect(10f, Screen.height * 0.5f, 900f, 24f), lastPick);
-        GUI.Label(new Rect(10f, Screen.height * 0.5f + 20f, 900f, 24f),
-            HasMarker ? $"Marker on: {(MarkerOnWall ? "wall" : "floor / top")}   path {(PathBlocked ? "BLOCKED" : "clear")}" : "No marker");
-    }
-
-    bool InReach(Vector3 centre) =>
-        (centre - transform.position).sqrMagnitude <= Square(motor.Tuning.maxAimRange * aimHeightScale);
-
-    static float Square(float x) => x * x;
-
-    // Whether the frog's centre, resting there, is right over ground it can stand on.
-    bool HasFooting(Vector3 centre)
-    {
-        if (!Cast(new Ray(centre + Vector3.up * 0.05f, Vector3.down), motor.Radius + 0.25f, out RaycastHit below))
+        float reach = Mathf.Max(
+            0.05f,
+            motor.Tuning.maxJumpHeight * heightScale - motor.Tuning.jumpClearance
+        );
+        if (SphereCast(new Ray(transform.position, Vector3.up), radius, reach, out RaycastHit ceiling))
+            reach = ceiling.distance;
+        Vector3 top = transform.position + offset + Vector3.up * reach;
+        if (Blocked(top, radius))
             return false;
-        return Vector3.Angle(below.normal, Vector3.up) <= motor.Tuning.maxSlopeAngle;
-    }
-
-    // ---- The jump path ----
-    // A smooth curve (cubic Bezier) from the frog to the marker. It leaves the frog's surface
-    // along that surface's normal (straight up off a floor, straight out from a wall) and arrives
-    // on the marker's surface along its normal, rising as high as it needs to clear anything in
-    // the way: the edge of a desk, the lip of a cabinet, the corner round a wall. The charge
-    // makes it rise higher.
-    void PlanPath()
-    {
-        FrogTuning tuning = motor.Tuning;
-        Vector3 start = transform.position;
-        Vector3 end = MarkerPoint + MarkerNormal * motor.Radius;
-        // The surface the frog is on: a wall it clings to (its belly faces it), or the floor.
-        Vector3 startNormal = motor.Mode.Value == FrogMode.Climbing ? transform.up : Vector3.up;
-        Vector3 leave = (startNormal + Vector3.up).normalized;
-        Vector3 arrive = (MarkerNormal + Vector3.up).normalized;
-
-        float distance = Vector3.Distance(start, end);
-        float charge = tuning.chargeCurve.Evaluate(LocalCharge);
-        float lift = Mathf.Max(0.25f, distance * 0.35f) * Mathf.Lerp(1f, 1.6f, charge);
-
-        // The lowest arc (for this charge) that clears everything; if none does, the lowest one,
-        // drawn red, so the player can see it would hit something.
-        bool found = false;
-        Vector3 c1 = start + leave * lift, c2 = end + arrive * lift;
-        for (int attempt = 0; attempt < 8; attempt++)
+        if (!SphereCast(new Ray(top, Vector3.down), radius, reach + MaxAimDistance, out RaycastHit ground))
         {
-            float a = lift * (1f + 0.5f * attempt);
-            Vector3 tryC1 = start + leave * a;
-            Vector3 tryC2 = end + arrive * a;
-            if (PathClear(start, tryC1, tryC2, end))
-            {
-                c1 = tryC1;
-                c2 = tryC2;
-                found = true;
-                break;
-            }
+            HasMarker = false;
+            target = offset; // nothing below: aim level, it will fall
+            return true;
         }
-
-        HasPath = true;
-        PathBlocked = !found;
-        PathStart = start;
-        PathControl1 = c1;
-        PathControl2 = c2;
-        PathEnd = end;
-        LocalJumpTarget = end - start;
-
-        float length = 0f, highest = start.y;
-        Vector3 previous = start;
-        for (int i = 1; i <= PathChecks; i++)
-        {
-            Vector3 point = FrogMotor.PathPoint(start, c1, c2, end, i / (float)PathChecks);
-            length += Vector3.Distance(previous, point);
-            highest = Mathf.Max(highest, point.y);
-            previous = point;
-        }
-        PathHeight = highest - start.y;
-        PathDuration = Mathf.Max(tuning.minPathJumpTime, length / Mathf.Max(0.5f, tuning.pathJumpSpeed));
-    }
-
-    // Whether a ball a little smaller than the frog can fly the whole path without touching
-    // anything (other than this frog).
-    bool PathClear(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
-    {
-        float radius = motor.Radius * 0.8f;
-        Vector3 previous = p0;
-        for (int i = 1; i <= PathChecks; i++)
-        {
-            Vector3 point = FrogMotor.PathPoint(p0, p1, p2, p3, i / (float)PathChecks);
-            Vector3 step = point - previous;
-            if (step.sqrMagnitude > 0.000001f
-                && SphereCast(new Ray(previous, step), radius, step.magnitude, out _))
-                return false;
-            previous = point;
-        }
+        HasMarker = true;
+        MarkerPoint = ground.point;
+        MarkerNormal = ground.normal;
+        target = top + Vector3.down * ground.distance + Vector3.up * (motor.Radius - radius) - transform.position;
         return true;
     }
 
 
     // Nearest hit along a ray, ignoring this frog's own collider.
-    // skipFrogs: other players' frogs don't count either.
-    bool Cast(Ray ray, float distance, out RaycastHit best, bool skipFrogs = false)
+    bool Cast(Ray ray, float distance, out RaycastHit best)
     {
         int count = Physics.RaycastNonAlloc(ray, aimHits, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
         bool found = false;
         best = default;
         for (int i = 0; i < count; i++)
         {
-            Rigidbody body = aimHits[i].rigidbody;
-            if (body == frogRigidbody || (skipFrogs && body != null && body.GetComponent<FrogMotor>() != null))
+            if (aimHits[i].rigidbody == frogRigidbody)
                 continue;
             if (!found || aimHits[i].distance < best.distance)
             {
@@ -533,14 +342,22 @@ public class FrogNetworkDriver : NetworkBehaviour
         return found;
     }
 
+    // Whether a ball `radius` wide at point would be inside something other than this frog.
+    bool Blocked(Vector3 point, float radius)
+    {
+        int count = Physics.OverlapSphereNonAlloc(point, radius, aimOverlaps, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < count; i++)
+            if (aimOverlaps[i].attachedRigidbody != frogRigidbody)
+                return true;
+        return false;
+    }
+
     void ReleaseJumpLocally()
     {
         LocalJumpHeld = false;
-        if (HasPath)
-            JumpPathReleased(PathStart, PathControl1, PathControl2, PathEnd, MarkerNormal, PathDuration);
-        else
-            JumpReleased(LocalJumpVelocity, Vector3.zero, transform.position + LocalJumpTarget);
-        HasPath = false;
+        // Aimed at a wall: tell the host which wall, and where the frog's centre comes to rest on it.
+        bool toWall = HasMarker && MarkerOnWall;
+        JumpReleased(LocalJumpVelocity, toWall ? MarkerNormal : Vector3.zero, transform.position + LocalJumpTarget);
     }
 
     // ---- Owner -> host commands. The host only queues them; FrogMotor and
@@ -557,10 +374,6 @@ public class FrogNetworkDriver : NetworkBehaviour
     void JumpReleased(Vector3 velocity, Vector3 wallNormal, Vector3 wallTarget) => motor.ReleaseJump(velocity, wallNormal, wallTarget);
 
     [ServerRpc]
-    void JumpPathReleased(Vector3 start, Vector3 control1, Vector3 control2, Vector3 end, Vector3 endNormal, float duration) =>
-        motor.ReleasePathJump(start, control1, control2, end, endNormal, duration);
-
-    [ServerRpc]
     void TonguePressed(Vector3 aimOrigin, Vector3 aimDirection) => tongue.PressTongue(aimOrigin, aimDirection);
     [ServerRpc]
     void ReelWheel(float metres) => tongue.ReelBy(metres);
@@ -570,8 +383,8 @@ public class FrogNetworkDriver : NetworkBehaviour
 
     [ServerRpc]
     void BreakFreePressed() => FrogTongue.ReleaseEverythingHolding(NetworkObject);
-
-    // Public: the death screen calls it on your own frog when its countdown ends.
+ 
+  // Public: the death screen calls it on your own frog when its countdown ends.
     [ServerRpc]
-    public void RequestRespawn() => stats.Revive();
+     public void RequestRespawn() => stats.Revive();
 }

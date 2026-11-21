@@ -35,20 +35,11 @@ public class LoadingScreen : MonoBehaviour
     float progress, shownProgress;
 
     // Start, not Awake: the NetworkManager creates its SceneManager in its own Awake.
-    // A scene's own NetworkManager that FishNet throws away (the one from the last game is
-    // kept instead) is never set up and has no SceneManager. This screen, on that copy, lives
-    // one more frame, so it does nothing: the surviving manager's loading screen does the work.
     void Start()
     {
         pads = padRow.GetComponentsInChildren<Image>(true);
         picture.SetActive(false);
-        NetworkManager own = GetComponentInParent<NetworkManager>();
-        if (own == null || !own.Initialized || own.SceneManager == null)
-        {
-            enabled = false;
-            return;
-        }
-        manager = own;
+        manager = GetComponentInParent<NetworkManager>();
         manager.SceneManager.OnLoadStart += OnLoadStart;
         manager.SceneManager.OnLoadPercentChange += OnLoadPercentChange;
         manager.SceneManager.OnLoadEnd += OnLoadEnd;

@@ -408,7 +408,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -8885499319160373189, guid: ee74daeff2831e7418ec858bc904c57b, type: 3}
+  m_Sprite: {fileID: 655440332502395156, guid: daf409a76a95c264798982284cf82972, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -806,7 +806,6 @@ GameObject:
   - component: {fileID: 323967729705858568}
   - component: {fileID: 5339860167304027828}
   - component: {fileID: -3889393936053969343}
-  - component: {fileID: 3532089452651914956}
   m_Layer: 0
   m_Name: Fish Network Manager
   m_TagString: Untagged
@@ -911,27 +910,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSessionUI
   showInGamePanel: 0
---- !u!114 &3532089452651914956
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7701118080045727181}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34e4a322dca349547989b14021da4e23, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Managing.Transporting.TransportManager
-  Transport: {fileID: 5339860167304027828}
-  _maximumClientPacketSize: 20480
-  _intermediateLayer: {fileID: 0}
-  _latencySimulator:
-    _enabled: 0
-    _simulateHost: 1
-    _latency: 0
-    _outOfOrder: 0
-    _packetLoss: 0
 --- !u!1 &8123567792253306334
 GameObject:
   m_ObjectHideFlags: 0

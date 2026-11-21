@@ -117,23 +117,22 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 7
+  <PrefabId>k__BackingField: 65535
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 5158521305730663667
   SceneId: 0
   SerializedTransformProperties:
-    Position: {x: 4.0391083, y: -0.44983864, z: -17.9603}
-    Rotation: {x: 0.5, y: 0.5, z: -0.5, w: 0.5}
-    Scale: {x: 1, y: 1, z: 1}
-    IsValid: 1
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 0}
+    Scale: {x: 0, y: 0, z: 0}
+    IsValid: 0
   <IsNested>k__BackingField: 0
   WasActiveDuringEdit: 0
   WasActiveDuringEdit_Set1: 1
   <ComponentIndex>k__BackingField: 0
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours:
-  - {fileID: 7609770399421792684}
+  NetworkBehaviours: []
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -144,7 +143,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584064764052649560
+  _initializedTimestamp: 0
 --- !u!114 &9129607639259059413
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,9 +170,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79b8cce9ed1b2434b9dac7f6bd9bf4b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WallButton
-  _componentIndexCache: 0
+  _componentIndexCache: 255
   _addedNetworkObject: {fileID: 136106332752719262}
-  _networkObjectCache: {fileID: 136106332752719262}
+  _networkObjectCache: {fileID: 0}
   door: {fileID: 0}
   hazards: {fileID: 0}
   unlocks: {fileID: 0}

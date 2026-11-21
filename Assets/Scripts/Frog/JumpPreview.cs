@@ -22,20 +22,6 @@ public class JumpPreview : MonoBehaviour
     [Tooltip("Marker colour on the ground, and on a wall the frog will cling to.")]
     [SerializeField] Color floorColor = new Color(0.03f, 1f, 0f);
     [SerializeField] Color wallColor = new Color(0.1f, 0.6f, 1f);
-    [Tooltip("Colour when the path to the marker would hit something on the way.")]
-    [SerializeField] Color blockedColor = new Color(1f, 0.2f, 0.15f);
-
-    const int PathPoints = 40; // points the arc is drawn with along a planned jump path
-
-    [Header("Arc look")]
-    [Tooltip("How thick the arc is (m) with the camera close by. It gets thicker as the camera pulls back, so big jumps stay easy to read.")]
-    [SerializeField, Min(0.005f)] float arcWidth = 0.05f;
-    [Tooltip("The arc is drawn at Arc Width up to this camera distance (m), and thicker beyond it.")]
-    [SerializeField, Min(0.5f)] float arcWidthDistance = 4f;
-    [Tooltip("How see-through the arc is (1 = solid). It takes the marker's colour.")]
-    [SerializeField, Range(0.1f, 1f)] float arcOpacity = 0.85f;
-    [Tooltip("How far (m) the marker floats above the surface, so the floor never covers it.")]
-    [SerializeField, Min(0.001f)] float markerLift = 0.03f;
 
     // Where the jump being aimed will touch down (valid while HasLanding).
     public bool HasLanding { get; private set; }
@@ -56,27 +42,7 @@ public class JumpPreview : MonoBehaviour
         motor = GetComponent<FrogMotor>();
         driver = GetComponent<FrogNetworkDriver>();
         markerRenderer = landingMarker != null ? landingMarker.GetComponent<Renderer>() : null;
-        // The marker draws after other see-through things (goo, water, smoke), so they can't hide it.
-        if (markerRenderer != null)
-            markerRenderer.material.renderQueue = 3100;
-        if (arc != null)
-        {
-            arc.widthCurve = new AnimationCurve(new Keyframe(0f, 0.6f), new Keyframe(0.15f, 1f), new Keyframe(1f, 1f));
-            arc.numCapVertices = 4; // rounded ends
-        }
         Show(false);
-    }
-
-    // The arc's thickness and colour: thicker when the camera is further away, and the colour
-    // of the marker (on the ground, or on a wall the frog will cling to).
-    void StyleArc(Color color)
-    {
-        Camera view = Camera.main;
-        float distance = view != null ? Vector3.Distance(view.transform.position, transform.position) : arcWidthDistance;
-        arc.widthMultiplier = arcWidth * Mathf.Max(1f, distance / arcWidthDistance);
-        color.a = arcOpacity;
-        arc.startColor = color;
-        arc.endColor = color;
     }
 
     void LateUpdate()
@@ -90,48 +56,33 @@ public class JumpPreview : MonoBehaviour
             return;
         }
 
+        // Step the flight the way the physics engine does (gravity first, then move, once per
+        // physics step), sweeping a ball the frog's size, until it touches something.
+        Vector3 velocity = driver.LocalJumpVelocity;
+        float dt = Time.fixedDeltaTime;
+        float radius = motor.Radius * 0.95f;
         points.Clear();
+        Vector3 position = transform.position;
+        points.Add(position);
         HasLanding = false;
         RaycastHit landing = default;
-        if (driver.HasPath)
+        for (float t = 0f; t < maxFlightTime && !HasLanding; t += dt)
         {
-            // A jump to the marker: the planned path, exactly as the frog will fly it.
-            for (int i = 0; i <= PathPoints; i++)
-                points.Add(FrogMotor.PathPoint(driver.PathStart, driver.PathControl1, driver.PathControl2, driver.PathEnd, i / (float)PathPoints));
-            HasLanding = true;
-            LandingPoint = driver.MarkerPoint;
-        }
-        else
-        {
-            // Step the flight the way the physics engine does (gravity first, then move, once per
-            // physics step), sweeping a ball the frog's size, until it touches something.
-            Vector3 velocity = driver.LocalJumpVelocity;
-            float dt = Time.fixedDeltaTime;
-            float radius = motor.Radius * 0.95f;
-            Vector3 position = transform.position;
+            velocity += Physics.gravity * dt;
+            Vector3 next = position + velocity * dt;
+            HasLanding = Sweep(position, next, radius, out landing);
+            position = HasLanding ? position + (next - position).normalized * landing.distance : next;
             points.Add(position);
-            for (float t = 0f; t < maxFlightTime && !HasLanding; t += dt)
-            {
-                velocity += Physics.gravity * dt;
-                Vector3 next = position + velocity * dt;
-                HasLanding = Sweep(position, next, radius, out landing);
-                position = HasLanding ? position + (next - position).normalized * landing.distance : next;
-                points.Add(position);
-            }
-            if (HasLanding)
-                LandingPoint = landing.point;
         }
+        if (HasLanding)
+            LandingPoint = landing.point;
 
-        // Red when the path would hit something; blue onto a wall; green onto a floor or top.
-        Color color = driver.HasPath && driver.PathBlocked ? blockedColor
-            : driver.HasMarker && driver.MarkerOnWall ? wallColor : floorColor;
         Show(true);
         if (arc != null)
         {
             arc.positionCount = points.Count;
             for (int i = 0; i < points.Count; i++)
                 arc.SetPosition(i, points[i]);
-            StyleArc(color);
         }
         // The marker: the spot you aim at with the crosshair (the arc shows whether this charge
         // reaches it), or without one, where the arc comes down. It glides between spots and
@@ -146,7 +97,7 @@ public class JumpPreview : MonoBehaviour
                 return;
             }
             Vector3 normal = placed ? driver.MarkerNormal : landing.normal;
-            Vector3 point = (placed ? driver.MarkerPoint : landing.point) + normal * markerLift;
+            Vector3 point = (placed ? driver.MarkerPoint : landing.point) + normal * 0.01f;
             Quaternion rotation = Quaternion.FromToRotation(Vector3.up, normal);
             if (!landingMarker.gameObject.activeSelf)
             {
@@ -161,7 +112,7 @@ public class JumpPreview : MonoBehaviour
                 markerRotation = Quaternion.Slerp(markerRotation, rotation, 1f - Mathf.Exp(-markerTurnSpeed * Time.deltaTime));
             }
             landingMarker.SetPositionAndRotation(markerPosition, markerRotation);
-            TintMarker(color);
+            TintMarker(placed && driver.MarkerOnWall ? wallColor : floorColor);
         }
     }
 
