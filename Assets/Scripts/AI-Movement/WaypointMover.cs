@@ -127,6 +127,8 @@ public class WaypointMover : MonoBehaviour
 
     public void ResumePatrol()
     {
+        if (waypoint == null || currentWaypoint == null) return;
+
         canMove = true;
         isWaiting = false;
         if (patrolRoutine != null) { StopCoroutine(patrolRoutine); }
