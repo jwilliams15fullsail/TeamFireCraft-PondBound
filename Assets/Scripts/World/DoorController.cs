@@ -9,7 +9,6 @@ using UnityEngine;
 // state, so no position has to be streamed.
 // Sliding: Open Offset. Swinging: Open Rotation turns it round its pivot (world axes, degrees),
 // so a hatch or gate on a hinge goes on an empty placed at the hinge, with the model under it.
-// Opening completes an objective whose Completed By is this door (a gate that needs two plates).
 [RequireComponent(typeof(NetworkObject))]
 public class DoorController : NetworkBehaviour
 {
@@ -59,10 +58,7 @@ public class DoorController : NetworkBehaviour
             holders.Add(holder);
         else
             holders.Remove(holder);
-        bool wasOpen = isOpen.Value;
         isOpen.Value = holders.Count >= switchesNeeded;
-        if (isOpen.Value && !wasOpen)
-            ObjectiveSequence.Report(this, namedOnly: true);
     }
 
     void FixedUpdate()

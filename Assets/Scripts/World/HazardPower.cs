@@ -6,7 +6,6 @@ using UnityEngine;
 // Switches off every hazard under this object (TimedLaser, TimedVent) while at least one switch
 // holds it off. The host decides: pressure plates and wall buttons call HoldOff there. Off or on
 // is a SyncVar, so every player sees the same hazards, including anyone who joins later.
-// Switching off completes an objective whose Completed By is this object (both gas valves turned).
 [RequireComponent(typeof(NetworkObject))]
 public class HazardPower : NetworkBehaviour
 {
@@ -28,9 +27,6 @@ public class HazardPower : NetworkBehaviour
             holders.Add(holder);
         else
             holders.Remove(holder);
-        bool wasOff = isOff.Value;
         isOff.Value = holders.Count >= Mathf.Max(1, switchesNeeded);
-        if (isOff.Value && !wasOff)
-            ObjectiveSequence.Report(this, namedOnly: true);
     }
 }

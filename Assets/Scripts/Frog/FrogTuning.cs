@@ -113,23 +113,9 @@ public class FrogTuning : ScriptableObject
     public float minJumpDistance = 0.5f;
     [Tooltip("Without mouse aiming: how far (m) a jump reaches with a full charge. With mouse aiming: how far from the frog the landing marker can go.")]
     public float maxJumpDistance = 2.5f;
-    [Tooltip("Jumping down from a height reaches further, like a real arc that keeps falling. This caps that bonus as a multiple of Max Jump Distance (1 = no bonus).")]
-    [Min(1f)] public float maxDropReach = 2f;
-    [Tooltip("With mouse aiming: how far (m) from the frog the landing marker can go, in any direction (up a desk, along a wall, down off a ledge). A hungry frog's reach shrinks with its jump height.")]
-    [Min(0.5f)] public float maxAimRange = 4f;
-    [Tooltip("With mouse aiming: how fast (m/s) a frog flies its path to the marker. Bigger = snappier jumps.")]
-    [Min(0.5f)] public float pathJumpSpeed = 5f;
-    [Tooltip("With mouse aiming: the shortest time (s) any jump takes, so little hops still read as hops.")]
-    [Min(0.1f)] public float minPathJumpTime = 0.35f;
-    [Tooltip("Air control: WASD / the stick steers the frog while it's in the air, on every jump (it flies the previewed path, nudged by your steering). Off: jumps fly exactly as previewed.")]
-    public bool airControl = true;
-    [Tooltip("With Air Control: how fast (m/s) steering pushes a jump to the marker off its path.")]
-    [Min(0f)] public float jumpSteerSpeed = 2.5f;
-    [Tooltip("With Air Control: the furthest (m) steering can move a jump to the marker away from its path.")]
-    [Min(0f)] public float jumpSteerMax = 1.5f;
     [Tooltip("On: while charging, the landing marker goes wherever the crosshair points (a floor, a box top, a slope, a wall), as far as a jump can reach. The jump always comes down on the marker, and clings to it on a wall; the charge only sets how high the arc goes. Off: jumps go the way the frog faces, as far as the charge allows.")]
     public bool aimJumpsWithMouse = true;
-
+   
     [Tooltip("A jump always peaks at least this high (m) above where it lands, so it clears the edge of a higher landing spot.")]
     public float jumpClearance = 0.25f;
     [Tooltip("Charged jumps fly exactly along the previewed arc: no steering in the air. Off: WASD can steer and slow a jump.")]
