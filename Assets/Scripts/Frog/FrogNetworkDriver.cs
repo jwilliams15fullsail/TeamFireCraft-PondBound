@@ -11,6 +11,10 @@ public class FrogNetworkDriver : NetworkBehaviour
     const float MaxPickDistance = 200f; // how far the aim cursor looks for a surface
     const int PathChecks = 24;          // sections a planned jump path is checked in for walls in the way
 
+    [Tooltip("While aiming, write on screen what the aim cursor is pointing at and why the marker can or can't go there. For tracking down spots the marker won't move onto.")]
+    [SerializeField] bool debugAim;
+    string lastPick = "";
+
     // The host's copy of this player's input, shared with everyone (animation reads it).
     readonly SyncVar<FrogInputState> input = new(new SyncTypeSettings(0.001f));
 
@@ -288,7 +292,7 @@ public class FrogNetworkDriver : NetworkBehaviour
     {
         HasMarker = CursorOnMarker = false;
         AimCursor = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
-        if (TryPick(lens.ScreenPointToRay(AimCursor), out RaycastHit hit) == Pick.Ok)
+        if (TryPick(CursorRay(lens, AimCursor), out RaycastHit hit) == Pick.Ok)
         {
             SetMarker(hit);
             return;
@@ -297,7 +301,7 @@ public class FrogNetworkDriver : NetworkBehaviour
         if (frogOnScreen.z <= 0f)
             return;
         Vector2 inFront = (Vector2)frogOnScreen + new Vector2(0f, Screen.height * 0.08f);
-        if (TryPick(lens.ScreenPointToRay(inFront), out hit) == Pick.Ok)
+        if (TryPick(CursorRay(lens, inFront), out hit) == Pick.Ok)
         {
             AimCursor = inFront;
             SetMarker(hit);
@@ -317,7 +321,7 @@ public class FrogNetworkDriver : NetworkBehaviour
             Vector2 next = AimCursor + delta * part;
             next.x = Mathf.Clamp(next.x, screen.xMin, screen.xMax - 1f);
             next.y = Mathf.Clamp(next.y, screen.yMin, screen.yMax - 1f);
-            switch (TryPick(lens.ScreenPointToRay(next), out RaycastHit hit))
+            switch (TryPick(CursorRay(lens, next), out RaycastHit hit))
             {
                 case Pick.Ok:
                     AimCursor = next;
@@ -344,6 +348,19 @@ public class FrogNetworkDriver : NetworkBehaviour
 
     enum Pick { Ok, Unusable, OutOfReach }
 
+    // The ray under the cursor, starting near the frog instead of at the lens. The camera sits a
+    // few metres behind the frog and gets pushed up against things (the back of a cabinet, a
+    // glass panel, a lamp, the outside of a wall it can't draw), and a ray from the lens would
+    // stop on those before ever reaching the desk or cabinet the player is pointing at. Anything
+    // nearer the camera than the frog's reach is skipped.
+    Ray CursorRay(Camera lens, Vector2 screenPoint)
+    {
+        Ray ray = lens.ScreenPointToRay(screenPoint);
+        float frogDepth = Vector3.Dot(transform.position - ray.origin, ray.direction);
+        float skip = Mathf.Max(0f, frogDepth - motor.Tuning.maxAimRange - motor.Radius);
+        return new Ray(ray.GetPoint(skip), ray.direction);
+    }
+
     // A surface the frog can land on or cling to, within reach. Ceilings don't count, and on
     // something to stand on the frog's centre must be over solid ground (not hanging off an
     // edge, where it would slide off).
@@ -351,15 +368,36 @@ public class FrogNetworkDriver : NetworkBehaviour
     Pick TryPick(Ray ray, out RaycastHit hit)
     {
         if (!Cast(ray, MaxPickDistance, out hit, skipFrogs: true))
-            return Pick.Unusable;
+            return Report(Pick.Unusable, "nothing under the cursor", hit);
         FrogTuning tuning = motor.Tuning;
         if (Vector3.Dot(hit.normal, Vector3.up) < tuning.minWallUpDot)
-            return Pick.Unusable; // a ceiling
+            return Report(Pick.Unusable, "a ceiling or underside", hit);
         Vector3 centre = hit.point + hit.normal * motor.Radius;
         if (!InReach(centre))
-            return Pick.OutOfReach;
+            return Report(Pick.OutOfReach, $"out of reach ({Vector3.Distance(centre, transform.position):0.0} m)", hit);
         bool floor = Vector3.Angle(hit.normal, Vector3.up) <= tuning.maxSlopeAngle;
-        return !floor || HasFooting(centre) ? Pick.Ok : Pick.Unusable;
+        if (floor && !HasFooting(centre))
+            return Report(Pick.Unusable, "the frog would hang off an edge there", hit);
+        return Report(Pick.Ok, floor ? "landing spot" : "wall to cling to", hit);
+    }
+
+    // Debug Aim: remembers what the cursor last found and why, for the on-screen readout.
+    Pick Report(Pick result, string why, RaycastHit hit)
+    {
+        if (debugAim)
+            lastPick = hit.collider != null
+                ? $"Cursor: {hit.collider.name}  {why}  (normal {hit.normal.x:0.0} {hit.normal.y:0.0} {hit.normal.z:0.0})"
+                : $"Cursor: {why}";
+        return result;
+    }
+
+    void OnGUI()
+    {
+        if (!debugAim || !IsOwner || !LocalJumpHeld)
+            return;
+        GUI.Label(new Rect(10f, Screen.height * 0.5f, 900f, 24f), lastPick);
+        GUI.Label(new Rect(10f, Screen.height * 0.5f + 20f, 900f, 24f),
+            HasMarker ? $"Marker on: {(MarkerOnWall ? "wall" : "floor / top")}   path {(PathBlocked ? "BLOCKED" : "clear")}" : "No marker");
     }
 
     bool InReach(Vector3 centre) =>

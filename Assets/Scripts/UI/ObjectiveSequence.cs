@@ -24,10 +24,14 @@ public class ObjectiveSequence : NetworkBehaviour
         [TextArea(1, 3)] public string text;
         [Tooltip("Where the marker points. Empty: no marker for this one, just the text.")]
         public Transform target;
+        [Tooltip("Optional: more places that need a marker for this same objective, like the second of two pressure plates. Each one gets its own marker.")]
+        public Transform[] moreTargets;
         [Tooltip("Runs alongside the main objectives: it appears once every main objective above it is done, and never holds them up.")]
         public bool optional;
         [Tooltip("The switch, plate, door (done when it opens) or hazard group (done when it switches off) that completes this one, or a parent of it. Empty: whatever switch or plate completes the current main objective.")]
         public GameObject completedBy;
+        [Tooltip("Optional: this objective's own icon in the objective list (a key, a valve...). Empty: the list's Main Icon or Optional Icon.")]
+        public Sprite icon;
     }
 
     const int MaxObjectives = 32;
