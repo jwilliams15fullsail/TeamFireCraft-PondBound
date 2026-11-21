@@ -8,7 +8,8 @@ using UnityEngine;
 // Every machine reads the timing from the shared network clock, so the smoke matches the
 // damage with no network messages. The host does the damage; the bars update for everyone
 // through FrogStats. Needs a trigger collider on the same GameObject; no NetworkObject.
-// A HazardPower on a parent object can switch it off.
+// A HazardPower on a parent object can switch it off: the smoke then stops pouring out and
+// what's already out thins away quickly, so it's clear the gas is off.
 public class TimedVent : MonoBehaviour
 {
     [Header("Timing (seconds)")]
@@ -22,11 +23,14 @@ public class TimedVent : MonoBehaviour
     [Header("Effect")]
     [SerializeField] float damagePerSecond = 25f;
     [SerializeField] ParticleSystem smoke;
+    [Tooltip("When a switch turns the vent off, the smoke already out plays this many times faster, so it clears in moments instead of drifting on.")]
+    [SerializeField, Min(1f)] float switchOffClearSpeed = 4f;
 
     readonly Dictionary<FrogStats, int> inside = new(); // frog -> its colliders inside
     readonly List<FrogStats> gone = new();
     bool smoking;
     HazardPower power; // optional: a parent that can switch this vent off
+    ParticleSystem[] smokeParts;
 
     static bool IsHost => InstanceFinder.IsServerStarted;
     bool SwitchedOff => power != null && power.IsOff;
@@ -51,7 +55,10 @@ public class TimedVent : MonoBehaviour
         power = GetComponentInParent<HazardPower>();
         // The smoke only plays when this script says so.
         if (smoke != null)
+        {
+            smokeParts = smoke.GetComponentsInChildren<ParticleSystem>(true);
             smoke.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
     }
 
     void Update()
@@ -61,9 +68,24 @@ public class TimedVent : MonoBehaviour
             return;
         smoking = shouldSmoke;
         if (smoking)
+        {
+            SetSmokeSpeed(1f);
             smoke.Play(true);
+        }
         else
+        {
             smoke.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            SetSmokeSpeed(SwitchedOff ? switchOffClearSpeed : 1f);
+        }
+    }
+
+    void SetSmokeSpeed(float speed)
+    {
+        foreach (ParticleSystem part in smokeParts)
+        {
+            ParticleSystem.MainModule main = part.main;
+            main.simulationSpeed = speed;
+        }
     }
 
     void OnTriggerEnter(Collider other)

@@ -7,6 +7,7 @@ using UnityEngine.Audio;
 // lasers): it follows every TimedLaser and TimedVent on this object and under it, so a group
 // makes one sound instead of one per beam. Follows the hazards' shared clock, so every player
 // hears the same thing, and goes quiet when a switch turns the hazards off.
+// Pitch and an optional Undertone loop make a sound heavier and more menacing (poison gas).
 public class HazardSound : MonoBehaviour
 {
     [Tooltip("Played when the hazard starts: the warning beam or the first puff of gas.")]
@@ -16,6 +17,15 @@ public class HazardSound : MonoBehaviour
     [Tooltip("Played when it switches off.")]
     [SerializeField] AudioClip stopSound;
     [SerializeField, Range(0f, 1f)] float volume = 0.7f;
+
+    [Header("Mood")]
+    [Tooltip("Below 1 plays every sound slower and deeper (0.7 turns a vent hiss into a heavy, menacing one). Above 1: higher and faster.")]
+    [SerializeField, Range(0.3f, 2f)] float pitch = 1f;
+    [Tooltip("Optional: a second loop played under the main one while it's dangerous, e.g. a low drone, a rumble or a rattling breath.")]
+    [SerializeField] AudioClip undertone;
+    [SerializeField, Range(0f, 1f)] float undertoneVolume = 0.5f;
+    [Tooltip("The undertone's own pitch (low = more sinister).")]
+    [SerializeField, Range(0.3f, 2f)] float undertonePitch = 0.6f;
 
     [Header("3D sound")]
     [Tooltip("Full volume within this distance (m).")]
@@ -27,19 +37,24 @@ public class HazardSound : MonoBehaviour
 
     TimedLaser[] lasers;
     TimedVent[] vents;
-    AudioSource loopSource, shotSource;
+    AudioSource loopSource, shotSource, undertoneSource;
     int state; // 0 off, 1 warning, 2 dangerous
 
     void Awake()
     {
         lasers = GetComponentsInChildren<TimedLaser>(true);
         vents = GetComponentsInChildren<TimedVent>(true);
-        loopSource = MakeSource(true);
-        shotSource = MakeSource(false);
+        loopSource = MakeSource(true, volume, pitch);
+        shotSource = MakeSource(false, volume, pitch);
         loopSource.clip = loop;
+        if (undertone != null)
+        {
+            undertoneSource = MakeSource(true, undertoneVolume, undertonePitch);
+            undertoneSource.clip = undertone;
+        }
     }
 
-    AudioSource MakeSource(bool looping)
+    AudioSource MakeSource(bool looping, float sourceVolume, float sourcePitch)
     {
         AudioSource source = gameObject.AddComponent<AudioSource>();
         source.playOnAwake = false;
@@ -48,7 +63,8 @@ public class HazardSound : MonoBehaviour
         source.rolloffMode = AudioRolloffMode.Linear;
         source.minDistance = minDistance;
         source.maxDistance = maxDistance;
-        source.volume = volume;
+        source.volume = sourceVolume;
+        source.pitch = sourcePitch;
         source.outputAudioMixerGroup = output;
         return source;
     }
@@ -61,17 +77,26 @@ public class HazardSound : MonoBehaviour
                 now = Mathf.Max(now, laser.BeamDangerous ? 2 : laser.BeamShowing ? 1 : 0);
         foreach (TimedVent vent in vents)
             if (vent != null)
-
                 now = Mathf.Max(now, vent.IsBlasting ? 2 : vent.IsSmoking ? 1 : 0);
         if (now == state)
             return;
 
         if (state == 0 && startSound != null)
             shotSource.PlayOneShot(startSound);
-        if (now == 2 && loop != null && !loopSource.isPlaying)
-            loopSource.Play();
-        if (now < 2 && loopSource.isPlaying)
-            loopSource.Stop();
+        if (now == 2)
+        {
+            if (loop != null && !loopSource.isPlaying)
+                loopSource.Play();
+            if (undertoneSource != null && !undertoneSource.isPlaying)
+                undertoneSource.Play();
+        }
+        else
+        {
+            if (loopSource.isPlaying)
+                loopSource.Stop();
+            if (undertoneSource != null && undertoneSource.isPlaying)
+                undertoneSource.Stop();
+        }
         if (now == 0 && stopSound != null)
             shotSource.PlayOneShot(stopSound);
         state = now;
