@@ -9,6 +9,7 @@ public class SpiderAnimationController : NetworkBehaviour
     [SerializeField] private string runClip = "run";
     [SerializeField] private string tauntClip = "taunt";
     [SerializeField] private string[] attackClips = { "attack1", "attack2" };
+    [SerializeField] private string stunClip = "death1";
 
     [Header("Playback Speeds")]
     [SerializeField] private float walkSpeed = 1.0f;
@@ -21,6 +22,7 @@ public class SpiderAnimationController : NetworkBehaviour
 
     private EnemyAI enemyAI;
     private WaypointMover waypointMover;
+    private EnemyStun enemyStun;
     private ProceduralLegIK legIK;
     private Coroutine resumeIKRoutine;
     private bool isIKPaused = false;
@@ -31,6 +33,7 @@ public class SpiderAnimationController : NetworkBehaviour
         animation = GetComponent<Animation>();
         enemyAI = GetComponent<EnemyAI>();
         waypointMover = GetComponent<WaypointMover>();
+        enemyStun = GetComponent<EnemyStun>();
         legIK = GetComponent<ProceduralLegIK>();
     }
 
@@ -43,6 +46,12 @@ public class SpiderAnimationController : NetworkBehaviour
             enemyAI.OnRun += HandleRun;
             enemyAI.OnTaunt += HandleTaunt;
             enemyAI.OnAttack += HandleAttack;
+        }
+
+        if (enemyStun != null)
+        {
+            enemyStun.OnStunStart += HandleStunStart;
+            enemyStun.OnStunEnd += HandleStunEnd;
         }
 
         if (waypointMover != null)
@@ -61,6 +70,12 @@ public class SpiderAnimationController : NetworkBehaviour
             enemyAI.OnRun -= HandleRun;
             enemyAI.OnTaunt -= HandleTaunt;
             enemyAI.OnAttack -= HandleAttack;
+        }
+
+        if (enemyStun != null)
+        {
+            enemyStun.OnStunStart -= HandleStunStart;
+            enemyStun.OnStunEnd -= HandleStunEnd;
         }
 
         if (waypointMover != null)
@@ -111,6 +126,18 @@ public class SpiderAnimationController : NetworkBehaviour
         spiderAudio.PlayBite();
     }
 
+    private void HandleStunStart()
+    {
+        RequestPlayClip(stunClip, 0.15f, 1.0f, forceReplay: true);
+    }
+
+    private void HandleStunEnd()
+    {
+        // Reset lastBroadcastedClip so the next Idle/Walk/Run clip is guaranteed to play
+        lastBroadcastedClip = "";
+        RequestPlayClip(idleClip, 0.25f, 1.0f, forceReplay: true);
+    }
+
     // --- NETWORK BROADCAST LOGIC ---
     private void RequestPlayClip(string clipName, float fadeTime, float speed, bool forceReplay)
     {
@@ -147,8 +174,29 @@ public class SpiderAnimationController : NetworkBehaviour
     private void PlayClipLocally(string clipName, float fadeTime, float speed)
     {
         if (animation == null) return;
-        PauseIKForAction(clipName);
-        ResumeIKIfPaused();
+
+        // If playing the stun (death) clip, pause IK indefinitely until a non-stun clip plays
+        if (clipName == stunClip)
+        {
+            if (resumeIKRoutine != null)
+            {
+                StopCoroutine(resumeIKRoutine);
+                resumeIKRoutine = null;
+            }
+            isIKPaused = true;
+            if (legIK != null) legIK.SetIKActive(false);
+
+            if (animation[clipName] != null)
+            {
+                // Hold the collapsed pose on the last frame for the entire stun duration
+                animation[clipName].wrapMode = WrapMode.ClampForever;
+            }
+        }
+        else if (isIKPaused && clipName != tauntClip && !IsAttackClip(clipName))
+        {
+            // Returning to idle/walk/run after stun ends: re-enable procedural leg IK
+            ResumeIKIfPaused();
+        }
 
         animation.CrossFade(clipName, fadeTime);
 
@@ -156,6 +204,15 @@ public class SpiderAnimationController : NetworkBehaviour
         {
             animation[clipName].speed = speed;
         }
+    }
+
+    private bool IsAttackClip(string clipName)
+    {
+        for (int i = 0; i < attackClips.Length; i++)
+        {
+            if (attackClips[i] == clipName) return true;
+        }
+        return false;
     }
 
     public bool IsPlayingAttack()

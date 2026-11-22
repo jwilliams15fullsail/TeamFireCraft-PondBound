@@ -501,7 +501,6 @@ GameObject:
   - component: {fileID: 1490099721687078629}
   - component: {fileID: -1191942892440876961}
   - component: {fileID: -5155841888614524783}
-  - component: {fileID: 5607508857603526025}
   - component: {fileID: 165210988004468114}
   - component: {fileID: 1779736828643968118}
   - component: {fileID: 4914528732009831408}
@@ -599,6 +598,7 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 4653001287088918300}
   _networkObjectCache: {fileID: 4653001287088918300}
+  debugAim: 0
 --- !u!114 &5780482537121213717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -618,7 +618,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  respawnHeight: -60
+  respawnHeight: -1000
 --- !u!114 &744265398517051220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -906,6 +906,11 @@ MonoBehaviour:
   markerTurnSpeed: 20
   floorColor: {r: 0.03, g: 1, b: 0, a: 1}
   wallColor: {r: 0.1, g: 0.6, b: 1, a: 1}
+  blockedColor: {r: 1, g: 0.2, b: 0.15, a: 1}
+  arcWidth: 0.05
+  arcWidthDistance: 4
+  arcOpacity: 0.85
+  markerLift: 0.03
 --- !u!82 &-1191942892440876961
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1021,25 +1026,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: abda90b0e307a5e47bfb0aec7e8163c2, type: 3}
   movementVolume: 0.6
   minimumSoundInterval: 0.15
---- !u!114 &5607508857603526025
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6960431495464794997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86caaefbc093eef4895f5a127bac2d0f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FrogTongueAudio
-  fireSounds:
-  - {fileID: 8300000, guid: 3d63a161809d60f4dafc8dc210786c90, type: 3}
-  attachSounds:
-  - {fileID: 8300000, guid: 2b719a77d5ec87a448a4557331761789, type: 3}
-  retractSounds:
-  - {fileID: 8300000, guid: 83457bcb6d7c8f4439cc88c914e8a7f7, type: 3}
-  tongueVolume: 0.6
+  pitchRange: {x: 0.95, y: 1.05}
+  surfaceProbe: 0.6
+  surfaceLayers:
+    serializedVersion: 2
+    m_Bits: 8127
 --- !u!114 &165210988004468114
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2071,46 +2062,6 @@ PrefabInstance:
     - target: {fileID: 1059305998781514672, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
       propertyPath: m_Name
       value: Aura Lightning
-      objectReference: {fileID: 0}
-    - target: {fileID: 1059305998781514672, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 1059305998781514672, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2267315231019451117, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: cullingMode
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 2267315231019451117, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: playOnAwake
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5347986494076176096, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 7924497530843425693, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: cullingMode
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7924497530843425693, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: playOnAwake
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8473838645451163043, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8473838645451163043, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8473838645451163043, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8473838645451163043, guid: 4ea83d5c1d2f952498eadb09bb305cfe, type: 3}
       propertyPath: m_LocalPosition.x

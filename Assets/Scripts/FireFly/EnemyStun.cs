@@ -1,18 +1,29 @@
 
+using System;
 using UnityEngine;
+using FishNet;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 
-public class EnemyStun : MonoBehaviour
+public class EnemyStun : NetworkBehaviour
 {
+    public event Action OnStunStart;
+    public event Action OnStunEnd;
+
     [Header("Stun Settings")]
     [SerializeField] private float defaultStunDuration = 2f;
+
+    // Synced across all clients so EnemyStunAura and animations work in multiplayer
+    private readonly SyncVar<bool> syncedIsStunned = new();
 
     private EnemyAI enemyAI;
     private WaypointMover waypointMover;
     private Rigidbody rb;
 
     private float stunTimer;
+    private bool wasWaypointMoverEnabled;
 
-    public bool IsStunned => stunTimer > 0f;
+    public bool IsStunned => syncedIsStunned.Value || stunTimer > 0f;
 
     private void Awake()
     {
@@ -23,40 +34,60 @@ public class EnemyStun : MonoBehaviour
 
     private void Update()
     {
-        if (!IsStunned)
-            return;
+        // Only the Host/Server (or Offline player) counts down the stun timer
+        bool isRemoteClient = (InstanceFinder.NetworkManager != null && InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted);
+        if (isRemoteClient) return;
+
+        if (stunTimer <= 0f) return;
 
         stunTimer -= Time.deltaTime;
 
         if (stunTimer <= 0f)
         {
             stunTimer = 0f;
+            syncedIsStunned.Value = false;
 
             if (enemyAI != null)
                 enemyAI.enabled = true;
 
-            if (waypointMover != null)
+            // Only re-enable WaypointMover if it was actually enabled before the stun!
+            if (waypointMover != null && wasWaypointMoverEnabled)
                 waypointMover.enabled = true;
+
+            OnStunEnd?.Invoke();
         }
     }
 
     public void ApplyStun(float duration)
     {
+        bool isRemoteClient = (InstanceFinder.NetworkManager != null && InstanceFinder.IsClientStarted && !InstanceFinder.IsServerStarted);
+        if (isRemoteClient) return;
+
+        bool alreadyStunned = IsStunned;
         stunTimer = Mathf.Max(duration, 0.01f);
+        syncedIsStunned.Value = true;
 
-        if (waypointMover != null)
+        if (!alreadyStunned)
         {
-            waypointMover.canMove = false;
-            waypointMover.enabled = false;
-        }
+            // Remember whether this enemy uses WaypointMover or Random Wander
+            wasWaypointMoverEnabled = (waypointMover != null && waypointMover.enabled);
 
-        if (enemyAI != null)
-            enemyAI.enabled = false;
+            if (waypointMover != null)
+            {
+                waypointMover.canMove = false;
+                waypointMover.enabled = false;
+            }
 
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            if (enemyAI != null)
+                enemyAI.enabled = false;
+
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+
+            OnStunStart?.Invoke();
         }
     }
 
