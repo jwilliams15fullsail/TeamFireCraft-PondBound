@@ -45,11 +45,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayMenu
   gameScene:
-    sceneAsset: {fileID: 102900000, guid: dbabab8b1669ce14590a4b50c7b41fb3, type: 3}
-    sceneName: TutorialLevel
+    sceneAsset: {fileID: 102900000, guid: 6ebc368685c31214ca57aad70b7f7bf6, type: 3}
+    sceneName: LabLevelShowcase
+  continueButton: {fileID: 0}
+  playerNameInput: {fileID: 0}
   multiplayerPanel: {fileID: 0}
   sessionNameInput: {fileID: 0}
   joinCodeInput: {fileID: 0}
   sessionList: {fileID: 0}
   sessionRowPrefab: {fileID: 4674477183212134207, guid: a35d79f3dd3513046acc32a3243b23e1, type: 3}
   statusText: {fileID: 0}
+  loadingState: {fileID: 0}
+  emptyState: {fileID: 0}
+  sessionCountText: {fileID: 0}
+  joinCodeField: {fileID: 0}

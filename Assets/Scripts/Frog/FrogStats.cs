@@ -138,11 +138,15 @@ public class FrogStats : NetworkBehaviour
         Publish();
     }
 
-    // The death screen's countdown ended: back at the spawn point with full bars.
+    // The death screen's countdown ended: the level restarts from the team's last checkpoint
+    // (PlayerSpawner's Reset Level On Death), or just this frog comes back at the spawn point
+    // with full bars.
     public void Revive()
     {
         if (!IsServerInitialized || !motor.IsDead)
             return;
+        if (LevelReset.TryRestart(PlayerSpawner.Current))
+            return; // everyone starts again at the checkpoint
         motor.Respawn();
         RefillAll();
     }

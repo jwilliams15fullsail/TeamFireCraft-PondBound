@@ -11,6 +11,9 @@ using UnityEngine;
 // A switch, plate or anything else reports with ObjectiveSequence.Report(this) on the host: that
 // completes the objective whose Completed By is that object (or one of its parents) or, if
 // no objective names it, the current main objective when that has no Completed By set.
+// Doors report when they open and hazard groups when they switch off, but only for an objective
+// that names them, so a gate that needs two plates, or gas that needs two valves, can be one
+// objective.
 // Up to 32 objectives.
 public class ObjectiveSequence : NetworkBehaviour
 {
@@ -21,10 +24,14 @@ public class ObjectiveSequence : NetworkBehaviour
         [TextArea(1, 3)] public string text;
         [Tooltip("Where the marker points. Empty: no marker for this one, just the text.")]
         public Transform target;
+        [Tooltip("Optional: more places that need a marker for this same objective, like the second of two pressure plates. Each one gets its own marker.")]
+        public Transform[] moreTargets;
         [Tooltip("Runs alongside the main objectives: it appears once every main objective above it is done, and never holds them up.")]
         public bool optional;
-        [Tooltip("The switch, plate or other object that completes this one (or a parent of it). Empty: whatever completes the current main objective.")]
+        [Tooltip("The switch, plate, door (done when it opens) or hazard group (done when it switches off) that completes this one, or a parent of it. Empty: whatever switch or plate completes the current main objective.")]
         public GameObject completedBy;
+        [Tooltip("Optional: this objective's own icon in the objective list (a key, a valve...). Empty: the list's Main Icon or Optional Icon.")]
+        public Sprite icon;
     }
 
     const int MaxObjectives = 32;
@@ -117,19 +124,20 @@ public class ObjectiveSequence : NetworkBehaviour
 
     // Host only: a switch, plate or anything else was used. Every objective sequence in its scene
     // checks whether that completes an objective (see Complete), so nothing needs linking up.
-    public static void Report(Component source)
+    // namedOnly: only an objective whose Completed By is this object counts (doors, hazard groups).
+    public static void Report(Component source, bool namedOnly = false)
     {
         foreach (ObjectiveSequence sequence in running)
         {
             if (sequence.gameObject.scene == source.gameObject.scene)
-                sequence.Complete(source);
+                sequence.Complete(source, namedOnly);
         }
     }
 
     // An objective done early (say the capsules opened before they're asked for) counts, and
     // simply never shows up.
     [Server]
-    public void Complete(Component source)
+    public void Complete(Component source, bool namedOnly = false)
     {
         GameObject who = source != null ? source.gameObject : null;
         bool named = false;
@@ -144,8 +152,8 @@ public class ObjectiveSequence : NetworkBehaviour
                 return;
             }
         }
-        if (named)
-            return; // its objective is done already (a second press of the same switch)
+        if (named || namedOnly)
+            return; // its objective is done already (a second press of the same switch), or it only counts when named
 
         int current = Current;
         if (current >= 0 && steps[current].completedBy == null)

@@ -54,6 +54,8 @@ public class FrogCamera : MonoBehaviour
     [SerializeField] float aimFocusSmoothTime = 0.15f;
     [Tooltip("While you place the landing marker, the camera turns toward it only as far as keeps the frog on screen: 1 = the frog may reach the edge, 0.5 = it stays in the middle half.")]
     [SerializeField, Range(0.1f, 1f)] float keepFrogOnScreen = 0.7f;
+    [Tooltip("While placing the landing marker: how fast it slides across the screen (pixels per degree of mouse / stick look). Bigger = faster.")]
+    [SerializeField, Min(0.1f)] float aimCursorSpeed = 6f;
 
 
     [Header("Third Person Follow (only if the Frog Follow Camera uses it)")]
@@ -71,7 +73,7 @@ public class FrogCamera : MonoBehaviour
     [Tooltip("Seconds the camera takes to swing back behind the frog when you let go. 0 = it stays where you looked.")]
     [SerializeField, Min(0f)] float freeLookReturnTime = 0.3f;
     [SerializeField] float aimMaxSlide = 1.5f;
-   
+
 
     public float Yaw => transform.eulerAngles.y;
 
@@ -84,34 +86,29 @@ public class FrogCamera : MonoBehaviour
     public bool AimingJump { get; set; }
 
     // Set by our frog while it aims a jump with the landing marker: the camera goes overhead
-    // and follows the marker, and mouse / stick look steers the aim (JumpAimRay) instead of the
-    // camera. The aim starts where the crosshair points.
+    // and follows the marker, and mouse / stick look slides the marker across the screen
+    // (TakeJumpAimDelta) instead of turning the camera. Free Look still swings the camera.
     public bool AimingMarker
     {
         get => aimingMarker;
         set
         {
             if (value && !aimingMarker)
-            {
-                Vector3 forward = transform.forward;
-                jumpAimYaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
-                jumpAimPitch = -Mathf.Asin(Mathf.Clamp(forward.y, -1f, 1f)) * Mathf.Rad2Deg;
-            }
+                jumpAimDelta = Vector2.zero;
             aimingMarker = value;
         }
     }
 
-    // Aiming a jump: the ray the landing marker sits on. It starts at the frog's head (where the
-    // crosshair line passes over the frog) and points where the mouse steered it, so the camera
-    // can float overhead to follow the marker without moving the aim.
-    public Ray JumpAimRay
+    // The camera's lens, for the landing marker to find the surface under its spot on screen.
+    public Camera Lens => lens;
+
+    // How far (pixels, screen right and up) the mouse has moved the landing marker since the
+    // last call. FrogNetworkDriver calls it once per frame while aiming.
+    public Vector2 TakeJumpAimDelta()
     {
-        get
-        {
-            float head = thirdPerson != null ? shoulderOffset.y : composerOffset.y;
-            Vector3 from = target != null ? target.position + Vector3.up * head : transform.position;
-            return new Ray(from, Quaternion.Euler(jumpAimPitch, jumpAimYaw, 0f) * Vector3.forward);
-        }
+        Vector2 delta = jumpAimDelta;
+        jumpAimDelta = Vector2.zero;
+        return delta;
     }
 
     // The crosshair ray. It starts level with the frog rather than at the lens, so
@@ -152,7 +149,7 @@ public class FrogCamera : MonoBehaviour
     Vector3 shoulderOffset;      // Third Person Follow's Shoulder Offset, as set in the Inspector
     float aimRoom = 1f, aimRoomVelocity; // how much room the camera has behind its pivot (1 = all of it), smoothed
     bool aimingMarker;
-    float jumpAimYaw, jumpAimPitch; // where the jump is aimed while AimingMarker (degrees, pitch + = down)
+    Vector2 jumpAimDelta;        // mouse movement for the landing marker not yet taken (pixels)
     float zoomBlend, markerBlend; // 0 = normal, 1 = fully into aiming
     Vector3 markerFocus, markerFocusVelocity; // where the camera looks while (and just after) aiming
     Vector3 lastTargetPosition;
@@ -269,7 +266,7 @@ public class FrogCamera : MonoBehaviour
         if (orbit == null && thirdPerson == null)
             return;
         float dt = Time.deltaTime;
-        freeLookHeld = freeLookEnabled && thirdPerson != null && !AimingMarker && freeLookAction != null
+        freeLookHeld = freeLookEnabled && thirdPerson != null && freeLookAction != null
     && freeLookAction.IsPressed() && Cursor.lockState == CursorLockMode.Locked && Application.isFocused;
 
         if (Cursor.lockState == CursorLockMode.Locked && Application.isFocused)
@@ -288,12 +285,9 @@ public class FrogCamera : MonoBehaviour
             }
             else if (AimingMarker)
             {
-                // Aiming a jump: the mouse steers the aim (where the landing marker goes), not the
-                // camera. Third Person Follow turns with it, so the marker stays ahead of you.
-                jumpAimYaw = Mathf.Repeat(jumpAimYaw + look.x, 360f);
-                jumpAimPitch = Mathf.Clamp(jumpAimPitch + (invertY ? look.y : -look.y), -80f, 89f);
-                if (thirdPerson != null)
-                    lookYaw = jumpAimYaw;
+                // Aiming a jump: the mouse slides the landing marker across the screen, not the
+                // camera (hold Free Look to swing the camera round instead).
+                jumpAimDelta += new Vector2(look.x, invertY ? -look.y : look.y) * aimCursorSpeed;
             }
             else if (thirdPerson != null)
             {
@@ -533,8 +527,20 @@ public class FrogCamera : MonoBehaviour
 
     void OnGUI()
     {
-        if (target != null && Cursor.lockState == CursorLockMode.Locked && !AimingMarker) // the landing marker is the cursor while aiming
+        if (target == null || Cursor.lockState != CursorLockMode.Locked)
+            return;
+        if (!AimingMarker)
+        {
             GUI.Label(new Rect(Screen.width * 0.5f - 4f, Screen.height * 0.5f - 10f, 20f, 20f), "+");
+            return;
+        }
+        // Aiming: the landing marker is the cursor. While the cursor crosses something the frog
+        // can't land on (a gap between two desks), show where it is until it reaches a surface.
+        if (frogDriver != null && !frogDriver.CursorOnMarker)
+        {
+            Vector2 at = frogDriver.AimCursor;
+            GUI.Label(new Rect(at.x - 4f, Screen.height - at.y - 10f, 20f, 20f), "+");
+        }
     }
 
     static void LockCursor(bool locked)

@@ -17,11 +17,15 @@ public class FishNetSessionHandler : INetworkHandler
         if (configuration.Type != NetworkType.Relay)
             throw new SessionException($"Only Relay games are set up for FishNet, not {configuration.Type}.", SessionError.NetworkSetupFailed, null);
 
-        NetworkManager manager = InstanceFinder.NetworkManager;
+        NetworkManager manager = InstanceFinder.NetworkManager 
+            ?? Object.FindAnyObjectByType<NetworkManager>(FindObjectsInactive.Include);
         UnityTransport transport = GameSession.TransportOf(manager);
         if (transport == null)
             throw new SessionException("No FishNet NetworkManager in this scene.", SessionError.NetworkManagerNotInitialized, null);
 
+        // Web builds reach Relay over secure WebSockets (wss), desktop builds over DTLS. Match
+        // the transport to whichever this Relay connection uses, so one transport works for both.
+        transport.UseWebSockets = configuration.RelayServerData.IsWebSocket != 0;
         transport.SetRelayServerData(configuration.RelayServerData);
         if (configuration.Role == NetworkRole.Client)
         {
