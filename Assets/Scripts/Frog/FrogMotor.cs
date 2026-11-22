@@ -302,9 +302,9 @@ public class FrogMotor : NetworkBehaviour
     {
         jumpHeld = false;
         jumpReleaseQueued = true;
-        // Only paths a frog could really aim: ending within reach, taking a sensible time.
-        float slack = tuning.maxAimRange + 1f;
-        releasePath = (end - rb.position).sqrMagnitude <= slack * slack && endNormal.sqrMagnitude > 0.5f;
+        // Only paths a frog could really aim: ending within reach (with 1 m to spare, and drops
+        // down to the floor allowed, see FrogTuning.InAimReach), taking a sensible time.
+        releasePath = tuning.InAimReach(end - rb.position, 1f, 1f) && endNormal.sqrMagnitude > 0.5f;
         releasePathStart = start;
         releasePath1 = control1;
         releasePath2 = control2;

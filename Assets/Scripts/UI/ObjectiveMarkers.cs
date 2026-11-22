@@ -256,9 +256,11 @@ public class ObjectiveMarkers : MonoBehaviour
         pool.used++;
         marker.gameObject.SetActive(true);
 
-        float minX = marker.GetPixelAdjustedRect().width / 2f;
+        // The rect is in canvas units; lossyScale turns it into screen pixels at this resolution.
+        Vector3 toPixels = marker.rectTransform.lossyScale;
+        float minX = marker.GetPixelAdjustedRect().width * toPixels.x / 2f;
         float maxX = Screen.width - minX;
-        float minY = marker.GetPixelAdjustedRect().height / 2f;
+        float minY = marker.GetPixelAdjustedRect().height * toPixels.y / 2f;
         float maxY = Screen.height - minY;
 
         Vector3 targetPosition = target.position + offset;

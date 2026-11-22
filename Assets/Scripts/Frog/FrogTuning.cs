@@ -115,8 +115,10 @@ public class FrogTuning : ScriptableObject
     public float maxJumpDistance = 2.5f;
     [Tooltip("Jumping down from a height reaches further, like a real arc that keeps falling. This caps that bonus as a multiple of Max Jump Distance (1 = no bonus).")]
     [Min(1f)] public float maxDropReach = 2f;
-    [Tooltip("With mouse aiming: how far (m) from the frog the landing marker can go, in any direction (up a desk, along a wall, down off a ledge). A hungry frog's reach shrinks with its jump height.")]
+    [Tooltip("With mouse aiming: how far (m) from the frog the landing marker can go, up a desk or along a wall. Below the frog only the distance across counts, so it can always drop from a high surface to the floor (see Max Drop Height). A hungry frog's reach shrinks with its jump height.")]
     [Min(0.5f)] public float maxAimRange = 4f;
+    [Tooltip("With mouse aiming: how far (m) below the frog the landing marker can go, dropping from a high surface to the floor.")]
+    [Min(0f)] public float maxDropHeight = 12f;
     [Tooltip("With mouse aiming: how fast (m/s) a frog flies its path to the marker. Bigger = snappier jumps.")]
     [Min(0.5f)] public float pathJumpSpeed = 5f;
     [Tooltip("With mouse aiming: the shortest time (s) any jump takes, so little hops still read as hops.")]
@@ -210,4 +212,19 @@ public class FrogTuning : ScriptableObject
     [Range(0.1f, 1f)] public float hungryJumpHeight = 0.5f;
     [Tooltip("Jumps start getting lower below this much hunger (0.25 = a quarter full). 0 = only once it's empty.")]
     [Range(0f, 1f)] public float tiredBelowHunger = 0.25f;
+
+    // Whether a landing spot this far from the frog (offset) can be aimed at. Level or above:
+    // within Max Aim Range (times scale, plus slack) in a straight line. Below: within that range
+    // across, and no more than Max Drop Height down, so a frog on a high shelf can always aim
+    // down at the floor however far below it is.
+    public bool InAimReach(Vector3 offset, float scale, float slack = 0f)
+    {
+        float range = maxAimRange * scale + slack;
+        if (offset.y >= 0f)
+            return offset.sqrMagnitude <= range * range;
+        if (-offset.y > maxDropHeight + slack)
+            return false;
+        offset.y = 0f;
+        return offset.sqrMagnitude <= range * range;
+    }
 }

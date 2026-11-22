@@ -400,8 +400,8 @@ public class FrogNetworkDriver : NetworkBehaviour
             HasMarker ? $"Marker on: {(MarkerOnWall ? "wall" : "floor / top")}   path {(PathBlocked ? "BLOCKED" : "clear")}" : "No marker");
     }
 
-    bool InReach(Vector3 centre) =>
-        (centre - transform.position).sqrMagnitude <= Square(motor.Tuning.maxAimRange * aimHeightScale);
+    // Within reach: Max Aim Range up or across, and any drop down to Max Drop Height (FrogTuning.InAimReach).
+    bool InReach(Vector3 centre) => motor.Tuning.InAimReach(centre - transform.position, aimHeightScale);
 
     static float Square(float x) => x * x;
 
