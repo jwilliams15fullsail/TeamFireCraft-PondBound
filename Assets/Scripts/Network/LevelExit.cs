@@ -9,7 +9,7 @@ using UnityEngine;
 // countdown starts. Then the host loads the next level for everyone or, with no next level
 // picked, every player gets the victory screen. Someone stepping out (or a new player joining)
 // cancels the countdown. Only the host decides; every player sees the same "frogs here" count
-// and countdown on the label.
+// and countdown on the label and the HUD.
 // Needs a NetworkObject and a trigger collider on the same GameObject.
 [RequireComponent(typeof(NetworkObject))]
 public class LevelExit : NetworkBehaviour
@@ -20,6 +20,8 @@ public class LevelExit : NetworkBehaviour
     [Tooltip("Optional: a TextMeshPro (3D) text above the exit.")]
     [SerializeField] TMP_Text label;
     [SerializeField] bool labelFacesCamera = true;
+    [Tooltip("Write each step (a frog in or out, the countdown, the win) to the Console, to find out why the exit isn't working.")]
+    [SerializeField] bool logSteps = true;
 
     readonly SyncVar<int> playersInside = new();
     readonly SyncVar<int> playersNeeded = new();
@@ -34,6 +36,7 @@ public class LevelExit : NetworkBehaviour
     readonly Dictionary<NetworkObject, int> touching = new(); // host only: frog -> its colliders inside
     float timer = -1f;
     bool loading;
+    bool shownWin;
 
     void OnTriggerEnter(Collider other)
     {
@@ -44,6 +47,8 @@ public class LevelExit : NetworkBehaviour
             return;
         touching.TryGetValue(frog, out int count);
         touching[frog] = count + 1;
+        if (count == 0 && logSteps)
+            Debug.Log($"LevelExit '{name}': frog '{frog.name}' is in.", this);
     }
 
     void OnTriggerExit(Collider other)
@@ -54,18 +59,25 @@ public class LevelExit : NetworkBehaviour
         if (frog == null || !touching.TryGetValue(frog, out int count))
             return;
         if (count <= 1)
+        {
             touching.Remove(frog);
+            if (logSteps)
+                Debug.Log($"LevelExit '{name}': frog '{frog.name}' left.", this);
+        }
         else
+        {
             touching[frog] = count - 1;
+        }
     }
 
     // The player frog a collider belongs to, or null for anything else (cubes, flies...).
-    // Player frogs are the only objects with an owner.
     static NetworkObject PlayerFrog(Collider other)
     {
         Rigidbody body = other.attachedRigidbody;
-        NetworkObject netObject = body != null ? body.GetComponent<NetworkObject>() : null;
-        return netObject != null && netObject.Owner.IsValid ? netObject : null;
+        if (body == null)
+            return null;
+        FrogMotor motor = body.GetComponentInParent<FrogMotor>();
+        return motor != null ? motor.NetworkObject : null;
     }
 
     void Update()
@@ -73,9 +85,12 @@ public class LevelExit : NetworkBehaviour
         if (IsServerInitialized && !loading)
             CheckPlayers();
         ShowLabel();
-        // Every machine shows its own victory screen. WinGame ignores repeat calls.
-         if (won.Value && GameManager.instance != null)
-          GameManager.instance.WinGame();
+        // Every machine shows its own victory screen, once.
+        if (won.Value && !shownWin)
+        {
+            shownWin = true;
+            ShowVictory();
+        }
     }
 
     void CheckPlayers()
@@ -89,9 +104,13 @@ public class LevelExit : NetworkBehaviour
             if (frog != null && touching.ContainsKey(frog))
                 inside++;
         }
+        if (inside != playersInside.Value && logSteps)
+            Debug.Log($"LevelExit '{name}': {inside} / {needed} frog(s) at the exit ({touching.Count} frog(s) touching it).", this);
 
         if (needed > 0 && inside == needed)
         {
+            if (timer < 0f && logSteps)
+                Debug.Log($"LevelExit '{name}': all {needed} frog(s) are here, leaving in {countdown:0.#} s.", this);
             timer = timer < 0f ? countdown : timer - Time.deltaTime;
             if (timer <= 0f)
                 FinishLevel();
@@ -107,16 +126,40 @@ public class LevelExit : NetworkBehaviour
         secondsLeft.Value = timer < 0f ? -1f : Mathf.Ceil(timer);
     }
 
-     void FinishLevel()
+    void FinishLevel()
     {
         loading = true; // once only
         if (nextLevel == null || !nextLevel.IsSet)
+        {
+            if (logSteps)
+                Debug.Log($"LevelExit '{name}': no Next Level set, so the team has won.", this);
             won.Value = true; // the last level: nowhere to go, so every player gets the victory screen
+        }
         else
+        {
+            if (logSteps)
+                Debug.Log($"LevelExit '{name}': loading the next level, '{nextLevel.SceneName}'.", this);
             GameSession.LoadLevel(nextLevel.SceneName);
+        }
     }
 
-void ShowLabel()
+    // Through the GameManager when there is one (it came from the main menu), otherwise straight
+    // to this level's victory screen.
+    void ShowVictory()
+    {
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.WinGame();
+            return;
+        }
+        Debug.LogWarning("LevelExit: there's no GameManager (it lives in MainMenuScene, so start Play mode from the main menu). Showing the victory screen directly.", this);
+        if (VictoryUI.Current != null)
+            VictoryUI.Current.Show();
+        else
+            Debug.LogWarning("LevelExit: this level has no VictoryUI either, so there's no victory screen to show.", this);
+    }
+
+    void ShowLabel()
     {
         if (label == null)
             return;

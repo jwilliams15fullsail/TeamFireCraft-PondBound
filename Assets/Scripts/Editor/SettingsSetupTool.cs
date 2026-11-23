@@ -9,11 +9,15 @@ using UnityEngine.UI;
 // Tools > Settings Menu > 3. Connect All Settings. One click, safe to run again:
 // - points each menu's volume script at the sliders in Settings (NEW);
 // - switches off the old duplicate settingsController components;
-// - gives the dropdown lists a copy of the font material that masks can clip (the game font's
-//   own shader ignores masks, so long lists spilled out of their box);
+// - gives the game font a shader that masks can clip (its old shader ignored masks, so lists
+//   spilled out of their boxes and logged "doesn't have _Stencil property");
 // - allows window resizing and sets a sensible first window size.
 public static class SettingsSetupTool
 {
+    const string FontPath = "Assets/TextMesh Pro/Fonts/atop-font/Atop-R99O3 SDF.asset";
+    const string DropdownMaterialPath = "Assets/TextMesh Pro/Fonts/atop-font/Atop-R99O3 SDF Dropdown.mat";
+    // Draws exactly like the old GUI/Text Shader (colour x the atlas's alpha), but supports masks.
+    const string MaskableShader = "TextMeshPro/Mobile/Bitmap";
     const string MenuPath = "Assets/Prefabs/UI/Settings (NEW).prefab";
     const string PausePath = "Assets/Prefabs/UI/Pause Menu UI.prefab";
     const string MainMenuPath = "Assets/Scenes/MainMenuScene.unity";
@@ -40,17 +44,7 @@ public static class SettingsSetupTool
     {
         var report = new List<string>();
 
-        // The shared menu first, so the pause menu and main menu pick the change up.
-        GameObject settings = PrefabUtility.LoadPrefabContents(MenuPath);
-        try
-        {
-            if (FixDropdownClipping(settings, report))
-                PrefabUtility.SaveAsPrefabAsset(settings, MenuPath);
-        }
-        finally
-        {
-            PrefabUtility.UnloadPrefabContents(settings);
-        }
+        FixFontMasking(report);
 
         GameObject pause = PrefabUtility.LoadPrefabContents(PausePath);
         try
@@ -127,35 +121,33 @@ public static class SettingsSetupTool
         return changed;
     }
 
-    static bool FixDropdownClipping(GameObject root, List<string> report)
+    static void FixFontMasking(List<string> report)
     {
-        Shader maskable = Shader.Find("UI/Default");
-        int changed = 0;
-        foreach (var dropdown in root.GetComponentsInChildren<TMP_Dropdown>(true))
+        var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
+        Shader maskable = Shader.Find(MaskableShader);
+        if (font == null || font.material == null || maskable == null)
         {
-            TMP_Text text = dropdown.itemText;
-            if (text == null || text.font == null)
-                continue;
-            Material current = text.fontSharedMaterial;
-            if (current == null || current.shader == null || current.shader.name != "GUI/Text Shader")
-                continue; // already fine
-
-            // Saved next to the font. Same look, but this shader supports masks.
-            string fontPath = AssetDatabase.GetAssetPath(text.font);
-            string copyPath = fontPath.Substring(0, fontPath.LastIndexOf('.')) + " Dropdown.mat";
-            var copy = AssetDatabase.LoadAssetAtPath<Material>(copyPath);
-            if (copy == null)
-            {
-                copy = new Material(current) { shader = maskable };
-                AssetDatabase.CreateAsset(copy, copyPath);
-            }
-            text.fontSharedMaterial = copy;
-            EditorUtility.SetDirty(text);
-            changed++;
+            report.Add("Font: couldn't find the Atop font or the TextMeshPro bitmap shader.");
+            return;
         }
 
-        report.Add(changed > 0 ? $"Dropdowns: fixed clipping on {changed} lists." : "Dropdowns: already clip correctly.");
-        return changed > 0;
+        // Every text using the font shares this material. The dropdown lists have their own copy,
+        // made by the first version of this tool with a shader that turned their text black.
+        var materials = new List<Material> { font.material };
+        var dropdownCopy = AssetDatabase.LoadAssetAtPath<Material>(DropdownMaterialPath);
+        if (dropdownCopy != null)
+            materials.Add(dropdownCopy);
+
+        int changed = 0;
+        foreach (Material material in materials)
+        {
+            if (material.shader == maskable)
+                continue;
+            material.shader = maskable;
+            EditorUtility.SetDirty(material);
+            changed++;
+        }
+        report.Add(changed > 0 ? $"Font: masks now work ({changed} materials fixed)." : "Font: masks already work.");
     }
 
     static void SetPlayerSettings(List<string> report)

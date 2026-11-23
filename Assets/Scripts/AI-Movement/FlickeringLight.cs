@@ -45,6 +45,8 @@ public class FlickeringLight : MonoBehaviour
 
     float[] baseIntensities;
     Color[] baseEmissions;
+    bool[] canGlow; // checked once: reading sharedMaterials allocates every time
+    float appliedLevel = -1f;
     MaterialPropertyBlock block;
     float baseHumVolume;
     float nextBurst, burstEnd, blackoutEnd, nextJump, flickerLevel;
@@ -59,10 +61,12 @@ public class FlickeringLight : MonoBehaviour
 
         emissiveRenderers ??= new Renderer[0];
         baseEmissions = new Color[emissiveRenderers.Length];
+        canGlow = new bool[emissiveRenderers.Length];
         for (int i = 0; i < emissiveRenderers.Length; i++)
         {
             Renderer r = emissiveRenderers[i];
             Material m = r != null && materialIndex < r.sharedMaterials.Length ? r.sharedMaterials[materialIndex] : null;
+            canGlow[i] = r != null && materialIndex < r.sharedMaterials.Length;
             baseEmissions[i] = m != null && m.HasProperty(EmissionColor) ? m.GetColor(EmissionColor) : Color.black;
         }
         block = new MaterialPropertyBlock();
@@ -131,6 +135,9 @@ public class FlickeringLight : MonoBehaviour
 
     void Apply(float level)
     {
+        if (level == appliedLevel)
+            return;
+        appliedLevel = level;
         if (lights != null && baseIntensities != null)
             for (int i = 0; i < lights.Length; i++)
                 if (lights[i] != null)
@@ -140,7 +147,7 @@ public class FlickeringLight : MonoBehaviour
             for (int i = 0; i < emissiveRenderers.Length; i++)
             {
                 Renderer r = emissiveRenderers[i];
-                if (r == null || materialIndex >= r.sharedMaterials.Length)
+                if (r == null || !canGlow[i])
                     continue;
                 r.GetPropertyBlock(block, materialIndex);
                 block.SetColor(EmissionColor, baseEmissions[i] * level);

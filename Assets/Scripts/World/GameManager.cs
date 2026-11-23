@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// Lives in MainMenuScene and stays loaded for the whole game. Shows the level's victory screen
+// when the level is won (LevelExit), once per level.
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
@@ -34,7 +36,6 @@ public class GameManager : MonoBehaviour
             victoryPanel.SetActive(gameWon);
     }
 
-
     public void ResetWinState()
     {
         // Allow the win condition to trigger again in a new game.
@@ -47,7 +48,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("Win state reset for a new game.");
     }
 
-
     public void WinGame()
     {
         // Only allow the game to be completed once.
@@ -58,25 +58,20 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("Level Complete");
 
+        // The panel from an earlier level (or a level that was restarted) is gone: use this level's.
+        if (victoryPanel == null && VictoryUI.Current != null)
+            victoryPanel = VictoryUI.Current.Panel;
+
         //Trigger level complete UI
         if (victoryPanel != null)
         {
             victoryPanel.SetActive(true);
+            if (!victoryPanel.activeInHierarchy)
+                Debug.LogWarning($"Victory Panel '{victoryPanel.name}' is on, but something above it in the Hierarchy is switched off, so it can't be seen.", victoryPanel);
         }
         else
         {
             Debug.LogWarning("Victory Panel has not been registered!");
         }
-    }
-
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame.
-    void Update()
-    {
-
     }
 }

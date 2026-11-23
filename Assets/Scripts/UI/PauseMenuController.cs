@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PauseMenuController : MonoBehaviour
 {
@@ -10,6 +11,10 @@ public class PauseMenuController : MonoBehaviour
 
     [Header("HUD")]
     [SerializeField] private GameObject hud;
+
+    [Header("Restart (optional)")]
+    [Tooltip("The Restart from Checkpoint button. Only the host can restart the level, so other players see it greyed out.")]
+    [SerializeField] private Button restartButton;
 
     private bool isPaused;
 
@@ -69,6 +74,17 @@ public class PauseMenuController : MonoBehaviour
         GameSession.LeaveToMenu();
     }
 
+    // Connect your Restart from Checkpoint button to this method. The whole level starts again
+    // (doors, switches, timers, objectives) with every frog at the team's last checkpoint, or at
+    // the level's start if nobody has reached one yet. Host only; online, everyone restarts.
+    public void RestartFromCheckpoint()
+    {
+        if (!LevelReset.CanRestart)
+            return;
+        SetPaused(false);
+        LevelReset.Restart(PlayerSpawner.Current);
+    }
+
     // Connect your Quit button to this method.
     public void ExitGame()
     {
@@ -85,6 +101,7 @@ public class PauseMenuController : MonoBehaviour
         SetActive(howToPlayPanel, false);
         SetActive(mainMenuPanel, false);
         SetActive(hud, !paused);
+        RefreshRestartButton();
 
         // Offline gameplay pauses; online gameplay keeps running.
         Time.timeScale = paused && !IsOnlineGame ? 0f : 1f;
@@ -104,10 +121,17 @@ public class PauseMenuController : MonoBehaviour
         SetActive(howToPlayPanel, false);
         SetActive(mainMenuPanel, false);
         SetActive(hud, false);
+        RefreshRestartButton();
 
         Time.timeScale = IsOnlineGame ? 1f : 0f;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+    }
+
+    private void RefreshRestartButton()
+    {
+        if (restartButton != null)
+            restartButton.interactable = LevelReset.CanRestart;
     }
 
     private void ShowSubPanel(GameObject panel)

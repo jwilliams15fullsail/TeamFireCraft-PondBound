@@ -45,8 +45,7 @@ public class PlayMenu : MonoBehaviour
 
         SetStatus(GameSession.LastMessage ?? "");
         GameSession.LastMessage = null;
-        if (continueButton != null)
-            continueButton.interactable = SaveSystem.HasCheckpointSave; // greyed out until a checkpoint has saved
+        RefreshContinueButton();
 
         // Your name above your frog. It's saved as you type, so it sticks between games.
         if (playerNameInput != null)
@@ -61,6 +60,16 @@ public class PlayMenu : MonoBehaviour
             joinCodeInput.onValidateInput = (text, index, c) => char.IsLetterOrDigit(c) ? char.ToUpperInvariant(c) : '\0';
 
         SetListState(false, false, null);
+    }
+
+    // Also when the menu is shown again (coming back from a game, or switching panels).
+    void OnEnable() => RefreshContinueButton();
+
+    // Greyed out until a checkpoint has been saved. The save survives quitting the game.
+    void RefreshContinueButton()
+    {
+        if (continueButton != null)
+            continueButton.interactable = SaveSystem.HasCheckpointSave;
     }
 
     public async void PlayOffline()

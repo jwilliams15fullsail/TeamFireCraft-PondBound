@@ -93,6 +93,7 @@ public class PerformanceManager : MonoBehaviour
     float readoutMs = 16.7f;
     Camera lastCamera;
     Volume effectsOffVolume;
+    PerformanceReadout readout;
     float nextCameraCheck;
 
     bool IsWeb => Application.platform == RuntimePlatform.WebGLPlayer || (Application.isEditor && simulateWebInEditor);
@@ -137,6 +138,7 @@ public class PerformanceManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
         GraphicsOptions.Changed += OnOptionsChanged;
         showReadout |= GraphicsOptions.ShowFps;
+        ShowReadout(showReadout);
         ApplyFramePacing();
         GrabRenderAsset();
         CreateEffectsOffVolume();
@@ -217,6 +219,7 @@ public class PerformanceManager : MonoBehaviour
     void OnOptionsChanged()
     {
         showReadout = GraphicsOptions.ShowFps;
+        ShowReadout(showReadout);
         // Moving the slider (or picking a preset) starts again from exactly that scale.
         if (!Mathf.Approximately(appliedMaxScale, MaxScale))
         {
@@ -537,17 +540,19 @@ public class PerformanceManager : MonoBehaviour
         }
     }
 
-    void OnGUI()
+    void ShowReadout(bool show)
     {
-        if (!showReadout)
-            return;
+        if (show && readout == null)
+            readout = gameObject.AddComponent<PerformanceReadout>();
+        if (readout != null)
+            readout.enabled = show;
+    }
+
+    // For PerformanceReadout.
+    public string ReadoutText()
+    {
         int cap = FrameCap;
         string capText = cap > 0 ? cap.ToString() : cap < 0 ? "off" : IsWeb ? "browser" : "vsync";
-        string text = $"{1000f / Mathf.Max(readoutMs, 0.01f):F0} fps  {readoutMs:F1} ms  scale {currentScale:F2}  cap {capText}";
-        Matrix4x4 before = GUI.matrix;
-        float size = Mathf.Max(1f, Screen.height / 1080f); // readable at 1440p and 4K
-        GUI.matrix = Matrix4x4.Scale(new Vector3(size, size, 1f));
-        GUI.Label(new Rect(10, 10, 420, 24), text);
-        GUI.matrix = before;
+        return $"{1000f / Mathf.Max(readoutMs, 0.01f):F0} fps  {readoutMs:F1} ms  scale {currentScale:F2}  cap {capText}";
     }
 }

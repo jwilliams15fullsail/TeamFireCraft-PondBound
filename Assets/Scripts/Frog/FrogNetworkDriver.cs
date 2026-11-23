@@ -129,6 +129,7 @@ public class FrogNetworkDriver : NetworkBehaviour
 
     void Update()
     {
+        UpdateDebugOverlay();
         if (!IsSpawned || !IsOwner || moveAction == null)
             return;
 
@@ -391,8 +392,22 @@ public class FrogNetworkDriver : NetworkBehaviour
         return result;
     }
 
-    void OnGUI()
+    // Debug Aim's readout is only switched on while it shows, so it costs nothing otherwise (GuiOverlay).
+    GuiOverlay debugOverlay;
+
+    void UpdateDebugOverlay()
     {
+        bool show = debugAim && IsSpawned && IsOwner && LocalJumpHeld;
+        if (show && debugOverlay == null)
+            debugOverlay = GuiOverlay.Create(this, DrawDebugAim);
+        if (debugOverlay != null)
+            debugOverlay.Show(show);
+    }
+
+    void DrawDebugAim()
+    {
+        if (Event.current.type != EventType.Repaint)
+            return;
         if (!debugAim || !IsOwner || !LocalJumpHeld)
             return;
         GUI.Label(new Rect(10f, Screen.height * 0.5f, 900f, 24f), lastPick);

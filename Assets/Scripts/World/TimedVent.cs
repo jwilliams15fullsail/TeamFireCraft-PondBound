@@ -6,7 +6,7 @@ using UnityEngine;
 // A vent that blows smoke on a timer and hurts every frog inside it during the blast.
 // Each cycle: off, then smoke with no damage yet (the warning), then smoke with damage.
 // Every machine reads the timing from the shared network clock, so the smoke matches the
-// damage with no network messages. The host does the damage; the bars update for everyone
+// damage with no network messages. Offline pauses are left out of it (HazardClock). The host does the damage; the bars update for everyone
 // through FrogStats. Needs a trigger collider on the same GameObject; no NetworkObject.
 // A HazardPower on a parent object can switch it off: the smoke then stops pouring out and
 // what's already out thins away quickly, so it's clear the gas is off.
@@ -40,15 +40,7 @@ public class TimedVent : MonoBehaviour
     public bool IsBlasting => !SwitchedOff && CycleTime >= offTime + warningTime;
 
     // Seconds into the current cycle, the same on every machine.
-    float CycleTime
-    {
-        get
-        {
-            TimeManager clock = InstanceFinder.TimeManager;
-            double now = clock != null ? clock.TicksToTime(clock.GetPreciseTick(TickType.Tick)) : Time.timeAsDouble;
-            return (float)((now + cycleOffset) % (offTime + warningTime + blastTime));
-        }
-    }
+    float CycleTime => (float)((HazardClock.Now + cycleOffset) % (offTime + warningTime + blastTime));
 
     void Start()
     {

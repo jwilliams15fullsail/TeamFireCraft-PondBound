@@ -14,6 +14,9 @@ using UnityEngine;
 // Doors report when they open and hazard groups when they switch off, but only for an objective
 // that names them, so a gate that needs two plates, or gas that needs two valves, can be one
 // objective.
+// Reaching a checkpoint saves which objectives are done. Restarting from that checkpoint (or
+// Continue on the main menu) starts with them done again, so the list carries on with the
+// next one that isn't. One ObjectiveSequence per level.
 // Up to 32 objectives.
 public class ObjectiveSequence : NetworkBehaviour
 {
@@ -110,10 +113,52 @@ public class ObjectiveSequence : NetworkBehaviour
     // Host: every objective sequence that is running, so switches and plates can find theirs.
     static readonly List<ObjectiveSequence> running = new();
 
+    // Host: objectives already done as a level starts (a restart or Continue at a checkpoint),
+    // by scene name. PlayerSpawner fills this in.
+    static readonly Dictionary<string, int> startDone = new();
+
+    // Enter Play Mode Options skip the domain reload, so clear these at the start of every run.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetForNewRun()
+    {
+        running.Clear();
+        startDone.Clear();
+    }
+
     public override void OnStartServer()
     {
         base.OnStartServer();
         running.Add(this);
+        if (startDone.TryGetValue(gameObject.scene.name, out int mask))
+            done.Value = mask; // started at a checkpoint: these were done already
+    }
+
+    // Host only, as a level starts (PlayerSpawner): the objectives in that scene start with
+    // these done (bit i = objective i). 0 = a fresh start, nothing done.
+    public static void StartWith(string sceneName, int mask)
+    {
+        if (mask == 0)
+            startDone.Remove(sceneName);
+        else
+            startDone[sceneName] = mask;
+        foreach (ObjectiveSequence sequence in running)
+        {
+            if (sequence.gameObject.scene.name == sceneName)
+                sequence.done.Value = mask;
+        }
+    }
+
+    // Host only: which objectives in that scene are done right now (bit i = objective i),
+    // including ones the level started with that aren't on the network yet. Saved at checkpoints.
+    public static int DoneIn(string sceneName)
+    {
+        int mask = startDone.TryGetValue(sceneName, out int start) ? start : 0;
+        foreach (ObjectiveSequence sequence in running)
+        {
+            if (sequence.gameObject.scene.name == sceneName)
+                mask |= sequence.done.Value;
+        }
+        return mask;
     }
 
     public override void OnStopServer()

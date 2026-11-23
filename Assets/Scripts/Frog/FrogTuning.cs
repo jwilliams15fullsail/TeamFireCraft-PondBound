@@ -155,6 +155,16 @@ public class FrogTuning : ScriptableObject
     [Range(-1f, 1f)] public float minWallUpDot = -0.25f; // below this = ceiling, not allowed yet
     [Range(-1f, 1f)] public float maxWallUpDot = 0.75f;  // above this = floor, just walk on it
 
+    [Header("Climbing over a lip (a counter top sticking out over the cabinet)")]
+    [Tooltip("Climbing up into an edge that sticks out above the wall, the frog goes out around it and onto the top instead of getting stuck under it.")]
+    public bool climbOverLips = true;
+    [Tooltip("How far (m) a lip can stick out past the wall and still be climbed around. Deeper than this counts as a ceiling.")]
+    public float lipMaxDepth = 0.35f;
+    [Tooltip("How thick (m) a lip can be, from its underside to its top.")]
+    public float lipMaxThickness = 0.3f;
+    [Tooltip("How fast it goes around the lip, times Climb Speed.")]
+    public float lipClimbSpeed = 1.25f;
+
     [Tooltip("Jumping or falling into a climbable wall grabs it without pressing Stick.")]
     public bool autoClimb = true;
     [Tooltip("How far ahead (m) a frog in the air looks for a wall to grab. It looks further when flying fast.")]

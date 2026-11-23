@@ -20,6 +20,9 @@ public class NetworkSessionUI : MonoBehaviour
 
     NetworkManager manager;
     bool wasConnected;
+    GuiOverlay panel; // the box below, switched on only while it shows (see GuiOverlay)
+    float nextSceneCheck;
+    bool inMenuScene;
 
     // Start, not Awake: the NetworkManager creates its ClientManager in its own Awake.
     // Coming back to a scene that has its own NetworkManager while the one from the last game
@@ -36,6 +39,22 @@ public class NetworkSessionUI : MonoBehaviour
         }
         manager = own;
         manager.ClientManager.OnClientConnectionState += OnClientConnectionState;
+        panel = GuiOverlay.Create(this, DrawPanel, layout: true);
+    }
+
+    // The box shows only when testing a level directly (no game running outside the menu), or
+    // during a game with Show In Game Panel ticked. Otherwise it's switched off and costs nothing.
+    void Update()
+    {
+        if (panel == null || manager == null || manager.ServerManager == null || manager.ClientManager == null)
+            return;
+        bool running = manager.ServerManager.Started || manager.ClientManager.Started;
+        if (!running && Time.unscaledTime >= nextSceneCheck)
+        {
+            nextSceneCheck = Time.unscaledTime + 0.5f; // the scene name is a new string each time
+            inMenuScene = SceneManager.GetActiveScene().name == GameSession.MenuScene;
+        }
+        panel.Show(running ? showInGamePanel : !inMenuScene);
     }
 
     void OnDestroy()
@@ -73,7 +92,7 @@ public class NetworkSessionUI : MonoBehaviour
         GameSession.LeaveToMenu();
     }
 
-    void OnGUI()
+    void DrawPanel()
     {
         if (manager == null || manager.ServerManager == null || manager.ClientManager == null)
             return;

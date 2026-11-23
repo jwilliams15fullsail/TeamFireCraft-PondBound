@@ -179,17 +179,21 @@ Shader "PondBound/GrungeLit"
                                  lerp(GrimeHash(i + float3(0, 1, 1)), GrimeHash(i + float3(1, 1, 1)), f.x), f.y), f.z);
             }
 
-            float GrimeFbm(float3 p)
+            // Layered noise, 0 to 1. Fewer octaves is cheaper and only loses sub-pixel grit.
+            float GrimeFbm(float3 p, int octaves)
             {
                 float v = 0.0;
+                float total = 0.0;
                 float a = 0.5;
-                for (int k = 0; k < 5; k++)
+                UNITY_UNROLL
+                for (int k = 0; k < octaves; k++)
                 {
                     v += a * GrimeNoise(p);
+                    total += a;
                     p = p * 2.03 + 17.13;
                     a *= 0.5;
                 }
-                return v / 0.96875;
+                return v / total;
             }
 
             // ---------- grime layer ----------
@@ -207,8 +211,8 @@ Shader "PondBound/GrungeLit"
                 half wall = 1.0h - abs(n.y);
 
                 // Big blotchy stains plus fine grit.
-                half blotch = GrimeFbm(p / max(_GrimeScale, 0.01));
-                half fine = GrimeFbm(p * (8.0 / max(_GrimeScale, 0.01)) + 31.7);
+                half blotch = GrimeFbm(p / max(_GrimeScale, 0.01), 4);
+                half fine = GrimeFbm(p * (8.0 / max(_GrimeScale, 0.01)) + 31.7, 3);
                 half start = 1.0h - _GrimeAmount;
                 half stains = smoothstep(start, start + 1.0h / _GrimeContrast, blotch + (fine - 0.5h) * 0.25h) * (0.55h + 0.45h * fine);
 
@@ -220,15 +224,23 @@ Shader "PondBound/GrungeLit"
                 rise = rise * rise * wall * _RiseStrength;
 
                 // Walls: vertical drip streaks.
-                float across = abs(n.x) > abs(n.z) ? p.z : p.x;
-                half streakLine = GrimeNoise(float3(across * _StreakDensity, p.y * 0.12, 3.1)) * 0.65h
-                                + GrimeNoise(float3(across * _StreakDensity * 4.3, p.y * 0.3, 7.7)) * 0.35h;
-                half streakFade = GrimeNoise(float3(across * _StreakDensity * 0.35, p.y * 0.45, 11.3));
-                half streak = smoothstep(0.6h, 0.74h, streakLine) * smoothstep(0.25h, 0.75h, streakFade) * wall * _StreakAmount;
+                half streak = 0.0h;
+                UNITY_BRANCH
+                if (wall * _StreakAmount > 0.001h) // nothing to draw on floors and ceilings
+                {
+                    float across = abs(n.x) > abs(n.z) ? p.z : p.x;
+                    half streakLine = GrimeNoise(float3(across * _StreakDensity, p.y * 0.12, 3.1)) * 0.65h
+                                    + GrimeNoise(float3(across * _StreakDensity * 4.3, p.y * 0.3, 7.7)) * 0.35h;
+                    half streakFade = GrimeNoise(float3(across * _StreakDensity * 0.35, p.y * 0.45, 11.3));
+                    streak = smoothstep(0.6h, 0.74h, streakLine) * smoothstep(0.25h, 0.75h, streakFade) * wall * _StreakAmount;
+                }
 
                 // Floors: dust everywhere, damp patches with dried dirty rims.
                 half dust = up * _FloorDust * (0.35h + 0.65h * blotch);
-                half damp = GrimeFbm(float3(p.x, 0.0, p.z) / max(_PuddleScale, 0.01) + 5.3);
+                half damp = 0.0h;
+                UNITY_BRANCH
+                if (up * _Puddles > 0.001h) // nothing to draw on walls and ceilings
+                    damp = GrimeFbm(float3(p.x, 0.0, p.z) / max(_PuddleScale, 0.01) + 5.3, 4);
                 half wet = smoothstep(0.6h, 0.66h, damp) * up * _Puddles;
                 half rim = smoothstep(0.54h, 0.6h, damp) * (1.0h - wet / max(_Puddles, 0.001h)) * up * _Puddles * 0.8h;
 

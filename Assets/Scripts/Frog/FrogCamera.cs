@@ -129,6 +129,7 @@ public class FrogCamera : MonoBehaviour
     Camera lens;
     Transform target;
     FrogNetworkDriver frogDriver;
+    GuiOverlay crosshairOverlay; // the fallback "+", switched on only while it's needed
     JumpPreview frogPreview;
     Renderer[] frogRenderers;
     ShadowCastingMode[] frogShadowModes;
@@ -363,6 +364,7 @@ public class FrogCamera : MonoBehaviour
     // camera, so the look below matches exactly where the frog is and which way it faces.
     void LateUpdate()
     {
+        UpdateCrosshairOverlay();
         if (target == null)
             return;
         UpdateFollowPoint(Time.deltaTime);
@@ -525,12 +527,29 @@ public class FrogCamera : MonoBehaviour
                 frogRenderers[i].shadowCastingMode = hidden ? ShadowCastingMode.ShadowsOnly : frogShadowModes[i];
     }
 
-    void OnGUI()
+    // The plain "+" is only a fallback: the HUD's TongueCrosshair normally shows instead, and
+    // while aiming a jump the landing marker is the cursor. So it's usually switched off and
+    // costs nothing (see GuiOverlay).
+    void UpdateCrosshairOverlay()
     {
+        bool show = target != null && Cursor.lockState == CursorLockMode.Locked
+            && (AimingMarker ? frogDriver != null && !frogDriver.CursorOnMarker : !TongueCrosshair.Showing);
+        if (show && crosshairOverlay == null)
+            crosshairOverlay = GuiOverlay.Create(this, DrawCrosshair);
+        if (crosshairOverlay != null)
+            crosshairOverlay.Show(show);
+    }
+
+    void DrawCrosshair()
+    {
+        if (Event.current.type != EventType.Repaint)
+            return;
         if (target == null || Cursor.lockState != CursorLockMode.Locked)
             return;
         if (!AimingMarker)
         {
+            if (TongueCrosshair.Showing)
+                return; // the HUD draws the tongue crosshair
             GUI.Label(new Rect(Screen.width * 0.5f - 4f, Screen.height * 0.5f - 10f, 20f, 20f), "+");
             return;
         }
