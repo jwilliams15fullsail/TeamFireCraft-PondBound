@@ -11,6 +11,8 @@ using UnityEngine;
 // The host starts and stops it; the end time is a SyncVar on the shared network clock, so
 // every player sees the same countdown and the same lasers, including anyone who joins late.
 // TimerUI on the HUD shows it.
+// Offline, the pause menu stops the countdown (and falling lasers) until you resume. Online the
+// game keeps running for everyone, so the timer does too.
 // Needs a NetworkObject. For Starts When: Frog Enters, also a trigger collider on this object.
 [RequireComponent(typeof(NetworkObject))]
 public class RoomTimer : NetworkBehaviour
@@ -44,6 +46,7 @@ public class RoomTimer : NetworkBehaviour
     static readonly List<RoomTimer> all = new();
     Vector3 lasersStart;
     bool lasersHeldOff; // host: this timer is holding the lasers off
+    double lastClock = -1; // host: the clock last frame, to measure how long a pause lasted
 
     public string Label => label;
     public bool IsRunning => endsAt.Value >= 0 && !stopped.Value && Now < endsAt.Value;
@@ -135,9 +138,24 @@ public class RoomTimer : NetworkBehaviour
     // in step for everyone without streaming their position.
     void Update()
     {
+        HoldWhilePaused();
         if (lasers == null || !HasRunOut)
             return;
         float t = Mathf.Clamp01(((float)(Now - endsAt.Value) - warningTime) / dropTime);
         lasers.transform.position = lasersStart + Vector3.down * (dropDistance * Mathf.SmoothStep(0f, 1f, t));
+    }
+
+    // Host, offline: the network clock keeps ticking while the pause menu has stopped game time,
+    // so push the end time back by however long the pause lasts. The countdown and the falling
+    // lasers stay exactly where they were, and carry on from there on resume.
+    void HoldWhilePaused()
+    {
+        if (!IsServerInitialized)
+            return;
+        double now = Now;
+        bool paused = GameSession.IsOffline && Time.timeScale == 0f;
+        if (paused && lastClock >= 0 && endsAt.Value >= 0 && !stopped.Value)
+            endsAt.Value += now - lastClock;
+        lastClock = now;
     }
 }

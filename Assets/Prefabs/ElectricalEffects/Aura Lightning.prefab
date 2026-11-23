@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8473838645451163043}
   - component: {fileID: 2267315231019451117}
   - component: {fileID: 2837827622512021885}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Aura Lightning
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 170958757722939930}
@@ -2400,7 +2400,7 @@ GameObject:
   - component: {fileID: 170958757722939930}
   - component: {fileID: 7924497530843425693}
   - component: {fileID: 5023384759362211532}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2504,7 +2504,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 0.7529412}
+      maxColor: {r: 0.11247569, g: 0.24732493, b: 0.7610062, a: 0.7529412}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -4164,7 +4164,7 @@ ParticleSystem:
     maxLights: 20
   TrailModule:
     enabled: 0
-    mode: 0
+    mode: 1
     ratio: 1
     lifetime:
       serializedVersion: 3

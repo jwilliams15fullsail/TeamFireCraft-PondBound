@@ -113,9 +113,25 @@ public class FrogTuning : ScriptableObject
     public float minJumpDistance = 0.5f;
     [Tooltip("Without mouse aiming: how far (m) a jump reaches with a full charge. With mouse aiming: how far from the frog the landing marker can go.")]
     public float maxJumpDistance = 2.5f;
+    [Tooltip("Jumping down from a height reaches further, like a real arc that keeps falling. This caps that bonus as a multiple of Max Jump Distance (1 = no bonus).")]
+    [Min(1f)] public float maxDropReach = 2f;
+    [Tooltip("With mouse aiming: how far (m) from the frog the landing marker can go, up a desk or along a wall. Below the frog only the distance across counts, so it can always drop from a high surface to the floor (see Max Drop Height). A hungry frog's reach shrinks with its jump height.")]
+    [Min(0.5f)] public float maxAimRange = 4f;
+    [Tooltip("With mouse aiming: how far (m) below the frog the landing marker can go, dropping from a high surface to the floor.")]
+    [Min(0f)] public float maxDropHeight = 12f;
+    [Tooltip("With mouse aiming: how fast (m/s) a frog flies its path to the marker. Bigger = snappier jumps.")]
+    [Min(0.5f)] public float pathJumpSpeed = 5f;
+    [Tooltip("With mouse aiming: the shortest time (s) any jump takes, so little hops still read as hops.")]
+    [Min(0.1f)] public float minPathJumpTime = 0.35f;
+    [Tooltip("Air control: WASD / the stick steers the frog while it's in the air, on every jump (it flies the previewed path, nudged by your steering). Off: jumps fly exactly as previewed.")]
+    public bool airControl = true;
+    [Tooltip("With Air Control: how fast (m/s) steering pushes a jump to the marker off its path.")]
+    [Min(0f)] public float jumpSteerSpeed = 2.5f;
+    [Tooltip("With Air Control: the furthest (m) steering can move a jump to the marker away from its path.")]
+    [Min(0f)] public float jumpSteerMax = 1.5f;
     [Tooltip("On: while charging, the landing marker goes wherever the crosshair points (a floor, a box top, a slope, a wall), as far as a jump can reach. The jump always comes down on the marker, and clings to it on a wall; the charge only sets how high the arc goes. Off: jumps go the way the frog faces, as far as the charge allows.")]
     public bool aimJumpsWithMouse = true;
-   
+
     [Tooltip("A jump always peaks at least this high (m) above where it lands, so it clears the edge of a higher landing spot.")]
     public float jumpClearance = 0.25f;
     [Tooltip("Charged jumps fly exactly along the previewed arc: no steering in the air. Off: WASD can steer and slow a jump.")]
@@ -138,6 +154,16 @@ public class FrogTuning : ScriptableObject
     public float cornerLookAhead = 0.15f;     // how far ahead (m) to look for an inside corner or the floor
     [Range(-1f, 1f)] public float minWallUpDot = -0.25f; // below this = ceiling, not allowed yet
     [Range(-1f, 1f)] public float maxWallUpDot = 0.75f;  // above this = floor, just walk on it
+
+    [Header("Climbing over a lip (a counter top sticking out over the cabinet)")]
+    [Tooltip("Climbing up into an edge that sticks out above the wall, the frog goes out around it and onto the top instead of getting stuck under it.")]
+    public bool climbOverLips = true;
+    [Tooltip("How far (m) a lip can stick out past the wall and still be climbed around. Deeper than this counts as a ceiling.")]
+    public float lipMaxDepth = 0.35f;
+    [Tooltip("How thick (m) a lip can be, from its underside to its top.")]
+    public float lipMaxThickness = 0.3f;
+    [Tooltip("How fast it goes around the lip, times Climb Speed.")]
+    public float lipClimbSpeed = 1.25f;
 
     [Tooltip("Jumping or falling into a climbable wall grabs it without pressing Stick.")]
     public bool autoClimb = true;
@@ -196,4 +222,19 @@ public class FrogTuning : ScriptableObject
     [Range(0.1f, 1f)] public float hungryJumpHeight = 0.5f;
     [Tooltip("Jumps start getting lower below this much hunger (0.25 = a quarter full). 0 = only once it's empty.")]
     [Range(0f, 1f)] public float tiredBelowHunger = 0.25f;
+
+    // Whether a landing spot this far from the frog (offset) can be aimed at. Level or above:
+    // within Max Aim Range (times scale, plus slack) in a straight line. Below: within that range
+    // across, and no more than Max Drop Height down, so a frog on a high shelf can always aim
+    // down at the floor however far below it is.
+    public bool InAimReach(Vector3 offset, float scale, float slack = 0f)
+    {
+        float range = maxAimRange * scale + slack;
+        if (offset.y >= 0f)
+            return offset.sqrMagnitude <= range * range;
+        if (-offset.y > maxDropHeight + slack)
+            return false;
+        offset.y = 0f;
+        return offset.sqrMagnitude <= range * range;
+    }
 }

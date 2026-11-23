@@ -24,6 +24,16 @@ public class FrogClimb : NetworkBehaviour
     float wallUpSign = 1f;  // +1: W climbs up the wall, -1: W climbs down (camera looking over the top)
     float detachedAt = float.NegativeInfinity; // when we last let go (auto-climb waits a moment)
 
+    // Going around a lip that sticks out over the wall (see LipClimb): out, up, then onto the top.
+    readonly Vector3[] lipPoints = new Vector3[3];
+    bool overLip;
+    int lipLeg;
+    float lipGiveUpAt;
+    Vector3 lipWallNormal;
+
+    // True while the frog is going around a lip onto the top.
+    public bool IsClimbingOverLip => overLip;
+
     void Awake()
     {
         motor = GetComponent<FrogMotor>();
@@ -119,13 +129,14 @@ public class FrogClimb : NetworkBehaviour
 
     public void Detach()
     {
+        overLip = false;
         surface = null;
         surfaceBody = null;
         IsAttached = false;
         rb.useGravity = true;
         cooldownUntil = Time.time + motor.Tuning.reattachCooldown;
-    detachedAt = Time.time;
-    externalForce = Vector3.zero;
+        detachedAt = Time.time;
+        externalForce = Vector3.zero;
         GripStrain.Value = 0f;
     }
 
@@ -133,6 +144,9 @@ public class FrogClimb : NetworkBehaviour
     public bool Simulate(FrogInputState input, bool charging, float dt)
     {
         FrogTuning t = motor.Tuning;
+        if (overLip)
+            return StepOverLip(t, dt);
+
         Vector3 n = SurfaceNormal;
         Vector3 forward = SurfaceForward(n, input);
         Vector3 climbDir = charging ? Vector3.zero : ClimbDirection(n, forward, input);
@@ -140,6 +154,19 @@ public class FrogClimb : NetworkBehaviour
         if (climbDir.sqrMagnitude > 0.01f)
         {
             Vector3 dir = climbDir.normalized;
+
+            // Climbing up into a lip that sticks out above (a counter top over its cabinet):
+            // the underside can't be climbed, so go around it onto the top.
+            if (t.climbOverLips && Vector3.Dot(dir, Vector3.up) > 0.3f
+                && LipClimb.Plan(rb.position, n, motor.Radius, t.cornerLookAhead, t.lipMaxDepth, t.lipMaxThickness,
+                                 t.minWallUpDot, t.maxSlopeAngle, surfaceMask, rb, lipPoints))
+            {
+                overLip = true;
+                lipLeg = 0;
+                lipWallNormal = n;
+                lipGiveUpAt = Time.time + 2f;
+                return StepOverLip(t, dt);
+            }
 
             // Inside corner: another climbable face just ahead (a side wall, a ledge above,
             // a climbable floor below). Switch onto it before bumping into it.
@@ -199,6 +226,38 @@ public class FrogClimb : NetworkBehaviour
 
         // Lie flat on the surface, head toward the climb direction (or "forward" when idle).
         motor.FaceTowards(climbDir, n, dt, forward);
+        return true;
+    }
+
+    // One step around a lip: head for the next point at a steady speed, with gravity off (the
+    // frog is still attached). Done at the top: let go, and FrogMotor finds the frog standing there.
+    bool StepOverLip(FrogTuning t, float dt)
+    {
+        float speed = t.climbSpeed * Mathf.Max(0.1f, t.lipClimbSpeed);
+        Vector3 to = lipPoints[lipLeg] - rb.position;
+        while (to.magnitude < 0.03f)
+        {
+            if (++lipLeg >= lipPoints.Length)
+            {
+                overLip = false;
+                rb.linearVelocity = Vector3.zero;
+                return false; // on the top
+            }
+            to = lipPoints[lipLeg] - rb.position;
+        }
+        if (Time.time > lipGiveUpAt)
+        {
+            overLip = false; // knocked off the way round (a box, a frog): just drop
+            return false;
+        }
+        rb.linearVelocity = to.normalized * Mathf.Min(speed, to.magnitude / dt);
+
+        // Head up while going round, then level out facing in over the top.
+        Vector3 inward = -Vector3.ProjectOnPlane(lipWallNormal, Vector3.up).normalized;
+        if (lipLeg < 2)
+            motor.FaceTowards(Vector3.up, lipWallNormal, dt, inward);
+        else
+            motor.FaceTowards(inward, Vector3.up, dt, inward);
         return true;
     }
 

@@ -33,6 +33,8 @@ public class GooTrails : MonoBehaviour
     FrogMotor[] frogs = new FrogMotor[0];
     float nextFrogSearch;
     bool changed;
+    // The texels that can have a trail in them. Empty (maxX < minX) means nothing to do.
+    int minX, maxX = -1, minY, maxY = -1;
 
     void Start()
     {
@@ -82,14 +84,34 @@ public class GooTrails : MonoBehaviour
             nextFrogSearch = Time.time + 1f;
         }
 
-        // The goo closes up: 95% healed after Heal Time
-        float keep = Mathf.Exp(-Time.deltaTime * 3f / healTime);
-        for (int i = 0; i < trail.Length; i++)
+        // The goo closes up: 95% healed after Heal Time. Only where trails are: untouched goo costs nothing.
+        if (maxX >= minX)
         {
-            if (trail[i] <= 0f)
-                continue;
-            trail[i] = trail[i] * keep < 0.004f ? 0f : trail[i] * keep;
-            changed = true;
+            float keep = Mathf.Exp(-Time.deltaTime * 3f / healTime);
+            bool any = false;
+            for (int y = minY; y <= maxY; y++)
+            {
+                int end = y * width + maxX;
+                for (int i = y * width + minX; i <= end; i++)
+                {
+                    float value = trail[i];
+                    if (value <= 0f)
+                        continue;
+                    value *= keep;
+                    if (value < 0.004f)
+                        value = 0f;
+                    else
+                        any = true;
+                    trail[i] = value;
+                    pixels[i] = (byte)(value * 255f + 0.5f);
+                    changed = true;
+                }
+            }
+            if (!any)
+            {
+                minX = minY = 0;
+                maxX = maxY = -1;
+            }
         }
 
         foreach (FrogMotor frog in frogs)
@@ -101,12 +123,11 @@ public class GooTrails : MonoBehaviour
 
         if (!changed)
             return;
-        for (int i = 0; i < trail.Length; i++)
-            pixels[i] = (byte)(trail[i] * 255f + 0.5f);
         trailTexture.SetPixelData(pixels, 0);
         trailTexture.Apply(false);
         changed = false;
     }
+
     // A single splash, such as a drop from a pipe landing here: a ring ringWidth metres across.
     public void Splash(Vector3 point, float ringWidth)
     {
@@ -145,7 +166,20 @@ public class GooTrails : MonoBehaviour
                 if (dent > trail[i])
                 {
                     trail[i] = dent;
+                    pixels[i] = (byte)(dent * 255f + 0.5f);
                     changed = true;
+                    if (maxX < minX)
+                    {
+                        minX = maxX = x;
+                        minY = maxY = y;
+                    }
+                    else
+                    {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
                 }
             }
         }

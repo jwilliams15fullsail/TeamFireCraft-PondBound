@@ -25,13 +25,24 @@ public class PlayerHUD : MonoBehaviour
     [SerializeField] Image chargeFill;
     [Tooltip("Optional: how high and how far this charge will go.")]
     [SerializeField] TMP_Text chargeText;
-    [Tooltip("Optional: shows RUN or HOP.")]
+
+    [Header("Hop / Run badge (optional)")]
+    [Tooltip("An Image that swaps between the Hop and Run pictures. Hidden when hop mode is turned off in Frog Tuning.")]
+    [SerializeField] Image moveModeImage;
+    [SerializeField] Sprite hopSprite;
+    [SerializeField] Sprite runSprite;
+    [Tooltip("Optional: shows RUN or HOP as text instead (or as well).")]
     [SerializeField] TMP_Text moveModeText;
+    [Tooltip("How much bigger the badge pops when you switch (1 = no pop).")]
+    [SerializeField, Range(1f, 1.5f)] float moveModePop = 1.15f;
 
     FrogStats stats;
     FrogMotor motor;
     FrogNetworkDriver driver;
     JumpPreview jumpPreview;
+    int shownMode = -1; // 0 run, 1 hop
+    float modePopLeft;
+    const float ModePopTime = 0.15f;
 
 
     LevelExit[] exits;
@@ -104,7 +115,9 @@ public class PlayerHUD : MonoBehaviour
             chargeFill.fillAmount = motor.Tuning.chargeCurve.Evaluate(charge01);
         if (chargeText == null)
             return;
-        float height = motor.JumpApex(charge01, driver.LocalJumpTarget, stats.JumpHeightMultiplier);
+        // A jump to a marker: how high its path rises. Otherwise the charge's own height.
+        float height = driver.HasPath ? driver.PathHeight
+            : motor.JumpApex(charge01, driver.LocalJumpTarget, stats.JumpHeightMultiplier);
         // Distance to the marker you placed (it stays put), or else to where the arc lands.
         Vector3? landing = driver.HasMarker ? driver.MarkerPoint
             : jumpPreview != null && jumpPreview.HasLanding ? jumpPreview.LandingPoint
@@ -122,9 +135,41 @@ public class PlayerHUD : MonoBehaviour
 
     void UpdateMoveMode()
     {
-        if (moveModeText == null || driver == null)
+        if (moveModeImage == null && moveModeText == null)
             return;
-        moveModeText.text = motor.Tuning.hopLocomotion && driver.HopModeOn ? "HOP" : "RUN";
+        bool available = driver != null && motor.Tuning.hopLocomotion;
+        if (moveModeImage != null && moveModeImage.gameObject.activeSelf != available)
+            moveModeImage.gameObject.SetActive(available);
+        if (moveModeText != null && moveModeText.gameObject.activeSelf != available)
+            moveModeText.gameObject.SetActive(available);
+        if (!available)
+        {
+            shownMode = -1;
+            return;
+        }
+
+        int mode = driver.HopModeOn ? 1 : 0;
+        if (mode != shownMode)
+        {
+            if (shownMode >= 0)
+                modePopLeft = ModePopTime; // no pop when the badge first appears
+            shownMode = mode;
+            if (moveModeImage != null)
+            {
+                Sprite sprite = mode == 1 ? hopSprite : runSprite;
+                if (sprite != null)
+                    moveModeImage.sprite = sprite;
+            }
+            if (moveModeText != null)
+                moveModeText.text = mode == 1 ? "HOP" : "RUN";
+        }
+
+        if (moveModeImage != null)
+        {
+            modePopLeft = Mathf.Max(0f, modePopLeft - Time.unscaledDeltaTime);
+            float t = modePopLeft / ModePopTime;
+            moveModeImage.rectTransform.localScale = Vector3.one * Mathf.Lerp(1f, moveModePop, t * t);
+        }
     }
 
 

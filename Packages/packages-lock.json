@@ -237,6 +237,13 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.performance.profile-analyzer": {
+      "version": "1.4.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.physics": {
       "version": "6.6.0",
       "depth": 0,
@@ -262,6 +269,16 @@
         "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.screencapture": "1.0.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.postprocessing": {
+      "version": "3.5.4",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.physics": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -339,6 +356,17 @@
         "com.unity.services.core": "1.18.0",
         "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.modules.unitywebrequest": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.services.cloud-build": {
+      "version": "2.1.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.collab-proxy": "2.12.4",
+        "com.unity.services.core": "1.16.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.2"
       },
       "url": "https://packages.unity.com"
     },

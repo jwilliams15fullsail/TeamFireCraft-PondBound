@@ -45,8 +45,7 @@ public class PlayMenu : MonoBehaviour
 
         SetStatus(GameSession.LastMessage ?? "");
         GameSession.LastMessage = null;
-        if (continueButton != null)
-            continueButton.interactable = SaveSystem.HasCheckpointSave; // greyed out until a checkpoint has saved
+        RefreshContinueButton();
 
         // Your name above your frog. It's saved as you type, so it sticks between games.
         if (playerNameInput != null)
@@ -63,16 +62,25 @@ public class PlayMenu : MonoBehaviour
         SetListState(false, false, null);
     }
 
-    public void PlayOffline()
+    // Also when the menu is shown again (coming back from a game, or switching panels).
+    void OnEnable() => RefreshContinueButton();
+
+    // Greyed out until a checkpoint has been saved. The save survives quitting the game.
+    void RefreshContinueButton()
+    {
+        if (continueButton != null)
+            continueButton.interactable = SaveSystem.HasCheckpointSave;
+    }
+
+    public async void PlayOffline()
     {
         if (busy || !LevelPicked())
             return;
-        if (!GameSession.StartOffline(gameScene.SceneName))
-            SetStatus("Couldn't start the offline game.");
+        await Run("Starting...", () => GameSession.StartOfflineAsync(gameScene.SceneName));
     }
 
     // The Continue button: back to the level and checkpoint of the last save, offline.
-    public void ContinueOffline()
+    public async void ContinueOffline()
     {
         if (busy)
             return;
@@ -83,11 +91,8 @@ public class PlayMenu : MonoBehaviour
             return;
         }
         SaveSystem.Continuing = save; // the level's PlayerSpawner picks it up
-        if (!GameSession.StartOffline(save.sceneName))
-        {
+        if (!await Run("Starting...", () => GameSession.StartOfflineAsync(save.sceneName)))
             SaveSystem.Continuing = null;
-            SetStatus("Couldn't start the offline game.");
-        }
     }
 
     public async void QuickMatch()

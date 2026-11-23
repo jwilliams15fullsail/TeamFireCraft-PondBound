@@ -72,9 +72,12 @@ public class DeathScreen : MonoBehaviour
         // RESET STATE: If the frog becomes alive again, reset tracking flags
         if (!dead)
         {
+            if (startedDeathCountdown)
+                StopAllCoroutines(); // brought back early (the level restarted): drop the old countdown
             deadTime = 0f;
             canRespawn = false;
             startedDeathCountdown = false;
+            countdownFinished = false; // the next death waits the full time again
             respawnRequested = false;
 
             ToggleCountdownUi(false);

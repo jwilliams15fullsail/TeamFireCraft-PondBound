@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 // In-game pause menu, opened with Esc or the gamepad Start button.
 // Online, the game keeps running for everyone else: your frog just stops taking input
@@ -15,6 +16,8 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] GameObject howToPlayPanel;
     [Tooltip("Optional: shows the join code and player count in online games.")]
     [SerializeField] TMP_Text sessionInfo;
+    [Tooltip("Optional: the Restart from Checkpoint button. Only the host can restart, so other players see it greyed out.")]
+    [SerializeField] Button restartButton;
 
     // Enter Play Mode Options can skip the domain reload; don't carry IsOpen over.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -91,6 +94,16 @@ public class PauseMenu : MonoBehaviour
         ShowSessionInfo();
     }
 
+    // The Restart from Checkpoint button: the whole level starts again with every frog at the
+    // team's last checkpoint (or the level's start). Host only; online, everyone restarts.
+    public void RestartFromCheckpoint()
+    {
+        if (!LevelReset.CanRestart)
+            return;
+        Resume();
+        LevelReset.Restart(PlayerSpawner.Current);
+    }
+
     public void LeaveToMainMenu()
     {
         Close();
@@ -122,6 +135,8 @@ public class PauseMenu : MonoBehaviour
 
     void ShowSessionInfo()
     {
+        if (restartButton != null)
+            restartButton.interactable = LevelReset.CanRestart;
         if (sessionInfo == null)
             return;
         if (GameSession.IsOffline)

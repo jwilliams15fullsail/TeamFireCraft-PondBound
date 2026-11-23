@@ -54,6 +54,8 @@ public class AlarmLight : MonoBehaviour
     float onSince;
     int lastFlash = -1;
     MaterialPropertyBlock block;
+    bool[] canGlow; // checked once: reading sharedMaterials allocates every time
+    float appliedLevel = -1f;
 
     public bool IsOn => isOn;
 
@@ -63,6 +65,9 @@ public class AlarmLight : MonoBehaviour
             lights = GetComponentsInChildren<Light>();
         emissiveRenderers ??= new Renderer[0];
         block = new MaterialPropertyBlock();
+        canGlow = new bool[emissiveRenderers.Length];
+        for (int i = 0; i < emissiveRenderers.Length; i++)
+            canGlow[i] = emissiveRenderers[i] != null && materialIndex < emissiveRenderers[i].sharedMaterials.Length;
         foreach (Light l in lights)
             if (l != null)
                 l.color = color;
@@ -142,14 +147,18 @@ public class AlarmLight : MonoBehaviour
 
     void Apply(float level)
     {
+        if (level == appliedLevel || canGlow == null)
+            return;
+        appliedLevel = level;
         foreach (Light l in lights)
             if (l != null)
                 l.intensity = intensity * level;
 
         Color glow = color * (emissionStrength * level);
-        foreach (Renderer r in emissiveRenderers)
+        for (int i = 0; i < emissiveRenderers.Length; i++)
         {
-            if (r == null || materialIndex >= r.sharedMaterials.Length)
+            Renderer r = emissiveRenderers[i];
+            if (r == null || !canGlow[i])
                 continue;
             r.GetPropertyBlock(block, materialIndex);
             block.SetColor(EmissionColor, glow);

@@ -48,16 +48,9 @@ public class TimedLaser : MonoBehaviour
     Quaternion restRotation;
     HazardPower power; // optional: a parent that can switch this laser offs
 
-    // Seconds on the shared clock, the same on every machine.
-    double Clock
-    {
-        get
-        {
-            TimeManager clock = InstanceFinder.TimeManager;
-            double now = clock != null ? clock.TicksToTime(clock.GetPreciseTick(TickType.Tick)) : Time.timeAsDouble;
-            return now + cycleOffset;
-        }
-    }
+    // Seconds on the shared clock, the same on every machine. Offline pauses are left out
+    // (HazardClock), so the beam picks up where it was when you resume.
+    double Clock => HazardClock.Now + cycleOffset;
 
     float CycleTime => (float)(Clock % (offTime + warningTime + onTime));
     bool SwitchedOff => power != null && power.IsOff;
@@ -79,12 +72,12 @@ public class TimedLaser : MonoBehaviour
     void LateUpdate()
     {
         if (Time.timeScale == 0f)
-            return; // paused offline: the network clock keeps counting, but the beam should freeze
-         if (SwitchedOff)
-                  {
-                       line.enabled = false;
-                     return;
-               }
+            return; // paused offline: the beam freezes (HazardClock stops counting too)
+        if (SwitchedOff)
+        {
+            line.enabled = false;
+            return;
+        }
         Aim();
         float cycle = CycleTime;
         line.enabled = cycle >= offTime;
